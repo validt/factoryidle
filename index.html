@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Game - Inspired by Factorio</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div id="container">
+        <h1>Idle Game - Inspired by Factorio</h1>
+
+        <div class="game-section" id="parcels-section">
+            <h2>Parcels</h2>
+            <div id="parcel-tabs"> <!-- Add this line -->
+                <!-- Parcel tabs will be dynamically added here -->
+            </div>
+            <div id="parcels">
+                <!-- Parcel content will be dynamically added here -->
+            </div>
+            <button id="buyParcel">Buy New Parcel</button>
+        </div>
+
+        <div class="game-section">
+            <h2>Resources</h2>
+            <table class="table" id="resourceTable"></table>
+        </div>
+
+        <div class="game-section">
+          <h2 id="buildingHeader">Buildings</h2>
+            <table class="table" id="buildings">
+                <thead>
+                    <tr>
+                        <th>Building</th>
+                        <th>Count</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Buildings will be dynamically added here -->
+                </tbody>
+            </table>
+            <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
+                <!-- Building options will be dynamically added here -->
+            </select>
+            <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
+            <select id="researchSelect">
+                <!-- Research options will be dynamically added here -->
+            </select>
+            <button id="startResearch">Start Research</button>
+        </div>
+    </div>
+    <script src="js/modules/parcels.js"></script>
+    <script src="js/modules/buildings.js"></script>
+    <script src="js/modules/progressionManager.js"></script>
+    <script src="js/modules/researchManager.js"></script>
+    <script src="js/utils/ui.js"></script>
+    <script src="js/utils/gameState.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/utils/gameLoop.js"></script>
+</body>
+</html>

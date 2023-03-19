@@ -1,0 +1,49 @@
+### Resources:
+- Generalize Resource System
+- Add multiple resources with multiple steps
+
+### Buildings:
+- Generalize Building System
+- Add multiple Buildings
+
+### Energy:
+- Add an Energy System
+
+### Parcels:
+- Add Resource Storage Limits
+- Add Parcel Specific Resource Deposits
+
+### Long Term:
+- Blueprints
+    - Does it make sense to include blueprints?
+- Scaling production
+    - Continent System: Build a boat to access new continents?
+    - Planet System: After a rocket is launched, the player can choose a new planet. This opens up the gate for interplanetary logistics
+    - Galaxy System: Harness the Energy of the Sun to build a dyson sphere and then build an intergalactic spaceship. Opens up intergalactic logistics (wormhole or will time play a role?)
+
+
+Random Resources per Parcel generation:
+- Issue: Full Parcel Blueprints will become harder to use. Also full planet scale blueprinting will become harder.
+- Solutions:
+    - Scanners: Allow searching for specific parcels, determining the next parcels composition
+    - Terraforming: Allow changing parcel resource deposits
+    - Nanobots: Allow changing parcel resource deposits
+    - Simple Resource Deposits: Just make them "Rich", "Medium", "Traces" --> makes blueprints easier
+    - Never have blueprints --> Scaling becomes harder
+
+Roadmap:
+- Add ironOre to ironPlate production
+    - Needs another building
+
+
+
+I changed ironPlates to be ironOre.
+As a next step I want to introduce the mechanic of transforming one resource into another.
+So a building can have one or multiple inputs of resources & outputs another resource at a given rate.
+The first example of this will be iron smelting. For this we will have two new buildings called "Iron Smelter" & "Coal Miner".
+The Coal Miner works just as the Iron Miner, but outputs coal.
+The Iron Smelter takes as an Input 4 Iron Ore & 1 Coal to output 2 Iron Plates.
+
+Please think about the changes that need to be made to the codebase. Don't write the full code yet, but let me know about all the changes needed.
+Include any changes in terms of depencies that change.
+Also, think about how to generalize functions to accomodate multiple resources, multiple buildings so that adding in new buildings and resources afterwards becomes easier.

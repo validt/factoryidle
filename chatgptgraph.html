@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Graph Example</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        svg {
+            background-color: #f2f2f2;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const data = [
+            {x: 0, y: 100},
+            {x: 3, y: 50},
+            {x: 6, y: 0},
+        ];
+
+        const margin = {top: 20, right: 20, bottom: 30, left: 50};
+        const width = 600 - margin.left - margin.right;
+        const height = 300 - margin.top - margin.bottom;
+
+        const xScale = d3.scaleLinear().domain([0, 6]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
+
+        const line = d3.line()
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y))
+            .curve(d3.curveMonotoneX);
+
+        const svg = d3.select('body')
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+        // Draw the first line segment
+        svg.append('path')
+            .datum(data.slice(0, 2))
+            .attr('class', 'line')
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', 2);
+
+        // Draw the second line segment (dotted)
+        svg.append('path')
+            .datum(data.slice(1))
+            .attr('class', 'line')
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', 'steelblue')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '5,5');
+
+        const xAxis = d3.axisBottom(xScale).ticks(6);
+        const yAxis = d3.axisLeft(yScale);
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0, ${height})`)
+            .call(xAxis)
+            .append('text')
+            .attr('x', width / 2)
+            .attr('y', margin.bottom - 5)
+            .attr('fill', '#000')
+            .text('Days since GPT-4 Release');
+
+        svg.append('g')
+            .attr('class', 'axis')
+            .call(yAxis)
+            .append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('x', -height / 2)
+            .attr('y', -margin.left)
+            .attr('dy', '1em')
+            .attr('fill', '#000')
+            .text('Message cap');
+    </script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+const ui = (() => {
+  const parcelContainer = document.getElementById("parcels");
+  const buildingDisplay = document.getElementById("buildings");
+  let selectedParcelIndex = 0;
+
+  class ResourceTable {
+    constructor(parcel) {
+      this.parcel = parcel;
+      this.tableElement = document.getElementById("resourceTable");
+    }
+
+    update() {
+      // If the table is empty, create the header row
+      if (this.tableElement.innerHTML === "") {
+        this.createHeader();
+      }
+
+      // Update the header row
+      this.updateHeader();
+
+      // Clear the table content except for the header row
+      while (this.tableElement.rows.length > 1) {
+        this.tableElement.deleteRow(-1);
+      }
+
+      // Iterate over each resource in the parcel
+      for (const resourceName in this.parcel.resources) {
+        // Create a new row for the resource and append it to the table element
+        this.tableElement.appendChild(this.createRow(resourceName));
+      }
+
+      //Add event listeners to buttons after appending all rows
+      this.addEventListenerToButtons(".buy-building-resource", buyBuilding);
+      this.addEventListenerToButtons(".sell-building-resource", sellBuilding);
+    }
+
+    addEventListenerToButtons(buttonClass, actionFunction) {
+      const buttons = this.tableElement.querySelectorAll(buttonClass);
+      buttons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          const buildingId = event.target.dataset.buildingId;
+          actionFunction(this.parcel, buildingId);
+        });
+      });
+    }
+
+    updateHeader() {
+        // Get the current header elements using a query selector
+        let forwardBeltLabel = document.querySelector("[id^='forwardBeltHeader-']");
+        let backwardBeltLabel = document.querySelector("[id^='backwardBeltHeader-']");
+
+        if (forwardBeltLabel && backwardBeltLabel) {
+        // Set new ids
+        forwardBeltLabel.id = `forwardBeltHeader-${this.parcel.id}`;
+        backwardBeltLabel.id = `backwardBeltHeader-${this.parcel.id}`;
+
+        // Update forward and backward belt labels
+        const forwardBeltCount = this.parcel.buildings['forwardBelt'] ?? 0;
+        const backwardBeltCount = this.parcel.buildings['backwardBelt'] ?? 0;
+        forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${forwardBeltCount}`;
+        backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${backwardBeltCount}`;
+        }
+    }
+
+    updateRow(resourceName) {
+      const row = document.getElementById(`resourceRow-${this.parcel.id}-${resourceName}`);
+      row.children[1].textContent = this.parcel.resources[resourceName];
+      const beltTypes = ["forwardBelt", "backwardBelt"];
+      beltTypes.forEach((beltId) => {
+        const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
+        const beltCount = this.parcel.buildings[beltId] || 0;
+        const headerId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltLabel-${this.parcel.id}`;
+        const headerElement = document.getElementById(headerId);
+        headerElement.textContent = `${beltId === "forwardBelt" ? "Forwards" : "Backwards"} ${beltUsage}/${beltCount}`;
+      });
+    }
+
+    createHeader() {
+      const headerRow = document.createElement("tr");
+      const headerLabels = [
+        "Resource",
+        "Amount",
+        "Action",
+        "Count",
+        "Production",
+        "Forward 0/0",
+        "Backward 0/0",
+      ];
+
+      headerLabels.forEach((label) => {
+        const headerCell = document.createElement("th");
+        headerCell.textContent = label;
+        headerRow.appendChild(headerCell);
+      });
+
+      headerRow.children[3].id = `countHeader-${this.parcel.id}`; // Add an ID to the Production header
+
+      headerRow.children[4].id = `productionHeader-${this.parcel.id}`; // Add an ID to the Production header
+      headerRow.children[5].id = `forwardBeltHeader-${this.parcel.id}`; // Add an ID to the Forward header
+      headerRow.children[5].style.display = "none"; // Initially hide the Forward header
+
+      headerRow.children[6].id = `backwardBeltHeader-${this.parcel.id}`; // Add an ID to the Backward header
+      headerRow.children[6].style.display = "none"; // Initially hide the Backward header
+
+      // Hide the Production header initially
+      const productionHeader = headerRow.children[4];
+      const countHeader = headerRow.children[3];
+      productionHeader.style.display = "none";
+      countHeader.style.display = "none";
+
+      this.tableElement.appendChild(headerRow);
+    }
+
+    createRow(resourceName) {
+      const building = buildingManager.getBuildingByResourceName(resourceName);
+      const row = document.createElement("tr");
+      row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
+
+      row.appendChild(this.createCell(resourceName));
+
+      // Get the color from getResourceRateColor and apply it to the resource amount cell
+      const color = getResourceRateColor(this.parcel, resourceName);
+      row.appendChild(this.createCell(this.parcel.resources[resourceName], color));
+
+      const actionCell = document.createElement("td");
+      if (building && building.minable) {
+          const mineButton = this.createMineButton(resourceName);
+          actionCell.appendChild(mineButton);
+      }
+      row.appendChild(actionCell);
+
+      const countCell = document.createElement("td"); // Create a new cell for the building count
+      if (building) {
+        if (
+          progressionManager.isUnlocked("ironMiner") &&
+          progressionManager.isUnlocked("stoneMiner") &&
+          progressionManager.isUnlocked("coalMiner")
+        ) {
+          countCell.textContent = this.parcel.buildings[building.id] || 0; // Display the number of built buildings
+        } else {
+          countCell.textContent = ""; // Hide the content if the required buildings are not unlocked
+        }
+      }
+      row.appendChild(countCell);
+
+      const productionCell = document.createElement("td");
+      if (building) {
+        const buildingCount = this.parcel.buildings[building.id] || 0;
+        if (
+          buildingCount > 0 &&
+          progressionManager.isUnlocked("ironMiner") &&
+          progressionManager.isUnlocked("stoneMiner") &&
+          progressionManager.isUnlocked("coalMiner")
+        ) {
+          productionCell.innerHTML = `
+            <button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
+            <button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
+          `;
+        } else {
+          productionCell.textContent = ""; // Hide the content if the required buildings are not unlocked
+        }
+      }
+      row.appendChild(productionCell);
+
+      // Create input fields for forward and backward belts
+      const beltTypes = ["forwardBelt", "backwardBelt"];
+      beltTypes.forEach((beltId, index) => {
+        const directionInput = this.createDirectionInput(beltId, resourceName);
+        const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
+        const beltCount = this.parcel.buildings[beltId] || 0;
+
+        const cell = this.createCell(directionInput);
+        cell.style.display = "none"; // Initially hide the Forward and Backward cells
+        row.appendChild(cell);
+
+        if (beltCount > 0) {
+          const headerId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltHeader-${this.parcel.id}`;
+          const headerElement = document.getElementById(headerId);
+          headerElement.style.display = ""; // Unhide the header if the belt has been built
+
+          const labelId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltHeader-${this.parcel.id}`;
+          const labelElement = document.getElementById(labelId);
+          labelElement.textContent = `${beltId === "forwardBelt" ? "Forwards" : "Backwards"} ${beltUsage}/${beltCount}`;
+
+          cell.style.display = ""; // Unhide the cell if the belt has been built
+        }
+      });
+
+      return row;
+    }
+
+    createMineButton(resourceName) {
+      const mineButton = document.createElement("button");
+      mineButton.textContent = "Mine";
+      mineButton.addEventListener("click", () => {
+        this.parcel.resources[resourceName]++;
+        this.update();
+      });
+
+      return mineButton;
+    }
+
+    createCell(content, bgColor = "white") {
+      const cell = document.createElement("td");
+
+      if (typeof content === "string" || typeof content === "number") {
+        cell.textContent = content;
+      } else if (content instanceof Node) {
+        cell.appendChild(content);
+      }
+
+      cell.style.backgroundColor = bgColor;
+
+      if (bgColor === "green") {
+        cell.style.color = "white";
+      }
+
+      return cell;
+    }
+
+
+
+
+
+
+    createDirectionInput(beltId, resourceName) {
+        const directionInput = document.createElement("input");
+        directionInput.type = "number";
+        directionInput.min = 0;
+        directionInput.value = this.parcel.inputValues?.[resourceName]?.[beltId] || 0; // Set the value based on the stored value
+        directionInput.setAttribute("data-belt", beltId);
+        directionInput.setAttribute("data-resource", resourceName);
+        directionInput.setAttribute('data-currentval', directionInput.value);
+        directionInput.addEventListener("input", (event) => {
+          const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
+          const inputVal = parseInt(event.target.value, 10) || 0;
+          const maxVal = parseInt(this.parcel.buildings[beltId], 10) || 0;
+          const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
+          const maxCellVal = maxVal - (beltUsage - currentVal);
+          console.log("maxCellVal: " + maxCellVal);
+          console.log("currentVal: " + currentVal);
+          console.log("maxVal: " + maxVal);
+          console.log("inputVal: " + inputVal);
+
+          if (inputVal > maxCellVal) {
+            event.target.value = maxCellVal;
+          } else if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
+            event.target.value = 0;
+          } else {
+            console.log(inputVal)
+            event.target.value = inputVal;
+          }
+
+          event.target.setAttribute('data-currentval', event.target.value);
+
+          if (maxCellVal > 0) {
+            this.updateBeltUsage(beltId, maxCellVal);   //todo
+          } else {
+            this.updateBeltUsage(beltId, 0);            //todo
+          }
+
+          // Save the input field values for the parcel and resource
+          this.updateBeltUsage(beltId, resourceName, event.target.value);
+
+          this.update();
+      });
+
+      return directionInput;
+    }
+
+
+
+    updateBeltUsage(beltId, resourceName, value) {
+        let totalBeltUsage = 0;
+        const beltInputs = this.tableElement.querySelectorAll(`input[data-belt="${beltId}"]`);
+
+        beltInputs.forEach((input) => {
+          const inputVal = parseInt(input.value, 10);
+          totalBeltUsage += inputVal;
+        });
+
+        if (!this.parcel.beltUsage) {
+          this.parcel.beltUsage = {};
+        }
+
+        this.parcel.beltUsage[beltId] = totalBeltUsage;
+
+        // Save the input field values for the parcel and resource
+        if (!this.parcel.inputValues) {
+          this.parcel.inputValues = {};
+        }
+        if (!this.parcel.inputValues[resourceName]) {
+          this.parcel.inputValues[resourceName] = {};
+        }
+        this.parcel.inputValues[resourceName][beltId] = parseInt(value, 10) || 0;
+      }
+
+  }
+
+    function addParcelToUI(parcel) {
+        const parcelTab = document.createElement("button");
+        parcelTab.className = "parcel-tab";
+        parcelTab.id = `tab-${parcel.id}`;
+        parcelTab.textContent = parcel.id;
+
+        // Select Parcel
+        parcelTab.addEventListener("click", () => {
+            const prevSelected = document.querySelector(".parcel-tab.selected");
+            if (prevSelected) {
+                prevSelected.classList.remove("selected");
+            }
+            parcelTab.classList.add("selected");
+            selectedParcelIndex = parseInt(parcel.id.split("-")[1]) - 1;
+            updateResourceDisplay(parcels.getParcel(selectedParcelIndex));
+            updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
+        });
+
+        parcelContainer.appendChild(parcelTab);
+    }
+
+    function updateResourceDisplay(parcel) {
+      const resourceTable = new ResourceTable(parcel);
+      resourceTable.update();
+    }
+
+    function getTotalBeltUsage(parcel, beltId) {
+      let totalBeltUsage = 0;
+      for (const resourceName in parcel.resources) {
+        const beltUsage = parcel.beltUsage ? parcel.beltUsage[beltId] || {} : {};
+        const resourceBeltUsage = beltUsage[resourceName] || 0;
+        totalBeltUsage += resourceBeltUsage;
+      }
+      return totalBeltUsage;
+    }
+
+    function updateBuildingDisplay(parcel) {
+        buildingDisplay.innerHTML = `
+            <tr>
+                <th>Building</th>
+                <th>Count</th>
+                <th>Action</th>
+            </tr>
+        `;
+
+        for (const [key, value] of Object.entries(parcel.buildings)) {
+            const buildingElement = document.createElement("tr");
+            const building = buildingManager.getBuilding(key);
+            buildingElement.innerHTML = `
+                <td>${building.name}</td>
+                <td>${value}</td>
+                <td>
+                    <button data-building-id="${key}" class="buy-building">Buy</button>
+                    <button data-building-id="${key}" class="sell-building">Sell</button>
+                </td>
+            `;
+            buildingDisplay.appendChild(buildingElement);
+        }
+
+        const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+        const buildingHeader = document.getElementById("buildingHeader");
+        buildingHeader.textContent = `Buildings (${totalBuildings} / ${parcel.maxBuildings})`;
+
+        // Add event listeners to buy buttons
+        addEventListenerToButtons(parcel, ".buy-building", buyBuilding);
+
+        // Add event listeners to sell buttons
+        addEventListenerToButtons(parcel, ".sell-building", sellBuilding);
+    }
+
+    function addEventListenerToButtons(parcel, buttonClass, actionFunction) {
+        const buttons = buildingDisplay.querySelectorAll(buttonClass);
+        buttons.forEach((button) => {
+            button.addEventListener("click", (event) => {
+                const buildingId = event.target.dataset.buildingId;
+                actionFunction(parcel, buildingId);
+            });
+        });
+    }
+
+    function buyBuilding(parcel, buildingId) {
+        const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+        if (totalBuildings < parcel.maxBuildings) {
+            const building = buildingManager.getBuilding(buildingId);
+
+            // Check if there are enough resources to buy the building
+            let canBuy = true;
+            for (const [resource, cost] of Object.entries(building.cost)) {
+                if (!parcel.resources[resource] || parcel.resources[resource] < cost) {
+                    canBuy = false;
+                    break;
+                }
+            }
+
+            // If the building can be bought, deduct the cost and add the building
+            if (canBuy) {
+                for (const [resource, cost] of Object.entries(building.cost)) {
+                    parcel.resources[resource] -= cost;
+                }
+
+                // Update building count
+                parcel.buildings[buildingId]++;
+
+                // Update building display
+                updateBuildingDisplay(parcel);
+            }
+        }
+    }
+
+    function sellBuilding(parcel, buildingId) {
+        if (parcel.buildings[buildingId] && parcel.buildings[buildingId] > 0) {
+            const building = buildingManager.getBuilding(buildingId);
+
+            // Refund 25% of the cost rounded down
+            for (const [resource, cost] of Object.entries(building.cost)) {
+                parcel.resources[resource] = (parcel.resources[resource] || 0) + Math.floor(cost * 0.25);
+            }
+
+            // Update building count
+            parcel.buildings[buildingId]--;
+
+            if (parcel.buildings[buildingId] === 0) {
+                delete parcel.buildings[buildingId];
+            }
+
+            // Update building display
+            updateBuildingDisplay(parcel);
+        }
+    }
+
+    function updateParcelBuildingCount(parcelIndex, buildingCount) {
+        const selectedParcel = document.getElementById(`parcel-${parcelIndex + 1}`);
+        const buildingHeader = document.getElementById("buildingHeader");
+        buildingHeader.textContent = `Buildings (${buildingCount} / ${parcels.maxBuildingsPerParcel})`;
+    }
+
+    function getSelectedParcelIndex() {
+        return selectedParcelIndex;
+    }
+
+    function selectParcel(parcelIndex) {
+        selectedParcelIndex = parcelIndex;
+        const parcelButtons = document.querySelectorAll(".parcel-button");
+        parcelButtons.forEach((button, index) => {
+            button.classList.toggle("selected", index === parcelIndex);
+        });
+    }
+
+    const addedToDropdown = new Set();
+
+    function updateBuildingDropdown() {
+      const buildNewBuildingSelect = document.getElementById("buildingSelect");
+
+      // Iterate through all unlocked buildings
+      for (const buildingId of window.progressionManager.unlockedBuildings) {
+        // If the building hasn't been added to the dropdown yet
+        if (!addedToDropdown.has(buildingId)) {
+          // Add the building to the dropdown
+          const building = window.buildingManager.getBuilding(buildingId);
+          const optionElement = document.createElement("option");
+          optionElement.value = building.id;
+          optionElement.textContent = `${building.name} - ${JSON.stringify(building.cost)}`;
+          buildNewBuildingSelect.appendChild(optionElement);
+
+          // Mark the building as added to the dropdown
+          addedToDropdown.add(buildingId);
+        }
+      }
+    }
+
+    function getResourceRateColor(parcel, resourceName) {
+      const currentResourceCount = parcel.resources[resourceName] || 0;
+      const previousResourceCount = parcel.previousResources[resourceName] || 0;
+      const productionRate = currentResourceCount - previousResourceCount;
+
+      if (productionRate > 0) {
+        return "green";
+      } else if (productionRate < 0) {
+        return "red";
+      } else {
+        return "white";
+      }
+    }
+
+    function updateParcelsSectionVisibility() {
+      const parcelsSection = document.getElementById("parcels-section");
+      const expansionTechCenterBuilt = gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0);
+
+      parcelsSection.style.display = expansionTechCenterBuilt ? "block" : "none";
+    }
+
+
+    return {
+        addParcelToUI,
+        updateResourceDisplay,
+        updateBuildingDisplay,
+        updateParcelBuildingCount,
+        getSelectedParcelIndex,
+        updateBuildingDropdown,
+        selectParcel,
+        updateParcelsSectionVisibility,
+    };
+    })();
+
+    window.ui = ui;
