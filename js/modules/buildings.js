@@ -1,15 +1,3 @@
-/*
-Okay great. Next requirements are:
-Unlock ironSmelter when bricks are > 0
-Unlock ironMiner, stoneMiner & coalMiner when ironPlates are > 0
-Unlock copperMiner & copperSmelter when ironMiner, stoneMiner & coalMiner all have been built at least once
-Unlock gearPress when copperPlates are > 0
-Unlock cableExtruder when gears are > 0
-Unlock greenChipFactory when copperCables are > 0
-Unlock redScienceLab when greenChips are > 0
-Unlock researchCenter when redScience are > 0
-*/
-
   const buildings = [
     {
       id: "kiln",

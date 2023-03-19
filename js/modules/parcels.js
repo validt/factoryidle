@@ -20,18 +20,18 @@ class Parcel {
         this.id = id;
         this.maxBuildings = maxBuildings;
         this.buildings = createNumberGuard({
-            kiln: id === 'parcel-1' ? 6 : 0,
-            ironSmelter: id === 'parcel-1' ? 10 : 0,
-            coalMiner: id === 'parcel-1' ? 24 : 0,
-            stoneMiner: id === 'parcel-1' ? 12 : 0,
-            ironMiner: id === 'parcel-1' ? 20 : 0,
-            copperSmelter: id === 'parcel-1' ? 6 : 0,
-            copperMiner: id === 'parcel-1' ? 12 : 0,
-            gearPress: id === 'parcel-1' ? 2 : 0,
-            cableExtruder: id === 'parcel-1' ? 4 : 0,
-            greenChipFactory: id === 'parcel-1' ? 2 : 0,
-            redScienceLab: id === 'parcel-1' ? 2 : 0,
-            researchCenter: id === 'parcel-1' ? 1 : 0,
+            // kiln: id === 'parcel-1' ? 6 : 0,
+            // ironSmelter: id === 'parcel-1' ? 10 : 0,
+            // coalMiner: id === 'parcel-1' ? 24 : 0,
+            // stoneMiner: id === 'parcel-1' ? 12 : 0,
+            // ironMiner: id === 'parcel-1' ? 20 : 0,
+            // copperSmelter: id === 'parcel-1' ? 6 : 0,
+            // copperMiner: id === 'parcel-1' ? 12 : 0,
+            // gearPress: id === 'parcel-1' ? 2 : 0,
+            // cableExtruder: id === 'parcel-1' ? 4 : 0,
+            // greenChipFactory: id === 'parcel-1' ? 2 : 0,
+            // redScienceLab: id === 'parcel-1' ? 2 : 0,
+            // researchCenter: id === 'parcel-1' ? 1 : 0,
         });
         this.resources = createNumberGuard({
             stone: 0,
@@ -114,7 +114,33 @@ const parcels = {
           },
           maxBuildingLimit: 25, // Add the max building limit value for this level
         },
-        // ... Add more levels and costs as needed
+        {
+          level: 4,
+          cost: {
+            ironOre: 250,
+            stone: 250,
+            coal: 125,
+          },
+          maxBuildingLimit: 50, // Add the max building limit value for this level
+        },
+        {
+          level: 5,
+          cost: {
+            ironOre: 625,
+            stone: 625,
+            coal: 325,
+          },
+          maxBuildingLimit: 75, // Add the max building limit value for this level
+        },
+        {
+          level: 6,
+          cost: {
+            ironOre: 1500,
+            stone: 1500,
+            coal: 850,
+          },
+          maxBuildingLimit: 100, // Add the max building limit value for this level
+        },
       ],
     },
 
@@ -139,6 +165,14 @@ const parcels = {
 
     getParcel(parcelIndex) {
         return this.parcelList[parcelIndex];
+    },
+
+    getUpgradeInfo(parcel, upgradeType) {
+        const currentLevel = parcel.upgrades[upgradeType];
+        const upgradeInfo = this.upgradeCosts[upgradeType].find(
+            (upgrade) => upgrade.level === currentLevel + 1
+        );
+        return upgradeInfo;
     },
 
     getUpgradeCost(parcel, upgradeType) {

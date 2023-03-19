@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let canAfford = true;
             for (const [resourceName, cost] of resourceCost) {
-                if (selectedParcel.resources[resourceName] < cost) {
+                if (isNaN(selectedParcel.resources[resourceName]) || selectedParcel.resources[resourceName] < cost) {
                     canAfford = false;
                     break;
                 }
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ui.updateBuildingDisplay(selectedParcel);
 
                     const totalBuildings = Object.values(selectedParcel.buildings).reduce((a, b) => a + b, 0);
-                    ui.updateParcelBuildingCount(selectedParcelIndex, totalBuildings);
+                    //ui.updateParcelBuildingCount(selectedParcelIndex, totalBuildings);
                 }
             }
         }

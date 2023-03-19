@@ -32,6 +32,12 @@ const ui = (() => {
       //Add event listeners to buttons after appending all rows
       this.addEventListenerToButtons(".buy-building-resource", buyBuilding);
       this.addEventListenerToButtons(".sell-building-resource", sellBuilding);
+
+      // Add tooltips to the Buy buttons
+      this.addTooltipToButtons(".buy-building-resource", this.parcel);
+
+      // Add tooltips to the resource names
+      this.addResourceTooltips(this.parcel);
     }
 
     addEventListenerToButtons(buttonClass, actionFunction) {
@@ -40,6 +46,71 @@ const ui = (() => {
         button.addEventListener("click", (event) => {
           const buildingId = event.target.dataset.buildingId;
           actionFunction(this.parcel, buildingId);
+        });
+      });
+    }
+
+    addTooltipToButtons(buttonClass, parcel) {
+      const buttons = this.tableElement.querySelectorAll(buttonClass);
+      buttons.forEach((button) => {
+        // Show tooltip on mouseover for Buy buttons only
+        if (buttonClass.includes("buy-building")) {
+          button.addEventListener("mouseover", (event) => {
+            const buildingId = event.target.dataset.buildingId;
+            const building = buildingManager.getBuilding(buildingId);
+            const costText = Object.entries(building.cost)
+              .map(([resource, cost]) => `${cost} ${resource}`)
+              .join("<br>");
+            const buyText = `Cost:<br>${costText}`;
+
+            tooltip.innerHTML = buyText;
+            tooltip.style.display = "block";
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+          });
+
+          // Hide tooltip on mouseout
+          button.addEventListener("mouseout", () => {
+            tooltip.style.display = "none";
+          });
+
+          // Update tooltip position on mousemove
+          button.addEventListener("mousemove", (event) => {
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+          });
+        }
+      });
+    }
+
+
+    addResourceTooltips(parcel) {
+      const resourceNames = this.tableElement.querySelectorAll(".resource-name");
+      resourceNames.forEach((resourceName) => {
+        resourceName.addEventListener("mouseover", (event) => {
+          const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
+          const inputText = Object.entries(resource.inputs || {})
+            .map(([inputResource, amount]) => `${amount} ${inputResource}`)
+            .join("<br>");
+          const outputText = Object.entries(resource.outputs || {})
+            .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+            .join("<br>");
+
+          const tooltipText = `Input:<br>${inputText || "None"}<br>Output:<br>${outputText || "None"}`;
+
+          tooltip.innerHTML = tooltipText;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.pageX + 10 + "px";
+          tooltip.style.top = event.pageY + 10 + "px";
+        });
+
+        resourceName.addEventListener("mouseout", () => {
+          tooltip.style.display = "none";
+        });
+
+        resourceName.addEventListener("mousemove", (event) => {
+          tooltip.style.left = event.pageX + 10 + "px";
+          tooltip.style.top = event.pageY + 10 + "px";
         });
       });
     }
@@ -60,19 +131,6 @@ const ui = (() => {
         forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${forwardBeltCount}`;
         backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${backwardBeltCount}`;
         }
-    }
-
-    updateRow(resourceName) {
-      const row = document.getElementById(`resourceRow-${this.parcel.id}-${resourceName}`);
-      row.children[1].textContent = this.parcel.resources[resourceName];
-      const beltTypes = ["forwardBelt", "backwardBelt"];
-      beltTypes.forEach((beltId) => {
-        const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
-        const beltCount = this.parcel.buildings[beltId] || 0;
-        const headerId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltLabel-${this.parcel.id}`;
-        const headerElement = document.getElementById(headerId);
-        headerElement.textContent = `${beltId === "forwardBelt" ? "Forwards" : "Backwards"} ${beltUsage}/${beltCount}`;
-      });
     }
 
     createHeader() {
@@ -116,7 +174,13 @@ const ui = (() => {
       const row = document.createElement("tr");
       row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
 
-      row.appendChild(this.createCell(resourceName));
+      // Create the resource name cell
+      const nameCell = document.createElement("td");
+      nameCell.textContent = resourceName;
+      nameCell.classList.add("resource-name");
+      row.appendChild(nameCell);
+
+      //row.appendChild(this.createCell(resourceName));
 
       // Get the color from getResourceRateColor and apply it to the resource amount cell
       const color = getResourceRateColor(this.parcel, resourceName);
@@ -218,11 +282,6 @@ const ui = (() => {
       return cell;
     }
 
-
-
-
-
-
     createDirectionInput(beltId, resourceName) {
         const directionInput = document.createElement("input");
         directionInput.type = "number";
@@ -267,8 +326,6 @@ const ui = (() => {
 
       return directionInput;
     }
-
-
 
     updateBeltUsage(beltId, resourceName, value) {
         let totalBeltUsage = 0;
@@ -360,6 +417,50 @@ const ui = (() => {
         const buildingHeader = document.getElementById("buildingHeader");
         buildingHeader.textContent = `Buildings (${totalBuildings} / ${parcel.maxBuildings})`;
 
+        // Add Upgrade button
+        const upgradeButton = document.createElement("button");
+        upgradeButton.textContent = "Upgrade";
+        upgradeButton.classList.add("upgrade-button");
+        buildingHeader.appendChild(upgradeButton);
+
+        // Get a reference to the tooltip element
+        const tooltip = document.getElementById("tooltip");
+
+        // Display upgrade information on mouseover
+        upgradeButton.addEventListener("mouseover", (event) => {
+            const upgradeType = "maxBuildingLimit";
+            const upgradeCost = parcels.getUpgradeCost(parcel, upgradeType);
+            const upgradeInfo = parcels.getUpgradeInfo(parcel, upgradeType);
+            const costText = Object.entries(upgradeCost)
+                .map(([resource, cost]) => `${cost} ${resource}`)
+                .join(", ");
+            const upgradeText = upgradeInfo
+                ? `Upgrade cost: ${costText}. New limit: ${upgradeInfo.maxBuildingLimit}`
+                : "Max level reached.";
+
+            tooltip.innerHTML = upgradeText;
+            tooltip.style.display = "block";
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+        });
+
+        // Hide the tooltip on mouseout
+        upgradeButton.addEventListener("mouseout", () => {
+            tooltip.style.display = "none";
+        });
+
+        // Update the tooltip position on mousemove
+        upgradeButton.addEventListener("mousemove", (event) => {
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+        });
+
+        // Add event listener for Upgrade button
+        upgradeButton.addEventListener("click", () => {
+            parcels.upgradeParcel(parcel, "maxBuildingLimit");
+            updateBuildingDisplay(parcel);
+        });
+
         // Add event listeners to buy buttons
         addEventListenerToButtons(parcel, ".buy-building", buyBuilding);
 
@@ -367,15 +468,46 @@ const ui = (() => {
         addEventListenerToButtons(parcel, ".sell-building", sellBuilding);
     }
 
+
     function addEventListenerToButtons(parcel, buttonClass, actionFunction) {
         const buttons = buildingDisplay.querySelectorAll(buttonClass);
         buttons.forEach((button) => {
             button.addEventListener("click", (event) => {
                 const buildingId = event.target.dataset.buildingId;
                 actionFunction(parcel, buildingId);
+                updateBuildingDisplay(parcel);
             });
+
+            // Show tooltip on mouseover for Buy buttons only
+            if (actionFunction === buyBuilding) {
+                button.addEventListener("mouseover", (event) => {
+                    const buildingId = event.target.dataset.buildingId;
+                    const building = buildingManager.getBuilding(buildingId);
+                    const costText = Object.entries(building.cost)
+                        .map(([resource, cost]) => `${cost} ${resource}`)
+                        .join("<br>");
+                    const buyText = `Cost:<br>${costText}`;
+
+                    tooltip.innerHTML = buyText;
+                    tooltip.style.display = "block";
+                    tooltip.style.left = event.pageX + 10 + "px";
+                    tooltip.style.top = event.pageY + 10 + "px";
+                });
+
+                // Hide tooltip on mouseout
+                button.addEventListener("mouseout", () => {
+                    tooltip.style.display = "none";
+                });
+
+                // Update tooltip position on mousemove
+                button.addEventListener("mousemove", (event) => {
+                    tooltip.style.left = event.pageX + 10 + "px";
+                    tooltip.style.top = event.pageY + 10 + "px";
+                });
+            }
         });
     }
+
 
     function buyBuilding(parcel, buildingId) {
         const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);

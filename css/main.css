@@ -102,7 +102,6 @@ h1 {
 }
 
 .resource-name {
-    font-weight: bold;
     margin-bottom: 5px;
 }
 
@@ -157,4 +156,14 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Table Styles */
+/* Tooltips */
+.tooltip {
+  position: absolute;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #333333;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 14px;
+  z-index: 9999;
+}
