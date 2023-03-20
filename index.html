@@ -35,7 +35,10 @@
             </div>
           </div>
         </div>
-
+        <select id="researchSelect">
+            <!-- Research options will be dynamically added here -->
+        </select>
+        <button id="startResearch">Start Research</button>
         <div class="game-section" id="parcels-section">
             <h2>Parcels</h2>
             <div id="parcel-tabs"> <!-- Add this line -->
@@ -54,6 +57,7 @@
 
         <div class="game-section">
           <h3 id="buildingHeader">Buildings</h3>
+            <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
             <table class="table" id="buildings">
                 <thead>
                     <tr>
@@ -69,11 +73,6 @@
             <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
                 <!-- Building options will be dynamically added here -->
             </select>
-            <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
-            <select id="researchSelect">
-                <!-- Research options will be dynamically added here -->
-            </select>
-            <button id="startResearch">Start Research</button>
         </div>
     </div>
     <script src="js/modules/parcels.js"></script>

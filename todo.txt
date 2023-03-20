@@ -1,3 +1,16 @@
+### Progression Update
+- Make Max Building Harder to achieve. Let it cost Expansion Points additionally to resources.
+
+
+### Quest System --> Project System
+- Ask the player to fullfil quests. Projects make it possible to earn Expansion Points, Research Points, Cash (later)
+- Display next to Energy.
+- First Quests:
+    - Exploration Mission -> Expansion Points
+    - Research Mission -> Research Points
+
+
+
 ### The ability to scale production rates on a:
 - Global Level
 - Building Specific Level

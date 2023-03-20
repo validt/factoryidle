@@ -184,7 +184,7 @@ const ui = (() => {
 
       // Get the color from getResourceRateColor and apply it to the resource amount cell
       const color = getResourceRateColor(this.parcel, resourceName);
-      row.appendChild(this.createCell(this.parcel.resources[resourceName], color));
+      row.appendChild(this.createCell(Math.round(this.parcel.resources[resourceName] * 10) / 10, color));
 
       const actionCell = document.createElement("td");
       if (building && building.minable) {

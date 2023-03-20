@@ -61,23 +61,25 @@ const gameLoop = (() => {
                         // If the building can produce, consume the input resources and produce output resources
                         if (canProduce) {
                             for (const [key, value] of Object.entries(building.inputs)) {
-                                parcel.resources[key] -= value * buildingCount * building.rate * (1 + totalConsumptionRateModifier);
+                                const updatedValue = parcel.resources[key] - value * buildingCount * building.rate * (1 + totalConsumptionRateModifier);
+                                parcel.resources[key] = Math.round(updatedValue * 10) / 10;
                             }
 
                             for (const [key, value] of Object.entries(building.outputs)) {
                                 if (!parcel.resources[key]) {
                                     parcel.resources[key] = 0;
                                 }
-                                parcel.resources[key] += value * buildingCount * building.rate * (1 + totalProductionRateModifier);
+                                const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (1 + totalProductionRateModifier);
+                                parcel.resources[key] = Math.round(updatedValue * 10) / 10;
                             }
                         }
                     } else {
-                        // If the building doesn't have any input resources, just produce the output resources
                         for (const [key, value] of Object.entries(building.outputs)) {
                             if (!parcel.resources[key]) {
                                 parcel.resources[key] = 0;
                             }
-                            parcel.resources[key] += value * buildingCount * building.rate * (1 + totalProductionRateModifier);
+                            const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (1 + totalProductionRateModifier);
+                            parcel.resources[key] = Math.round(updatedValue * 10) / 10;
                         }
                     }
                 }

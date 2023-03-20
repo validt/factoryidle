@@ -4,6 +4,13 @@ function isNumber(value) {
 
 function createNumberGuard(target) {
   return new Proxy(target, {
+    get(obj, prop) {
+      const value = obj[prop];
+      if (typeof value === 'object' && value !== null) {
+        return createNumberGuard(value);
+      }
+      return value;
+    },
     set(obj, prop, value) {
       if (!isNumber(value)) {
         console.warn(`Attempted to set a non-number value (${value}) for property '${prop}'. Ignoring the operation.`);
