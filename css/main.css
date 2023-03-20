@@ -3,7 +3,7 @@ body {
     font-family: Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
+    background-color: #eee;
 }
 
 #container {
@@ -176,6 +176,15 @@ button:disabled {
   /* Add styles for the energy subcategory if needed */
 }
 
+.global {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.subcategory {
+  margin-right: 20px;
+}
+
 .energy-stats {
   display: flex;
   flex-direction: column;
@@ -189,4 +198,12 @@ button:disabled {
 .label {
   font-weight: bold;
   margin-right: 5px;
+}
+
+/* Projects */
+.project-box {
+  border: 1px solid black;
+  padding: 10px;
+  margin: 10px;
+  background-color: #fff;
 }

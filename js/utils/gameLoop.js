@@ -4,6 +4,7 @@ const gameLoop = (() => {
     let tickCounter = 0;
 
     function start() {
+        projects.renderProjects();
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();

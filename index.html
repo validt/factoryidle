@@ -34,11 +34,21 @@
               </div>
             </div>
           </div>
+          <div class="subcategory research">
+            <h3>Research</h3>
+            <select id="researchSelect">
+                <!-- Research options will be dynamically added here -->
+            </select>
+            <button id="startResearch">Start Research</button>
+          </div>
+          <div class="subcategory projects">
+            <h3>Projects</h3>
+            <div id="projects-container">
+              <!-- Projects will be dynamically added here -->
+            </div>
+          </div>
         </div>
-        <select id="researchSelect">
-            <!-- Research options will be dynamically added here -->
-        </select>
-        <button id="startResearch">Start Research</button>
+
         <div class="game-section" id="parcels-section">
             <h2>Parcels</h2>
             <div id="parcel-tabs"> <!-- Add this line -->
@@ -57,6 +67,9 @@
 
         <div class="game-section">
           <h3 id="buildingHeader">Buildings</h3>
+          <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
+              <!-- Building options will be dynamically added here -->
+          </select>
             <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
             <table class="table" id="buildings">
                 <thead>
@@ -70,15 +83,14 @@
                     <!-- Buildings will be dynamically added here -->
                 </tbody>
             </table>
-            <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
-                <!-- Building options will be dynamically added here -->
-            </select>
+
         </div>
     </div>
     <script src="js/modules/parcels.js"></script>
     <script src="js/modules/buildings.js"></script>
     <script src="js/modules/progressionManager.js"></script>
     <script src="js/modules/researchManager.js"></script>
+    <script src="js/modules/projects.js"></script>
     <script src="js/modules/energy.js"></script>
     <script src="js/utils/ui.js"></script>
     <script src="js/utils/gameState.js"></script>
