@@ -9,6 +9,7 @@ function createNumberGuard(target) {
         console.warn(`Attempted to set a non-number value (${value}) for property '${prop}'. Ignoring the operation.`);
         return true;
       }
+      value = Math.round(value * 10) / 10;
       obj[prop] = value;
       return true;
     },
@@ -32,6 +33,7 @@ class Parcel {
             // greenChipFactory: id === 'parcel-1' ? 2 : 0,
             // redScienceLab: id === 'parcel-1' ? 2 : 0,
             // researchCenter: id === 'parcel-1' ? 1 : 0,
+            // coalPowerPlant: id === 'parcel-1' ? 0 : 0,
         });
         this.resources = createNumberGuard({
             stone: 0,
@@ -49,6 +51,10 @@ class Parcel {
         this.upgrades = {
           maxBuildingLimit: 1,
         };
+        this.productionRateModifier = 0;
+        this.consumptionRateModifier = 0;
+        this.buildingProductionRateModifiers = {};
+        this.buildingConsumptionRateModifiers = {};
     }
 
     updatePreviousResources() {
@@ -142,6 +148,20 @@ const parcels = {
           maxBuildingLimit: 100, // Add the max building limit value for this level
         },
       ],
+    },
+    globalProductionRateModifiers: {
+      energyModifier: 0,
+      // Add more sources of modifiers here
+    },
+    globalConsumptionRateModifiers: {
+      energyModifier: 0,
+      // Add more sources of modifiers here
+    },
+    getGlobalProductionRateModifier: function () {
+      return Object.values(this.globalProductionRateModifiers).reduce((a, b) => a + b, 0);
+    },
+    getGlobalConsumptionRateModifier: function () {
+      return Object.values(this.globalConsumptionRateModifiers).reduce((a, b) => a + b, 0);
     },
 
 

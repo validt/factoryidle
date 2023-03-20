@@ -615,11 +615,110 @@ const ui = (() => {
 
     function updateParcelsSectionVisibility() {
       const parcelsSection = document.getElementById("parcels-section");
+      const globalHeader = document.getElementById("global-header");
       const expansionTechCenterBuilt = gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0);
 
       parcelsSection.style.display = expansionTechCenterBuilt ? "block" : "none";
+      globalHeader.style.display = expansionTechCenterBuilt ? "block" : "none";
     }
 
+    function calculateFulfillmentAndModifier(energyDemand, energyProduction) {
+      let fulfillment = (energyProduction / energyDemand) * 100;
+      let modifier;
+      let emoji;
+
+      if (energyDemand === 0 && energyProduction === 0) {
+        fulfillment = 100;
+        fulfillmentModifier = 0;
+      } else if (energyDemand === 0) {
+        fulfillment = 100;
+        fulfillmentModifier = 0;
+      }
+
+
+      if (fulfillment >= 200) {
+        emoji = '🟢🟢🟢';
+        modifier = (fulfillment - 100) / fulfillment * 100;
+      } else if (fulfillment > 120) {
+        emoji = '🟢🟢';
+        modifier = (fulfillment - 100) / fulfillment * 100;
+      } else if (fulfillment >= 100) {
+        emoji = '🟢';
+        modifier = (fulfillment - 100) / fulfillment * 100;
+      } else {
+        emoji = fulfillment < 40 ? '🔴' : '🟠';
+        modifier = fulfillment - 100;
+      }
+
+      return {
+        fulfillment: fulfillment.toFixed(2),
+        fulfillmentModifier: `${emoji} ${modifier.toFixed(2)}%`,
+      };
+    }
+
+    function updateEnergyDisplay() {
+      const energyDemandElement = document.getElementById("energy-demand");
+      const energyProductionElement = document.getElementById("energy-production");
+      const fulfillmentElement = document.getElementById("fulfillment");
+      const fulfillmentModifierElement = document.getElementById("fulfillment-modifier");
+
+      const energyDemand = energyManager.calculateGlobalEnergyUsage();
+      const energyProduction = energyManager.calculateGlobalEnergyProduction();
+
+      energyDemandElement.textContent = energyDemand;
+      energyProductionElement.textContent = energyProduction;
+
+      const { fulfillment, fulfillmentModifier } = calculateFulfillmentAndModifier(energyDemand, energyProduction);
+      fulfillmentElement.textContent = `${fulfillment}%`;
+      fulfillmentModifierElement.textContent = fulfillmentModifier;
+
+      if (fulfillment >= 100) {
+        const modifier = (fulfillment - 100) / fulfillment;
+        parcels.globalProductionRateModifiers.energyModifier = modifier;
+        parcels.globalConsumptionRateModifiers.energyModifier = modifier;
+        // Reset energy modifier for buildings with energyInput > 0
+        for (const parcel of window.parcels.parcelList) {
+          for (const buildingId in parcel.buildings) {
+            const building = window.buildingManager.getBuilding(buildingId);
+            if (building.energyInput > 0) {
+              if (parcel.buildingProductionRateModifiers[buildingId]) {
+                delete parcel.buildingProductionRateModifiers[buildingId].energyModifier;
+              }
+              if (parcel.buildingConsumptionRateModifiers[buildingId]) {
+                delete parcel.buildingConsumptionRateModifiers[buildingId].energyModifier;
+              }
+            }
+          }
+        }
+      } else {
+        // Reset global modifiers for energy
+        parcels.globalProductionRateModifiers.energyModifier = 0;
+        parcels.globalConsumptionRateModifiers.energyModifier = 0;
+
+        // Apply negative energy modifier to buildings with energyInput > 0
+        const energyModifier = Math.max((fulfillment - 100) / 100, -1);
+        for (const parcel of window.parcels.parcelList) {
+          for (const buildingId in parcel.buildings) {
+            const building = window.buildingManager.getBuilding(buildingId);
+            if (building.energyInput > 0) {
+              parcel.buildingProductionRateModifiers[buildingId] = parcel.buildingProductionRateModifiers[buildingId] || {};
+              parcel.buildingProductionRateModifiers[buildingId].energyModifier = energyModifier;
+
+              parcel.buildingConsumptionRateModifiers[buildingId] = parcel.buildingConsumptionRateModifiers[buildingId] || {};
+              parcel.buildingConsumptionRateModifiers[buildingId].energyModifier = energyModifier;
+            } else {
+              // Remove energy modifier for buildings without energy input
+              if (parcel.buildingProductionRateModifiers[buildingId]) {
+                delete parcel.buildingProductionRateModifiers[buildingId].energyModifier;
+              }
+              if (parcel.buildingConsumptionRateModifiers[buildingId]) {
+                delete parcel.buildingConsumptionRateModifiers[buildingId].energyModifier;
+              }
+            }
+          }
+        }
+      }
+    }
 
     return {
         addParcelToUI,
@@ -630,6 +729,7 @@ const ui = (() => {
         updateBuildingDropdown,
         selectParcel,
         updateParcelsSectionVisibility,
+        updateEnergyDisplay,
     };
     })();
 

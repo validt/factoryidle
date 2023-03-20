@@ -12,6 +12,7 @@ const gameLoop = (() => {
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
             window.ui.updateResourceDisplay(selectedParcel);
             updateAllParcels();
+            ui.updateEnergyDisplay();
             window.progressionManager.update(gameState);
             tickCounter++;
 
@@ -37,13 +38,21 @@ const gameLoop = (() => {
                 if (buildingCount && buildingCount > 0) {
                     const building = window.buildingManager.getBuilding(buildingId);
 
+                    const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[buildingId] && parcel.buildingProductionRateModifiers[buildingId].energyModifier || 0;
+                    const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[buildingId] && parcel.buildingConsumptionRateModifiers[buildingId].energyModifier || 0;
+                    console.log(buildingId + ": buildingConsumptionRateModifier: " + buildingConsumptionRateModifier);
+
+                    const totalProductionRateModifier = parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier;
+                    const totalConsumptionRateModifier = parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier;
+                    console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
+
                     // Check if the building has any input resources required for production
-                    if (building.inputs) {
+                    if (building.inputs && !(building.energyOutput > 0)) { // Add !building.energyOutput to the condition
                         let canProduce = true;
 
                         // Check if the parcel has enough resources to meet the input requirements
                         for (const [key, value] of Object.entries(building.inputs)) {
-                            if (!parcel.resources[key] || parcel.resources[key] < value * buildingCount) {
+                            if (!parcel.resources[key] || parcel.resources[key] < value * buildingCount * (1 + totalConsumptionRateModifier)) {
                                 canProduce = false;
                                 break;
                             }
@@ -52,14 +61,14 @@ const gameLoop = (() => {
                         // If the building can produce, consume the input resources and produce output resources
                         if (canProduce) {
                             for (const [key, value] of Object.entries(building.inputs)) {
-                                parcel.resources[key] -= value * buildingCount * building.rate;
+                                parcel.resources[key] -= value * buildingCount * building.rate * (1 + totalConsumptionRateModifier);
                             }
 
                             for (const [key, value] of Object.entries(building.outputs)) {
                                 if (!parcel.resources[key]) {
                                     parcel.resources[key] = 0;
                                 }
-                                parcel.resources[key] += value * buildingCount * building.rate;
+                                parcel.resources[key] += value * buildingCount * building.rate * (1 + totalProductionRateModifier);
                             }
                         }
                     } else {
@@ -68,7 +77,7 @@ const gameLoop = (() => {
                             if (!parcel.resources[key]) {
                                 parcel.resources[key] = 0;
                             }
-                            parcel.resources[key] += value * buildingCount * building.rate;
+                            parcel.resources[key] += value * buildingCount * building.rate * (1 + totalProductionRateModifier);
                         }
                     }
                 }
@@ -79,6 +88,7 @@ const gameLoop = (() => {
         const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
         ui.updateResourceDisplay(selectedParcel);
     }
+
 
     function updateBeltLogistics() {
       for (let i = 0; i < parcels.getParcelCount(); i++) {

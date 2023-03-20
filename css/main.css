@@ -167,3 +167,26 @@ button:disabled {
   font-size: 14px;
   z-index: 9999;
 }
+
+.category.global {
+  /* Add styles for the global category if needed */
+}
+
+.subcategory.energy {
+  /* Add styles for the energy subcategory if needed */
+}
+
+.energy-stats {
+  display: flex;
+  flex-direction: column;
+}
+
+.energy-usage,
+.energy-production {
+  margin: 5px 0;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 5px;
+}

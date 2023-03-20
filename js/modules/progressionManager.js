@@ -52,7 +52,7 @@ class ProgressionManager {
       }
 
       if (
-        (buildingId === "ironMiner" || buildingId === "stoneMiner" || buildingId === "coalMiner") &&
+        (buildingId === "ironMiner" || buildingId === "stoneMiner" || buildingId === "coalMiner" || buildingId === "coalPowerPlant") &&
         parcel.resources.ironPlates > 0
       ) {
         return true;

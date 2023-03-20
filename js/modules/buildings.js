@@ -5,8 +5,13 @@
       cost: { stone: 25 },
       inputs: { stone: 2, coal: 1 },
       outputs: { bricks: 1 },
+      energyInput: 0,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "ironSmelter",
@@ -14,8 +19,13 @@
       cost: { bricks: 20},
       inputs: { ironOre: 2, coal: 1 },
       outputs: { ironPlates: 1 },
+      energyInput: 0,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "copperSmelter",
@@ -23,8 +33,27 @@
       cost: { bricks: 20 },
       inputs: { copperOre: 2, coal: 1 },
       outputs: { copperPlates: 1 },
+      energyInput: 0,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+    },
+    {
+      id: "coalPowerPlant",
+      name: "Coal Power Plant",
+      cost: { bricks: 50 },
+      inputs: { coal: 1 },
+      outputs: {},
+      energyOutput: 12,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "ironMiner",
@@ -32,8 +61,13 @@
       cost: { ironPlates: 25, bricks: 20 },
       inputs: {},
       outputs: { ironOre: 1 },
+      energyInput: 1,
       rate: 1,
       minable: true,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "coalMiner",
@@ -41,8 +75,13 @@
       cost: { ironPlates: 25, bricks: 20 },
       inputs: {},
       outputs: { coal: 1 },
+      energyInput: 1,
       rate: 1,
       minable: true,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "copperMiner",
@@ -50,8 +89,13 @@
       cost: { ironPlates: 25, bricks: 20 },
       inputs: {},
       outputs: { copperOre: 1 },
+      energyInput: 1,
       rate: 1,
       minable: true,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "stoneMiner",
@@ -59,8 +103,13 @@
       cost: { ironPlates: 25, bricks: 20 },
       inputs: {},
       outputs: { stone: 1 },
+      energyInput: 1,
       rate: 1,
       minable: true,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "gearPress",
@@ -68,8 +117,13 @@
       cost: { ironPlates: 100, bricks: 200 },
       inputs: { ironPlates: 2 },
       outputs: { gears: 1 },
+      energyInput: 2,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "cableExtruder",
@@ -77,8 +131,13 @@
       cost: { gears: 50, bricks: 200 },
       inputs: { copperPlates: 1 },
       outputs: { copperCables: 2 },
+      energyInput: 2,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "greenChipFactory",
@@ -86,8 +145,13 @@
       cost: { copperCables: 200, ironPlates: 200, bricks: 400 },
       inputs: { copperCables: 3, ironPlates: 2 },
       outputs: { greenChips: 1 },
+      energyInput: 3,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "researchCenter",
@@ -95,8 +159,13 @@
       cost: { greenChips: 150, copperCables: 200, ironPlates: 200, bricks: 400 },
       inputs: { redScience: 1 },
       outputs: { researchPoints: 1 },
+      energyInput: 4,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "redScienceLab",
@@ -104,8 +173,13 @@
       cost: { greenChips: 250, copperCables: 250, gears: 250, bricks: 250 },
       inputs: { gears: 1, greenChips: 1 },
       outputs: { redScience: 1 },
+      energyInput: 3,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "forwardBelt",
@@ -113,8 +187,13 @@
       cost: { ironPlates: 250, gears: 50, greenChips: 25 },
       inputs: {},
       outputs: {},
+      energyInput: 2,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "backwardBelt",
@@ -122,8 +201,13 @@
       cost: { ironPlates: 250, gears: 50, greenChips: 25 },
       inputs: {},
       outputs: {},
+      energyInput: 2,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
     {
       id: "expansionCenter",
@@ -131,8 +215,13 @@
       cost: { ironPlates: 500, gears: 100, greenChips: 100 },
       inputs: {},
       outputs: {},
+      energyInput: 3,
       rate: 1,
       minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
     },
   ];
 
@@ -153,9 +242,32 @@
       return null;
   }
 
+  function getTotalModifierValue(modifierSources) {
+    let totalModifier = 0;
+    for (const source in modifierSources) {
+      totalModifier += modifierSources[source];
+    }
+    return totalModifier;
+  }
+
+  function updateBuildingProductionRateModifier(buildingId, modifierValue) {
+    const building = getBuilding(buildingId);
+    if (building) {
+      building.productionRateModifier = modifierValue;
+    }
+  }
+
+  function updateBuildingConsumptionRateModifier(buildingId, modifierValue) {
+    const building = getBuilding(buildingId);
+    if (building) {
+      building.consumptionRateModifier = modifierValue;
+    }
+  }
 
   window.buildingManager = {
-      getBuilding,
-      getBuildingList,
-      getBuildingByResourceName,
+    getBuilding,
+    getBuildingList,
+    getBuildingByResourceName,
+    updateBuildingProductionRateModifier,
+    updateBuildingConsumptionRateModifier,
   };

@@ -9,7 +9,32 @@
 <body>
     <div id="tooltip" class="tooltip" style="display: none;"></div>
     <div id="container">
-        <h1>Idle Game - Inspired by Factorio</h1>
+        <h1>Factory Idle</h1>
+
+        <div class="category global">
+          <h2 id="global-header">Global</h2>
+          <div class="subcategory energy">
+            <h3>Energy</h3>
+            <div class="energy-stats">
+              <div class="energy-demand">
+                <span class="label">Energy Demand:</span>
+                <span class="value" id="energy-demand">0</span>
+              </div>
+              <div class="energy-production">
+                <span class="label">Energy Production:</span>
+                <span class="value" id="energy-production">0</span>
+              </div>
+              <div class="fulfillment">
+                <span class="label">Fulfillment:</span>
+                <span class="value" id="fulfillment">0%</span>
+              </div>
+              <div class="fulfillment-modifier">
+                <span class="label">Fulfillment Modifier:</span>
+                <span class="value" id="fulfillment-modifier">🟢 0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="game-section" id="parcels-section">
             <h2>Parcels</h2>
@@ -23,12 +48,12 @@
         </div>
 
         <div class="game-section">
-            <h2>Resources</h2>
+            <h3>Resources</h3>
             <table class="table" id="resourceTable"></table>
         </div>
 
         <div class="game-section">
-          <h2 id="buildingHeader">Buildings</h2>
+          <h3 id="buildingHeader">Buildings</h3>
             <table class="table" id="buildings">
                 <thead>
                     <tr>
@@ -55,6 +80,7 @@
     <script src="js/modules/buildings.js"></script>
     <script src="js/modules/progressionManager.js"></script>
     <script src="js/modules/researchManager.js"></script>
+    <script src="js/modules/energy.js"></script>
     <script src="js/utils/ui.js"></script>
     <script src="js/utils/gameState.js"></script>
     <script src="js/main.js"></script>
