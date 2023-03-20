@@ -41,11 +41,11 @@ const gameLoop = (() => {
 
                     const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[buildingId] && parcel.buildingProductionRateModifiers[buildingId].energyModifier || 0;
                     const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[buildingId] && parcel.buildingConsumptionRateModifiers[buildingId].energyModifier || 0;
-                    console.log(buildingId + ": buildingConsumptionRateModifier: " + buildingConsumptionRateModifier);
+                    // console.log(buildingId + ": buildingConsumptionRateModifier: " + buildingConsumptionRateModifier);
 
                     const totalProductionRateModifier = parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier;
                     const totalConsumptionRateModifier = parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier;
-                    console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
+                    // console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
 
                     // Check if the building has any input resources required for production
                     if (building.inputs && !(building.energyOutput > 0)) { // Add !building.energyOutput to the condition

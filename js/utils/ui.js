@@ -544,7 +544,7 @@ const ui = (() => {
 
             // Refund 25% of the cost rounded down
             for (const [resource, cost] of Object.entries(building.cost)) {
-                parcel.resources[resource] = (parcel.resources[resource] || 0) + Math.floor(cost * 0.25);
+                parcel.resources[resource] = (parcel.resources[resource] || 0) + Math.floor(cost * 1);
             }
 
             // Update building count

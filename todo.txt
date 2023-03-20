@@ -1,5 +1,6 @@
 ### Progression Update
-- Make Max Building Harder to achieve. Let it cost Expansion Points additionally to resources.
+- Unlock Miners after Power Plant
+- QoL: Show Only buildings in new building dropdown that haven't been built yet in that parcel
 
 
 ### Quest System --> Project System

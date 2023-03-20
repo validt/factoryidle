@@ -100,8 +100,8 @@ class Parcel {
 
 const parcels = {
     parcelList: [],
-    maxBuildingsPerParcel: 4,
-    buyParcelCost: 50,
+    maxBuildingsPerParcel: 8,
+    buyParcelCost: 2,
     upgradeCosts: {
       maxBuildingLimit: [
         {
@@ -109,14 +109,15 @@ const parcels = {
           cost: {
             stone: 50,
           },
-          maxBuildingLimit: 4, // Add the max building limit value for this level
+          maxBuildingLimit: 8, // Add the max building limit value for this level
         },
         {
           level: 2,
           cost: {
             stone: 50,
+            expansionPoints: 1,
           },
-          maxBuildingLimit: 12, // Add the max building limit value for this level
+          maxBuildingLimit: 16, // Add the max building limit value for this level
         },
         {
           level: 3,
@@ -124,8 +125,9 @@ const parcels = {
             ironOre: 100,
             stone: 100,
             coal: 50,
+            expansionPoints: 2,
           },
-          maxBuildingLimit: 25, // Add the max building limit value for this level
+          maxBuildingLimit: 24, // Add the max building limit value for this level
         },
         {
           level: 4,
@@ -133,8 +135,9 @@ const parcels = {
             ironOre: 250,
             stone: 250,
             coal: 125,
+            expansionPoints: 3,
           },
-          maxBuildingLimit: 50, // Add the max building limit value for this level
+          maxBuildingLimit: 32, // Add the max building limit value for this level
         },
         {
           level: 5,
@@ -142,8 +145,9 @@ const parcels = {
             ironOre: 625,
             stone: 625,
             coal: 325,
+            expansionPoints: 4,
           },
-          maxBuildingLimit: 75, // Add the max building limit value for this level
+          maxBuildingLimit: 40, // Add the max building limit value for this level
         },
         {
           level: 6,
@@ -151,8 +155,29 @@ const parcels = {
             ironOre: 1500,
             stone: 1500,
             coal: 850,
+            expansionPoints: 6,
           },
-          maxBuildingLimit: 100, // Add the max building limit value for this level
+          maxBuildingLimit: 48, // Add the max building limit value for this level
+        },
+        {
+          level: 7,
+          cost: {
+            ironOre: 3000,
+            stone: 3000,
+            coal: 1500,
+            expansionPoints: 8,
+          },
+          maxBuildingLimit: 56, // Add the max building limit value for this level
+        },
+        {
+          level: 8,
+          cost: {
+            ironOre: 6000,
+            stone: 6000,
+            coal: 3000,
+            expansionPoints: 16,
+          },
+          maxBuildingLimit: 64, // Add the max building limit value for this level
         },
       ],
     },

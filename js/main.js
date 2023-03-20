@@ -17,10 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     buyParcelButton.addEventListener("click", () => {
         const highestParcelIndex = parcels.getParcelCount() - 1;
         const highestParcel = parcels.getParcel(highestParcelIndex);
-        const resourceCount = highestParcel.resources.ironPlates;
+        const resourceCount = highestParcel.resources.expansionPoints;
 
         if (parcels.canBuyParcel(resourceCount)) {
-            highestParcel.resources.ironPlates -= parcels.buyParcelCost;
+            highestParcel.resources.expansionPoints -= parcels.buyParcelCost;
             const newParcel = parcels.createNewParcel();
             ui.addParcelToUI(newParcel);
             ui.updateResourceDisplay(newParcel);
