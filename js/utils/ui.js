@@ -231,7 +231,7 @@ const ui = (() => {
       beltTypes.forEach((beltId, index) => {
         const directionInput = this.createDirectionInput(beltId, resourceName);
         const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
-        const beltCount = this.parcel.buildings[beltId] || 0;
+        const beltCount = this.parcel.buildings[beltId] * 2 || 0;
 
         const cell = this.createCell(directionInput);
         cell.style.display = "none"; // Initially hide the Forward and Backward cells
@@ -293,7 +293,7 @@ const ui = (() => {
         directionInput.addEventListener("input", (event) => {
           const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
           const inputVal = parseInt(event.target.value, 10) || 0;
-          const maxVal = parseInt(this.parcel.buildings[beltId], 10) || 0;
+          const maxVal = 2 * parseInt(this.parcel.buildings[beltId], 10) || 0;
           const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
           const maxCellVal = maxVal - (beltUsage - currentVal);
           console.log("maxCellVal: " + maxCellVal);
