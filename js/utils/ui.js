@@ -589,9 +589,11 @@ const ui = (() => {
           // Add the building to the dropdown
           const building = window.buildingManager.getBuilding(buildingId);
           const optionElement = document.createElement("option");
+          const firstChild = buildNewBuildingSelect.firstChild;
           optionElement.value = building.id;
           optionElement.textContent = `${building.name} - ${JSON.stringify(building.cost)}`;
-          buildNewBuildingSelect.appendChild(optionElement);
+          //buildNewBuildingSelect.appendChild(optionElement);
+          buildNewBuildingSelect.insertBefore(optionElement, firstChild);
 
           // Mark the building as added to the dropdown
           addedToDropdown.add(buildingId);
