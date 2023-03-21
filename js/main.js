@@ -101,7 +101,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let canAfford = true;
       for (const [resourceName, cost] of resourceCost) {
-        if (selectedParcel.resources[resourceName] < cost) {
+        const resourceAmount = selectedParcel.resources[resourceName];
+
+        if (resourceAmount === undefined || isNaN(resourceAmount) || resourceAmount < cost) {
           canAfford = false;
           break;
         }

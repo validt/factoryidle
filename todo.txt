@@ -1,6 +1,9 @@
 ### Ability to Save the Game
 
 ### Progression Updat
+- MOST IMPORTANT: Change Ordering of Resources and Group them as well:
+    - By Categories
+- Overcharge should be unlocked via research. Also change emojis to show "overhcarge" better.
 - Unlock Red Science Lab after Research Center
 - QoL: Show Only buildings in new building dropdown that haven't been built yet in that parcel
 - Important QoL: Show Inputs in New Building Dropdown
