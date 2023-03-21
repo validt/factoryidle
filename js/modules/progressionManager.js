@@ -41,6 +41,29 @@ class ProgressionManager {
       return true;
     }
 
+    // Check for SteelMaking Tech
+    if (buildingId === "steelMill" && researchCompleted.steelMaking) {
+      return true;
+    }
+
+    // Check for GameWin
+    if (researchCompleted.gameWon) {
+      alert("Congrats. You won the Demo. Feedback highly appreciated. Also, take a screenshot of your factory and share it, that would be even more appreciated :)");
+      researchCompleted.gameWon = false;
+    }
+
+    // Check for GameWin
+    if (researchCompleted.gameWon2) {
+      alert("Wow Impressive! Now I really want to see your factory! How long did it take you to get here?");
+      researchCompleted.gameWon2 = false;
+    }
+
+    // Check for GameWin
+    if (researchCompleted.gameWon3) {
+      alert("This you must explain to me.");
+      researchCompleted.gameWon3 = false;
+    }
+
     // The "kiln" building is always unlocked
     if (buildingId === "kiln") {
       return true;

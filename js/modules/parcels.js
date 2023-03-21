@@ -149,6 +149,7 @@ const parcels = {
         {
           level: 7,
           cost: {
+            steel: 50,
             expansionPoints: 16,
           },
           maxBuildingLimit: 56, // Add the max building limit value for this level
@@ -156,6 +157,7 @@ const parcels = {
         {
           level: 8,
           cost: {
+            steel: 100,
             expansionPoints: 32,
           },
           maxBuildingLimit: 64, // Add the max building limit value for this level
@@ -163,6 +165,7 @@ const parcels = {
         {
           level: 9,
           cost: {
+            steel: 400,
             expansionPoints: 64,
           },
           maxBuildingLimit: 72, // Add the max building limit value for this level
@@ -170,6 +173,7 @@ const parcels = {
         {
           level: 10,
           cost: {
+            steel: 1600,
             expansionPoints: 128,
           },
           maxBuildingLimit: 80, // Add the max building limit value for this level
@@ -177,6 +181,7 @@ const parcels = {
         {
           level: 11,
           cost: {
+            steel: 3200,
             expansionPoints: 256,
           },
           maxBuildingLimit: 88, // Add the max building limit value for this level
@@ -184,6 +189,7 @@ const parcels = {
         {
           level: 12,
           cost: {
+            steel: 6400,
             expansionPoints: 512,
           },
           maxBuildingLimit: 96, // Add the max building limit value for this level

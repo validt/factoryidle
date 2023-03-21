@@ -55,7 +55,11 @@ window.researchManager = new ResearchManager();
 
 // Add research options here
 window.researchManager.addResearch(new Research('expansionTech', 'Expansion Tech', { researchPoints: 4 }));
-window.researchManager.addResearch(new Research('militaryTech', 'Military Tech', { researchPoints: 20000 }));
+window.researchManager.addResearch(new Research('steelMaking', 'Steel Making', { researchPoints: 12 }));
+window.researchManager.addResearch(new Research('gameWon', 'Win the Demo', { researchPoints: 400 }));
+window.researchManager.addResearch(new Research('gameWon2', 'Win the Demo Harder', { researchPoints: 4000 }));
+window.researchManager.addResearch(new Research('gameWon3', 'Win the Demo Too Hard. Or Cheat?', { researchPoints: 40000 }));
+window.researchManager.addResearch(new Research('militaryTech', 'Military Tech (Not Implemented Yet)', { researchPoints: 200000 }));
 // Add more research options as needed
 
 window.researchManager = researchManager;

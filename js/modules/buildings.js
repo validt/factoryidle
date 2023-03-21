@@ -223,6 +223,20 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
     },
+    {
+      id: "steelMill",
+      name: "Steel Mill",
+      cost: { ironPlates: 100, bricks: 400 },
+      inputs: { ironPlates: 5 },
+      outputs: { steel: 1 },
+      energyInput: 3,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+    },
   ];
 
   function getBuilding(id) {
