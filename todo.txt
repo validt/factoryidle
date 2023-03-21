@@ -1,13 +1,19 @@
 ### Ability to Save the Game
 
+### Bugs
+- Show forward and conveyer inputs when one of them two is built not seperate
+- Protect against Resources going into undefined parcels
+
 ### Progression Updat
+- QoL Building: Remote Construction Center -> Allows Construction Costs for Buildings, Buying Parcels & Buying Max Building Expansions to be deducted from this parcel as well instead of only the active one. - Puts a 50% malus on local production.
+- Upgrades to make basic miners more productive --> Generates space
+- Upgrades to make smelters more productive --> Probably no because it makes the ratios unfun.
 - MOST IMPORTANT: Change Ordering of Resources and Group them as well:
-    - By Categories
+    - By Categories: Raw, Basic, Tier 1, Points
 - Overcharge should be unlocked via research. Also change emojis to show "overhcarge" better.
 - Unlock Red Science Lab after Research Center
 - QoL: Show Only buildings in new building dropdown that haven't been built yet in that parcel
 - Important QoL: Show Inputs in New Building Dropdown
-- QoL Building: Remote Construction Center -> Allows Construction Costs for Buildings, Buying Parcels & Buying Max Building Expansions to be deducted from this parcel as well instead of only the active one. - Puts a 50% malus on local production.
 - QoL Build New Building Tooltips: Show Costs, Inputs/Outputs, Energy Consumption/Production, Description Text (add this)
 - QoL Ability to name parcels. Also ability to give them custom color.
 - QoL Question Mark Tooltip at various points:
