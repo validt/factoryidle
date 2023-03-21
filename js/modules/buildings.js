@@ -142,7 +142,7 @@
     {
       id: "greenChipFactory",
       name: "Green Chip Factory",
-      cost: { copperCables: 200, ironPlates: 200, bricks: 400 },
+      cost: { copperCables: 200, gears: 200, bricks: 400 },
       inputs: { copperCables: 3, ironPlates: 2 },
       outputs: { greenChips: 1 },
       energyInput: 3,
@@ -156,7 +156,7 @@
     {
       id: "researchCenter",
       name: "Research Center",
-      cost: { greenChips: 150, copperCables: 200, ironPlates: 200, bricks: 400 },
+      cost: { greenChips: 150, copperCables: 200, gears: 200, bricks: 400 },
       inputs: { redScience: 100 },
       outputs: { researchPoints: 1 },
       energyInput: 4,
