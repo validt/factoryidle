@@ -114,7 +114,6 @@ const parcels = {
         {
           level: 2,
           cost: {
-            stone: 50,
             expansionPoints: 1,
           },
           maxBuildingLimit: 16, // Add the max building limit value for this level
@@ -122,9 +121,6 @@ const parcels = {
         {
           level: 3,
           cost: {
-            ironOre: 100,
-            stone: 100,
-            coal: 50,
             expansionPoints: 2,
           },
           maxBuildingLimit: 24, // Add the max building limit value for this level
@@ -132,52 +128,65 @@ const parcels = {
         {
           level: 4,
           cost: {
-            ironOre: 250,
-            stone: 250,
-            coal: 125,
-            expansionPoints: 3,
+            expansionPoints: 4,
           },
           maxBuildingLimit: 32, // Add the max building limit value for this level
         },
         {
           level: 5,
           cost: {
-            ironOre: 625,
-            stone: 625,
-            coal: 325,
-            expansionPoints: 4,
+            expansionPoints: 6,
           },
           maxBuildingLimit: 40, // Add the max building limit value for this level
         },
         {
           level: 6,
           cost: {
-            ironOre: 1500,
-            stone: 1500,
-            coal: 850,
-            expansionPoints: 6,
+            expansionPoints: 8,
           },
           maxBuildingLimit: 48, // Add the max building limit value for this level
         },
         {
           level: 7,
           cost: {
-            ironOre: 3000,
-            stone: 3000,
-            coal: 1500,
-            expansionPoints: 8,
+            expansionPoints: 16,
           },
           maxBuildingLimit: 56, // Add the max building limit value for this level
         },
         {
           level: 8,
           cost: {
-            ironOre: 6000,
-            stone: 6000,
-            coal: 3000,
-            expansionPoints: 16,
+            expansionPoints: 32,
           },
           maxBuildingLimit: 64, // Add the max building limit value for this level
+        },
+        {
+          level: 9,
+          cost: {
+            expansionPoints: 64,
+          },
+          maxBuildingLimit: 72, // Add the max building limit value for this level
+        },
+        {
+          level: 10,
+          cost: {
+            expansionPoints: 128,
+          },
+          maxBuildingLimit: 80, // Add the max building limit value for this level
+        },
+        {
+          level: 11,
+          cost: {
+            expansionPoints: 256,
+          },
+          maxBuildingLimit: 88, // Add the max building limit value for this level
+        },
+        {
+          level: 12,
+          cost: {
+            expansionPoints: 512,
+          },
+          maxBuildingLimit: 96, // Add the max building limit value for this level
         },
       ],
     },

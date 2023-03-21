@@ -1,6 +1,15 @@
+### Ability to Save the Game
+
 ### Progression Update
 - Unlock Miners after Power Plant
+- Unlock Red Science Lab after Research Center
 - QoL: Show Only buildings in new building dropdown that haven't been built yet in that parcel
+- Important QoL: Show Inputs in New Building Dropdown
+- QoL Building: Remote Construction Center -> Allows Construction Costs for Buildings, Buying Parcels & Buying Max Building Expansions to be deducted from this parcel as well instead of only the active one. - Puts a 50% malus on local production.
+- QoL Build New Building Tooltips: Show Costs, Inputs/Outputs, Energy Consumption/Production, Description Text (add this)
+- QoL Ability to name parcels. Also ability to give them custom color.
+- QoL Question Mark Tooltip at various points:
+      - Fulfilment Modifier Explanation
 
 
 ### Quest System --> Project System

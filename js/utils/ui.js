@@ -640,7 +640,7 @@ const ui = (() => {
 
       if (fulfillment >= 200) {
         emoji = '🟢🟢🟢';
-        modifier = (fulfillment - 100) / fulfillment * 100;
+        modifier = 50;
       } else if (fulfillment > 120) {
         emoji = '🟢🟢';
         modifier = (fulfillment - 100) / fulfillment * 100;
@@ -675,7 +675,10 @@ const ui = (() => {
       fulfillmentModifierElement.textContent = fulfillmentModifier;
 
       if (fulfillment >= 100) {
-        const modifier = (fulfillment - 100) / fulfillment;
+        let modifier = (fulfillment - 100) / fulfillment;
+        if (fulfillment >= 200) {
+            modifier = 0.5
+        }
         parcels.globalProductionRateModifiers.energyModifier = modifier;
         parcels.globalConsumptionRateModifiers.energyModifier = modifier;
         // Reset energy modifier for buildings with energyInput > 0
