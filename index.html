@@ -15,84 +15,88 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div id="tooltip" class="tooltip" style="display: none;"></div>
     <div id="container">
-        <h1>Factory Idle</h1>
-        <h2 id="global-header">Global</h2>
-        <div class="category global">
-          <div class="subcategory energy">
-            <h3>Energy</h3>
-            <div class="energy-stats">
-              <div class="energy-demand">
-                <span class="label">Energy Demand:</span>
-                <span class="value" id="energy-demand">0</span>
-              </div>
-              <div class="energy-production">
-                <span class="label">Energy Production:</span>
-                <span class="value" id="energy-production">0</span>
-              </div>
-              <div class="fulfillment">
-                <span class="label">Fulfillment:</span>
-                <span class="value" id="fulfillment">0%</span>
-              </div>
-              <div class="fulfillment-modifier">
-                <span class="label">Fulfillment Modifier:</span>
-                <span class="value" id="fulfillment-modifier">🟢 0%</span>
-              </div>
-            </div>
-          </div>
-          <div class="subcategory research">
-            <h3>Research</h3>
-            <select id="researchSelect">
-                <!-- Research options will be dynamically added here -->
-            </select>
-            <button id="startResearch">Start Research</button>
-          </div>
-          <div class="subcategory projects">
-            <h3>Projects</h3>
-            <div id="projects-container">
-              <!-- Projects will be dynamically added here -->
-            </div>
-          </div>
-        </div>
-
-        <div class="game-section" id="parcels-section">
-            <h2>Parcels</h2>
-            <div id="parcel-tabs"> <!-- Add this line -->
-                <!-- Parcel tabs will be dynamically added here -->
-            </div>
-            <div id="parcels">
-                <!-- Parcel content will be dynamically added here -->
-            </div>
-            <button id="buyParcel">Buy New Parcel</button>
-        </div>
-
-        <div class="game-section">
-            <h3>Resources</h3>
-            <table class="table" id="resourceTable"></table>
-        </div>
-
-        <div class="game-section">
-          <h3 id="buildingHeader">Buildings</h3>
-          <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
-              <!-- Building options will be dynamically added here -->
-          </select>
-            <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
-            <table class="table" id="buildings">
-                <thead>
-                    <tr>
-                        <th>Building</th>
-                        <th>Count</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Buildings will be dynamically added here -->
-                </tbody>
-            </table>
-
-        </div>
+      <button id="feedback-button" onclick="window.open('https://docs.google.com/forms/d/1oq8YquPPuWRE1zaipHxxVlX2mTAbsTNlvpIQefqQE6M', '_blank')">Feedback & Bug Report</button>
     </div>
+      <div id="tooltip" class="tooltip" style="display: none;"></div>
+      <div id="container">
+          <h1>Factory Idle</h1>
+          <h2 id="global-header">Global</h2>
+          <div class="category global">
+            <div class="subcategory energy">
+              <h3>Energy</h3>
+              <div class="energy-stats">
+                <div class="energy-demand">
+                  <span class="label">Energy Demand:</span>
+                  <span class="value" id="energy-demand">0</span>
+                </div>
+                <div class="energy-production">
+                  <span class="label">Energy Production:</span>
+                  <span class="value" id="energy-production">0</span>
+                </div>
+                <div class="fulfillment">
+                  <span class="label">Fulfillment:</span>
+                  <span class="value" id="fulfillment">0%</span>
+                </div>
+                <div class="fulfillment-modifier">
+                  <span class="label">Fulfillment Modifier:</span>
+                  <span class="value" id="fulfillment-modifier">🟢 0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="subcategory research">
+              <h3>Research</h3>
+              <select id="researchSelect">
+                  <!-- Research options will be dynamically added here -->
+              </select>
+              <button id="startResearch">Start Research</button>
+            </div>
+            <div class="subcategory projects">
+              <h3>Projects</h3>
+              <div id="projects-container">
+                <!-- Projects will be dynamically added here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="game-section" id="parcels-section">
+              <h2>Parcels</h2>
+              <div id="parcel-tabs"> <!-- Add this line -->
+                  <!-- Parcel tabs will be dynamically added here -->
+              </div>
+              <div id="parcels">
+                  <!-- Parcel content will be dynamically added here -->
+              </div>
+              <button id="buyParcel">Buy New Parcel</button>
+          </div>
+
+          <div class="game-section">
+              <h3>Resources</h3>
+              <table class="table" id="resourceTable"></table>
+          </div>
+
+          <div class="game-section">
+            <h3 id="buildingHeader">Buildings</h3>
+            <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
+                <!-- Building options will be dynamically added here -->
+            </select>
+              <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
+              <table class="table" id="buildings">
+                  <thead>
+                      <tr>
+                          <th>Building</th>
+                          <th>Count</th>
+                          <th>Action</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <!-- Buildings will be dynamically added here -->
+                  </tbody>
+              </table>
+
+          </div>
+      </div>
+
     <script src="js/modules/parcels.js"></script>
     <script src="js/modules/buildings.js"></script>
     <script src="js/modules/progressionManager.js"></script>
