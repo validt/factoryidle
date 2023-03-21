@@ -1,9 +1,6 @@
 ### Ability to Save the Game
 
 ### Progression Updat
-- Add in Steelmaking
-  - Steel needed for MaxBuilding limit increase after 56
-- Unlock Miners after Power Plant
 - Unlock Red Science Lab after Research Center
 - QoL: Show Only buildings in new building dropdown that haven't been built yet in that parcel
 - Important QoL: Show Inputs in New Building Dropdown

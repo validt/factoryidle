@@ -15,15 +15,19 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+    <div id="intro">
+        <h1 id="intro-text">The Factory Must Grow</h1>
+    </div>
     <div id="container">
+      <h1>Factory Idle</h1>
       <button id="feedback-button" onclick="window.open('https://docs.google.com/forms/d/1oq8YquPPuWRE1zaipHxxVlX2mTAbsTNlvpIQefqQE6M', '_blank')">Feedback & Bug Report</button>
     </div>
       <div id="tooltip" class="tooltip" style="display: none;"></div>
       <div id="container">
-          <h1>Factory Idle</h1>
+
           <h2 id="global-header">Global</h2>
           <div class="category global">
-            <div class="subcategory energy">
+            <div class="subcategory energy" id="energy-section" style="display: none;">
               <h3>Energy</h3>
               <div class="energy-stats">
                 <div class="energy-demand">
@@ -44,14 +48,14 @@
                 </div>
               </div>
             </div>
-            <div class="subcategory research">
+            <div class="subcategory research" id="research-section" style="display: none;">
               <h3>Research</h3>
               <select id="researchSelect">
                   <!-- Research options will be dynamically added here -->
               </select>
               <button id="startResearch">Start Research</button>
             </div>
-            <div class="subcategory projects">
+            <div class="subcategory projects" id="project-section" style="display: none;">
               <h3>Projects</h3>
               <div id="projects-container">
                 <!-- Projects will be dynamically added here -->

@@ -615,13 +615,16 @@ const ui = (() => {
       }
     }
 
+    function updateSectionVisibility(sectionId, shouldBeVisible) {
+      const section = document.getElementById(sectionId);
+      section.style.display = shouldBeVisible ? "block" : "none";
+    }
+
     function updateParcelsSectionVisibility() {
-      const parcelsSection = document.getElementById("parcels-section");
-      const globalHeader = document.getElementById("global-header");
       const expansionTechCenterBuilt = gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0);
 
-      parcelsSection.style.display = expansionTechCenterBuilt ? "block" : "none";
-      globalHeader.style.display = expansionTechCenterBuilt ? "block" : "none";
+      updateSectionVisibility("parcels-section", expansionTechCenterBuilt);
+      updateSectionVisibility("global-header", expansionTechCenterBuilt);
     }
 
     function calculateFulfillmentAndModifier(energyDemand, energyProduction) {
@@ -735,6 +738,7 @@ const ui = (() => {
         selectParcel,
         updateParcelsSectionVisibility,
         updateEnergyDisplay,
+        updateSectionVisibility,
     };
     })();
 

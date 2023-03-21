@@ -74,12 +74,26 @@ class ProgressionManager {
         return true;
       }
 
-      if (
-        (buildingId === "ironMiner" || buildingId === "stoneMiner" || buildingId === "coalMiner" || buildingId === "coalPowerPlant") &&
-        parcel.resources.ironPlates > 0
-      ) {
+      if (buildingId === "coalPowerPlant" && parcel.resources.ironPlates > 0) {
         return true;
       }
+
+      if (parcel.buildings.coalPowerPlant > 0) {
+        ui.updateSectionVisibility("energy-section", true);
+      }
+
+      if (
+        (buildingId === "ironMiner" || buildingId === "stoneMiner" || buildingId === "coalMiner") &&
+        parcel.resources.ironPlates > 0 &&
+        parcel.buildings.coalPowerPlant > 0
+      ) {
+        const shouldBeVisible = parcel.buildings.ironMiner > 0 || parcel.buildings.stoneMiner > 0 || parcel.buildings.coalMiner > 0;
+        ui.updateSectionVisibility("project-section", shouldBeVisible);
+        ui.updateSectionVisibility("research-section", shouldBeVisible);
+        return true;
+      }
+
+
 
       if (
         (buildingId === "copperMiner" || buildingId === "copperSmelter") &&

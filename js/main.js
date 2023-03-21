@@ -1,3 +1,10 @@
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(function () {
+    const intro = document.getElementById("intro");
+    intro.style.display = "none";
+  }, 6000);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
     const buyParcelButton = document.getElementById("buyParcel");
     const buyBuildingButton = document.getElementById("buyBuilding");
