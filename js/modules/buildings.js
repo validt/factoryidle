@@ -240,7 +240,7 @@
       id: "expansionCenter",
       name: "Expansion Center",
       cost: { ironPlates: 100, expansionPoints: 4 },
-      inputs: { redScience: 150 },
+      inputs: { redScience: 75 },
       outputs: { expansionPoints: 1 },
       energyInput: 3,
       rate: 1,
