@@ -12,6 +12,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => true,
     },
     {
       id: "ironSmelter",
@@ -26,20 +27,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
-    },
-    {
-      id: "copperSmelter",
-      name: "Copper Smelter",
-      cost: { bricks: 20 },
-      inputs: { copperOre: 2, coal: 0.2 },
-      outputs: { copperPlates: 1 },
-      energyInput: 0,
-      rate: 1,
-      minable: false,
-      productionRateModifier: 0,
-      consumptionRateModifier: 0,
-      productionModifierSources: {},
-      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.bricks > 0),
     },
     {
       id: "coalPowerPlant",
@@ -54,20 +42,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
-    },
-    {
-      id: "ironMiner",
-      name: "Iron Miner",
-      cost: { ironPlates: 25, bricks: 20 },
-      inputs: {},
-      outputs: { ironOre: 1 },
-      energyInput: 1,
-      rate: 1,
-      minable: true,
-      productionRateModifier: 0,
-      consumptionRateModifier: 0,
-      productionModifierSources: {},
-      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0),
     },
     {
       id: "coalMiner",
@@ -82,13 +57,16 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () =>
+        window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
     },
     {
-      id: "copperMiner",
-      name: "Copper Miner",
+      id: "ironMiner",
+      name: "Iron Miner",
       cost: { ironPlates: 25, bricks: 20 },
       inputs: {},
-      outputs: { copperOre: 1 },
+      outputs: { ironOre: 1 },
       energyInput: 1,
       rate: 1,
       minable: true,
@@ -96,6 +74,9 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () =>
+        window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
     },
     {
       id: "stoneMiner",
@@ -110,6 +91,45 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () =>
+        window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
+    },
+    {
+      id: "copperMiner",
+      name: "Copper Miner",
+      cost: { ironPlates: 25, bricks: 20 },
+      inputs: {},
+      outputs: { copperOre: 1 },
+      energyInput: 1,
+      rate: 1,
+      minable: true,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () =>
+        window.gameState.parcels.some(parcel => parcel.buildings.ironMiner > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.stoneMiner > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.coalMiner > 0),
+    },
+    {
+      id: "copperSmelter",
+      name: "Copper Smelter",
+      cost: { bricks: 20 },
+      inputs: { copperOre: 2, coal: 0.2 },
+      outputs: { copperPlates: 1 },
+      energyInput: 0,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () =>
+        window.gameState.parcels.some(parcel => parcel.buildings.ironMiner > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.stoneMiner > 0) &&
+        window.gameState.parcels.some(parcel => parcel.buildings.coalMiner > 0),
     },
     {
       id: "gearPress",
@@ -124,6 +144,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.copperPlates > 0),
     },
     {
       id: "cableExtruder",
@@ -138,6 +159,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.gears > 0),
     },
     {
       id: "greenChipFactory",
@@ -152,6 +174,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.copperCables > 0),
     },
     {
       id: "researchCenter",
@@ -166,6 +189,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.greenChips > 0),
     },
     {
       id: "redScienceLab",
@@ -180,6 +204,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.researchCenter > 0),
     },
     {
       id: "forwardBelt",
@@ -194,6 +219,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0),
     },
     {
       id: "backwardBelt",
@@ -208,6 +234,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0),
     },
     {
       id: "expansionCenter",
@@ -222,6 +249,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.expansionTech,
     },
     {
       id: "steelMill",
@@ -236,6 +264,7 @@
       consumptionRateModifier: 0,
       productionModifierSources: {},
       consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.steelMaking,
     },
   ];
 

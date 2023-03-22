@@ -29,55 +29,29 @@ class ProgressionManager {
   }
 
   // Check the requirements for a building
-  checkRequirements(buildingId, gameState) {
-    const parcels = gameState.parcels;
-    const researchCompleted = gameState.research;
-
-    // Check if the "expansionTech" research has been completed
-    const expansionTechCompleted = researchCompleted.expansionTech;
-
-    // Add the conditions for expansionCenter
-    if (buildingId === "expansionCenter" && expansionTechCompleted) {
-      return true;
-    }
-
-    // Check for SteelMaking Tech
-    if (buildingId === "steelMill" && researchCompleted.steelMaking) {
-      return true;
-    }
+  checkRequirements(buildingId) {
+    const building = window.buildingManager.getBuilding(buildingId);
+    const parcels = window.gameState.parcels;
 
     // Check for GameWin
-    if (researchCompleted.gameWon) {
+    if (window.gameState.research.gameWon) {
       alert("Congrats. You won the Demo. Feedback highly appreciated. Also, take a screenshot of your factory and share it, that would be even more appreciated :)");
-      researchCompleted.gameWon = false;
+      window.gameState.research.gameWon = false;
     }
 
     // Check for GameWin
-    if (researchCompleted.gameWon2) {
+    if (window.gameState.research.gameWon2) {
       alert("Wow Impressive! Now I really want to see your factory! How long did it take you to get here?");
-      researchCompleted.gameWon2 = false;
+      window.gameState.research.gameWon2 = false;
     }
 
     // Check for GameWin
-    if (researchCompleted.gameWon3) {
+    if (window.gameState.research.gameWon3) {
       alert("This you must explain to me.");
-      researchCompleted.gameWon3 = false;
-    }
-
-    // The "kiln" building is always unlocked
-    if (buildingId === "kiln") {
-      return true;
+      window.gameState.research.gameWon3 = false;
     }
 
     for (const parcel of parcels) {
-      if (buildingId === "ironSmelter" && parcel.resources.bricks > 0) {
-        return true;
-      }
-
-      if (buildingId === "coalPowerPlant" && parcel.resources.ironPlates > 0) {
-        return true;
-      }
-
       if (parcel.buildings.coalPowerPlant > 0) {
         ui.updateSectionVisibility("energy-section", true);
       }
@@ -90,43 +64,11 @@ class ProgressionManager {
         const shouldBeVisible = parcel.buildings.ironMiner > 0 || parcel.buildings.stoneMiner > 0 || parcel.buildings.coalMiner > 0;
         ui.updateSectionVisibility("project-section", shouldBeVisible);
         ui.updateSectionVisibility("research-section", shouldBeVisible);
-        return true;
       }
+    }
 
-
-
-      if (
-        (buildingId === "copperMiner" || buildingId === "copperSmelter") &&
-        parcel.buildings.ironMiner > 0 &&
-        parcel.buildings.stoneMiner > 0 &&
-        parcel.buildings.coalMiner > 0
-      ) {
-        return true;
-      }
-
-      if (buildingId === "gearPress" && parcel.resources.copperPlates > 0) {
-        return true;
-      }
-
-      if (buildingId === "cableExtruder" && parcel.resources.gears > 0) {
-        return true;
-      }
-
-      if (buildingId === "greenChipFactory" && parcel.resources.copperCables > 0) {
-        return true;
-      }
-
-      if (buildingId === "redScienceLab" && parcel.resources.greenChips > 0) {
-        return true;
-      }
-
-      if (buildingId === "researchCenter" && parcel.resources.redScience > 0) {
-        return true;
-      }
-
-      if ((buildingId === "forwardBelt" || buildingId === "backwardBelt") && parcel.buildings.expansionCenter > 0) {
-        return true;
-      }
+    if (building && building.unlockConditions()) {
+      return true;
     }
 
     return false;
@@ -141,7 +83,7 @@ class ProgressionManager {
     const buildingList = window.buildingManager.getBuildingList();
     for (const i in buildingList) {
       const buildingId = buildingList[i].id
-      if (this.checkRequirements(buildingId, gameState)) {
+      if (this.checkRequirements(buildingId)) {
         this.unlockBuilding(buildingId);
       }
     }
