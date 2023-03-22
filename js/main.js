@@ -130,3 +130,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.updateParcelsSectionVisibility();
     //ui.populateBuildNewBuildingDropdown();
 });
+
+function saveGameWithAnimation() {
+  const saveButton = document.getElementById('saveButton');
+  const saveText = saveButton.querySelector('.save-text');
+  const saveCheckmark = saveButton.querySelector('.save-checkmark');
+
+  window.saveGame();
+
+  saveText.style.transform = 'translateY(100%)';
+  saveCheckmark.style.transform = 'translateY(0)';
+
+  setTimeout(() => {
+    saveText.style.transform = 'translateY(0)';
+    saveCheckmark.style.transform = 'translateY(-100%)';
+  }, 1000);
+}

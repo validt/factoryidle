@@ -24,9 +24,14 @@ const ui = (() => {
       }
 
       // Iterate over each resource in the parcel
-      for (const resourceName in this.parcel.resources) {
-        // Create a new row for the resource and append it to the table element
-        this.tableElement.appendChild(this.createRow(resourceName));
+      for (const category of window.resourceCategories) {
+        for (const resource of category.resources) {
+          const resourceName = resource.name;
+          if (this.parcel.resources.hasOwnProperty(resourceName)) {
+            // Create a new row for the resource and append it to the table element
+            this.tableElement.appendChild(this.createRow(resourceName));
+          }
+        }
       }
 
       //Add event listeners to buttons after appending all rows
@@ -468,7 +473,6 @@ const ui = (() => {
         addEventListenerToButtons(parcel, ".sell-building", sellBuilding);
     }
 
-
     function addEventListenerToButtons(parcel, buttonClass, actionFunction) {
         const buttons = buildingDisplay.querySelectorAll(buttonClass);
         buttons.forEach((button) => {
@@ -507,7 +511,6 @@ const ui = (() => {
             }
         });
     }
-
 
     function buyBuilding(parcel, buildingId) {
         const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);

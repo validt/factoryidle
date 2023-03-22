@@ -1,42 +1,38 @@
-const resources = (() => {
-    const resourceData = {
-        ironOre: {
-            productionRate: 1,
-            consumptionRate: 0,
-        },
-    };
+const resourceCategories = {
+  stone: { category: "Raw", order: 1 },
+  coal: { category: "Raw", order: 2 },
+  ironOre: { category: "Raw", order: 3 },
+  copperOre: { category: "Raw", order: 4 },
+  bricks: { category: "Basic", order: 1 },
+  ironPlates: { category: "Basic", order: 2 },
+  copperPlates: { category: "Basic", order: 3 },
+  gears: { category: "Basic", order: 4 },
+  copperCables: { category: "Basic", order: 5 },
+  greenChips: { category: "Advanced", order: 1 },
+  redScience: { category: "Advanced", order: 2 },
+  researchPoints: { category: "Points", order: 1 },
+  expansionPoints: { category: "Points", order: 2 },
+  steel: { category: "Other", order: 1 },
+};
 
-    function setProductionRate(resourceName, rate) {
-        if (resourceData.hasOwnProperty(resourceName)) {
-            resourceData[resourceName].productionRate = rate;
-        }
+window.resourceCategories = Object.keys(resourceCategories)
+  .map(resource => ({
+    name: resource,
+    category: resourceCategories[resource].category,
+    order: resourceCategories[resource].order,
+  }))
+  .reduce((categories, resource) => {
+    const index = categories.findIndex(cat => cat.name === resource.category);
+    if (index !== -1) {
+      categories[index].resources.push(resource);
+    } else {
+      categories.push({ name: resource.category, resources: [resource] });
     }
-
-    function setConsumptionRate(resourceName, rate) {
-        if (resourceData.hasOwnProperty(resourceName)) {
-            resourceData[resourceName].consumptionRate = rate;
-        }
-    }
-
-    function getProductionRate(resourceName) {
-        return resourceData.hasOwnProperty(resourceName) ? resourceData[resourceName].productionRate : 0;
-    }
-
-    function getConsumptionRate(resourceName) {
-        return resourceData.hasOwnProperty(resourceName) ? resourceData[resourceName].consumptionRate : 0;
-    }
-
-    function getResourceData() {
-        return resourceData;
-    }
-
-    return {
-        setProductionRate,
-        setConsumptionRate,
-        //getProductionRate,
-        getConsumptionRate,
-        getResourceData,
-    };
-})();
-
-window.resources = resources;
+    return categories;
+  }, [])
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(category => ({
+    ...category,
+    resources: category.resources.sort((a, b) => a.order - b.order),
+  }))
+  .reverse();

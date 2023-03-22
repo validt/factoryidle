@@ -4,7 +4,9 @@ const gameLoop = (() => {
     let tickCounter = 0;
 
     function start() {
+        window.loadGame();
         projects.renderProjects();
+        ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();

@@ -21,6 +21,18 @@
     <div id="container">
       <h1>Factory Idle</h1>
       <button id="feedback-button" onclick="window.open('https://docs.google.com/forms/d/1oq8YquPPuWRE1zaipHxxVlX2mTAbsTNlvpIQefqQE6M', '_blank')">Feedback & Bug Report</button>
+      <button id="saveButton" class="save-button" onclick="saveGameWithAnimation()">
+        <span class="save-text">Save</span>
+        <span class="save-checkmark">&#10003;</span>
+      </button>
+      <button id="resetButton" class="reset-button" onclick="showResetConfirmation()">
+        Reset Game
+      </button>
+      <div id="resetConfirmation" class="reset-confirmation">
+        <p>Are you sure you want to reset the game?</p>
+        <button onclick="resetGameAndHideConfirmation()">Yes</button>
+        <button onclick="hideResetConfirmation()">No</button>
+      </div>
     </div>
       <div id="tooltip" class="tooltip" style="display: none;"></div>
       <div id="container">
@@ -107,6 +119,7 @@
     <script src="js/modules/researchManager.js"></script>
     <script src="js/modules/projects.js"></script>
     <script src="js/modules/energy.js"></script>
+    <script src="js/modules/resources.js"></script>
     <script src="js/utils/ui.js"></script>
     <script src="js/utils/gameState.js"></script>
     <script src="js/main.js"></script>
