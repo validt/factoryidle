@@ -1,3 +1,42 @@
+### Balance Changes
+- Increase Max Building Space (Bigger Factory)
+
+### General overarching problem
+- When coming back after some time, it's hard to find out what one has been working on. What the goal has been.
+
+### Removing Forward and Backwards Concepts and make them Input & Output
+--> Would make the game way simpler. Removes the Linear dimension. Factories become microservices in a cloud that can just stream and request resources.
+      - Provide
+      - Request
+      - Should have an ability to see how much is being provided, how much is being used of that provision per resource
+      - If you over-request, you still get resources but at a proportional rate. This allows to set a request any time and get a result at any time. --> You always see how much provision is asked for from the network -> Next goal is clear
+      - Also considering coloring to show the total input and output. Or a seperate column.
+      - Consider refactoring the whole columns with this new concept.
+      - In general, I want to see and understand parcel stats.
+
+--> On the idea of micro-microserviceication:
+  - Allow not only parcel renaming but also giving it a custom category (CRUD. Can also be applied to Parcels as well)
+  - With this, scaling your factory becomes a matter of copy and paste at some point.
+        - Needs Blueprint Point Production
+        - Remote Construction Facility
+        - Drone System - Either additionally or exclusivley. exclusivley almost makes more sense? --> Belts could be more higher throughput but on fixed lanes? Still weird. One wants to start with Drones. Or it could be workers? --> Wages? --> Forklifts!
+            - Forklifts could be like drones but early game. They cost wages & fuel to operate. Then the game could stay mono-parcel for a bit longer. Allowing for more space.
+            - Oil needs to be unlocked before Expansion Tech then
+            - Oil before research. So greenships lead into Oil.
+            - Oil leads into Expansion Tech (The Quest to get the Research Points requires Oil)
+            - Expansion Tech opens up the map afterwards.
+            - Oil & Chips can be put to use to set up forklifts
+            Fork Lifts:
+            - Building: Fork Lift Hub
+            - Produce Logistics Capacity
+            - Similar to Energy: compary Demand vs Capacity
+            - Throughput will always be Min (Demand, Capacity)
+            - Seamlessly leads into drones. They consume energy instead of money.
+            - Generate money via Bitcoin Miner
+            - Generate more money via Trading Desk
+            - Money is global resource
+        - Maybe you can group Parcels in Groups of identical parcels. Then they can be edited
+
 ### Ability to Save the Game
 
 ### Bugs
