@@ -32,7 +32,7 @@
     {
       id: "coalPowerPlant",
       name: "Coal Power Plant",
-      cost: { bricks: 50 },
+      cost: { ironPlates: 25, bricks: 25 },
       inputs: { coal: 1 },
       outputs: {},
       energyOutput: 12,
