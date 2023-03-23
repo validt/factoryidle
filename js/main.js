@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const firstParcel = parcels.createNewParcel();
     ui.addParcelToUI(firstParcel);
 
+    
+
     // Select the first parcel
     const firstParcelTab = document.getElementById(`tab-${firstParcel.id}`);
     firstParcelTab.classList.add("selected");

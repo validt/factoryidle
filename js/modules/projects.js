@@ -170,9 +170,21 @@ const projectsModule = (() => {
     }
   }
 
+  function setProjects(newProjects) {
+    for (const category in projects) {
+      if (newProjects.hasOwnProperty(category)) {
+        projects[category] = newProjects[category];
+      }
+    }
+    renderProjects();
+  }
+
+
   return {
     renderProjects,
     startProject,
+    projects,
+    setProjects,
   };
 })();
 

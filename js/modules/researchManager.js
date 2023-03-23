@@ -46,6 +46,17 @@ class ResearchManager {
   completeResearch(researchId) {
     this.completedResearch.add(researchId);
   }
+
+  saveResearchData() {
+    const completedResearchData = Array.from(this.completedResearch);
+    return JSON.stringify(completedResearchData);
+  }
+
+  loadResearchData(savedData) {
+    const completedResearchData = JSON.parse(savedData);
+    this.completedResearch = new Set(completedResearchData);
+    this.populateResearchDropdown();
+  }
 }
 
 
