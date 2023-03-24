@@ -315,3 +315,34 @@ button:disabled {
 .reset-confirmation p {
   margin-bottom: 1rem;
 }
+
+/* Belt Controller */
+.belt-controller{
+  display:flex;
+  width:120px;
+  border:1px solid black;
+}
+
+.belt-btn{
+  width:30px;
+  text-align:center;
+  background-color:#AAAAAA;
+  padding:5px 3px;
+  user-select: none;
+}
+.belt-btn:hover{
+  background-color:#CCCCCC;
+  cursor:pointer;
+}
+.belt-btn:active{
+  background-color:#666666;
+}
+
+.belt-display{
+  width:80%;
+  text-align:center;
+  border-left: 1px solid black;
+  border-top: 0px;
+  border-right: 1px solid black;
+  border-bottom: 0px;
+}

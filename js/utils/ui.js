@@ -234,11 +234,11 @@ const ui = (() => {
       // Create input fields for forward and backward belts
       const beltTypes = ["forwardBelt", "backwardBelt"];
       beltTypes.forEach((beltId, index) => {
-        const directionInput = this.createDirectionInput(beltId, resourceName);
+        const beltController = this.createDirectionInput(beltId, resourceName);
         const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
         const beltCount = this.parcel.buildings[beltId] * 2 || 0;
 
-        const cell = this.createCell(directionInput);
+        const cell = this.createCell(beltController);
         cell.style.display = "none"; // Initially hide the Forward and Backward cells
         row.appendChild(cell);
 
@@ -258,44 +258,49 @@ const ui = (() => {
       return row;
     }
 
-    createMineButton(resourceName) {
-      const mineButton = document.createElement("button");
-      mineButton.textContent = "Mine";
-      mineButton.addEventListener("click", () => {
-        this.parcel.resources[resourceName]++;
-        this.update();
-      });
-
-      return mineButton;
-    }
-
-    createCell(content, bgColor = "white") {
-      const cell = document.createElement("td");
-
-      if (typeof content === "string" || typeof content === "number") {
-        cell.textContent = content;
-      } else if (content instanceof Node) {
-        cell.appendChild(content);
-      }
-
-      cell.style.backgroundColor = bgColor;
-
-      if (bgColor === "green") {
-        cell.style.color = "white";
-      }
-
-      return cell;
-    }
-
     createDirectionInput(beltId, resourceName) {
-        const directionInput = document.createElement("input");
-        directionInput.type = "number";
-        directionInput.min = 0;
-        directionInput.value = this.parcel.inputValues?.[resourceName]?.[beltId] || 0; // Set the value based on the stored value
-        directionInput.setAttribute("data-belt", beltId);
-        directionInput.setAttribute("data-resource", resourceName);
-        directionInput.setAttribute('data-currentval', directionInput.value);
-        directionInput.addEventListener("input", (event) => {
+      // Create the container for the new input format
+      const beltController = document.createElement("div");
+      beltController.className = "belt-controller";
+
+      // Create the minus button
+      const minusBtn = document.createElement("div");
+      minusBtn.className = "belt-btn";
+      minusBtn.innerText = "-";
+      beltController.appendChild(minusBtn);
+
+      //Create the input Element
+      const directionInput = document.createElement("input");
+      directionInput.type = "text";
+      directionInput.className = "belt-display";
+      directionInput.value = this.parcel.inputValues?.[resourceName]?.[beltId] || 0
+      directionInput.setAttribute("data-belt", beltId);
+      directionInput.setAttribute("data-resource", resourceName);
+      directionInput.setAttribute("data-currentval", directionInput.value);
+      beltController.appendChild(directionInput);
+
+      // Create the plus button
+      const plusBtn = document.createElement("div");
+      plusBtn.className = "belt-btn";
+      plusBtn.innerText = "+";
+      beltController.appendChild(plusBtn);
+
+      // Function to handle button clicks
+      const handleButtonClick = (increment) => {
+        const currentVal = parseInt(directionInput.value, 10) || 0;
+        const newVal = currentVal + increment;
+
+        directionInput.value = newVal;
+        directionInput.dispatchEvent(new Event("input"));
+      };
+
+      // Attach event listeners to the buttons
+      minusBtn.addEventListener("click", () => handleButtonClick(-1));
+      plusBtn.addEventListener("click", () => handleButtonClick(1));
+
+
+
+      directionInput.addEventListener("input", (event) => {
           const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
           const inputVal = parseInt(event.target.value, 10) || 0;
           const maxVal = 2 * parseInt(this.parcel.buildings[beltId], 10) || 0;
@@ -329,8 +334,39 @@ const ui = (() => {
           this.update();
       });
 
-      return directionInput;
+      return beltController;
     }
+
+    createMineButton(resourceName) {
+      const mineButton = document.createElement("button");
+      mineButton.textContent = "Mine";
+      mineButton.addEventListener("click", () => {
+        this.parcel.resources[resourceName]++;
+        this.update();
+      });
+
+      return mineButton;
+    }
+
+    createCell(content, bgColor = "#eee") {
+      const cell = document.createElement("td");
+
+      if (typeof content === "string" || typeof content === "number") {
+        cell.textContent = content;
+      } else if (content instanceof Node) {
+        cell.appendChild(content);
+      }
+
+      cell.style.backgroundColor = bgColor;
+
+      if (bgColor === "green") {
+        cell.style.color = "white";
+      }
+
+      return cell;
+    }
+
+
 
     updateBeltUsage(beltId, resourceName, value) {
         let totalBeltUsage = 0;
