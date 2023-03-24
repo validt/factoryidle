@@ -444,7 +444,7 @@ const ui = (() => {
             const buildingElement = document.createElement("tr");
             const building = buildingManager.getBuilding(key);
             buildingElement.innerHTML = `
-                <td>${building.name}</td>
+                <td data-building-id="${key}">${building.name}</td>
                 <td>${value}</td>
                 <td>
                     <button data-building-id="${key}" class="buy-building">Buy</button>
@@ -507,6 +507,41 @@ const ui = (() => {
 
         // Add event listeners to sell buttons
         addEventListenerToButtons(parcel, ".sell-building", sellBuilding);
+
+        // Add tooltips for buildings
+        addBuildingTooltips(parcel);
+    }
+
+    function addBuildingTooltips(parcel) {
+      const buildingNames = buildingDisplay.querySelectorAll("tr td:first-child");
+      buildingNames.forEach((buildingName) => {
+        buildingName.addEventListener("mouseover", (event) => {
+          const buildingId = event.target.dataset.buildingId;
+          const building = buildingManager.getBuilding(buildingId);
+          const inputText = Object.entries(building.inputs || {})
+            .map(([inputResource, amount]) => `${amount} ${inputResource}`)
+            .join("<br>");
+          const outputText = Object.entries(building.outputs || {})
+            .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+            .join("<br>");
+
+          const tooltipText = `Input:<br>${inputText || "None"}<br>Output:<br>${outputText || "None"}`;
+
+          tooltip.innerHTML = tooltipText;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.pageX + 10 + "px";
+          tooltip.style.top = event.pageY + 10 + "px";
+        });
+
+        buildingName.addEventListener("mouseout", () => {
+          tooltip.style.display = "none";
+        });
+
+        buildingName.addEventListener("mousemove", (event) => {
+          tooltip.style.left = event.pageX + 10 + "px";
+          tooltip.style.top = event.pageY + 10 + "px";
+        });
+      });
     }
 
     function addEventListenerToButtons(parcel, buttonClass, actionFunction) {
