@@ -1,5 +1,5 @@
 - Display Version Number
-- Building Detail Hover text
+- 
 
 ### General overarching problem
 - When coming back after some time, it's hard to find out what one has been working on. What the goal has been.

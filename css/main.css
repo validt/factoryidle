@@ -346,3 +346,21 @@ button:disabled {
   border-right: 1px solid black;
   border-bottom: 0px;
 }
+
+/* Title and Version Number */
+h1 {
+  position: relative;
+  text-align: center;
+}
+
+.title-text {
+  display: inline-block;
+}
+
+.version-number {
+  position: absolute;
+  right: 0;
+  font-size: 0.6em;
+  font-weight: normal;
+  color: #666;
+}
