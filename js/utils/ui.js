@@ -259,32 +259,35 @@ const ui = (() => {
       return row;
     }
 
+    // const inputValue = this.parcel.inputValues && this.parcel.inputValues[resourceName] && this.parcel.inputValues[resourceName][beltId] ? this.parcel.inputValues[resourceName][beltId] : 0;
+    // directionInput.value = inputValue;
+
     createDirectionInput(beltId, resourceName) {
-      // Create the container for the new input format
+      // Create elements
       const beltController = document.createElement("div");
+      const minusBtn = document.createElement("div");
+      const directionInput = document.createElement("input");
+      const plusBtn = document.createElement("div");
+
+      // Set properties and attributes
       beltController.className = "belt-controller";
 
-      // Create the minus button
-      const minusBtn = document.createElement("div");
       minusBtn.className = "belt-btn";
       minusBtn.innerText = "-";
-      beltController.appendChild(minusBtn);
 
-      //Create the input Element
-      const directionInput = document.createElement("input");
       directionInput.type = "text";
       directionInput.className = "belt-display";
-      directionInput.value = this.parcel.inputValues?.[resourceName]?.[beltId] || 0
-      directionInput.setAttribute("data-belt", beltId);
-      directionInput.setAttribute("data-resource", resourceName);
-      directionInput.setAttribute("data-currentval", directionInput.value);
-      beltController.appendChild(directionInput);
+      const inputValue = this.parcel.inputValues && this.parcel.inputValues[resourceName] && this.parcel.inputValues[resourceName][beltId] ? this.parcel.inputValues[resourceName][beltId] : 0;
+      directionInput.value = inputValue;
+      directionInput.dataset.belt = beltId;
+      directionInput.dataset.resource = resourceName;
+      directionInput.dataset.currentval = directionInput.value;
 
-      // Create the plus button
-      const plusBtn = document.createElement("div");
       plusBtn.className = "belt-btn";
       plusBtn.innerText = "+";
-      beltController.appendChild(plusBtn);
+
+      // Append elements
+      beltController.append(minusBtn, directionInput, plusBtn);
 
       // Function to handle button clicks
       const handleButtonClick = (increment) => {
@@ -295,43 +298,29 @@ const ui = (() => {
         directionInput.dispatchEvent(new Event("input"));
       };
 
-      // Attach event listeners to the buttons
+      // Attach event listeners
       minusBtn.addEventListener("click", () => handleButtonClick(-1));
       plusBtn.addEventListener("click", () => handleButtonClick(1));
 
       directionInput.addEventListener("input", (event) => {
-          const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
-          const inputVal = parseInt(event.target.value, 10) || 0;
-          const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings[beltId] || 0), 0);
-          //const maxVal = 2 * parseInt(this.parcel.buildings[beltId], 10) || 0;
-          const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
-          const maxCellVal = maxVal - (beltUsage - currentVal);
-          console.log("maxCellVal: " + maxCellVal);
-          console.log("currentVal: " + currentVal);
-          console.log("maxVal: " + maxVal);
-          console.log("inputVal: " + inputVal);
+        const inputVal = parseInt(event.target.value, 10) || 0;
+        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings[beltId] || 0), 0);
+        const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
+        const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
+        const maxCellVal = maxVal - (beltUsage - currentVal);
 
-          if (inputVal > maxCellVal) {
-            event.target.value = maxCellVal;
-          } else if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
-            event.target.value = 0;
-          } else {
-            console.log(inputVal)
-            event.target.value = inputVal;
-          }
+        if (inputVal > maxCellVal) {
+          event.target.value = maxCellVal;
+        } else if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
+          event.target.value = 0;
+        }
 
-          event.target.setAttribute('data-currentval', event.target.value);
+        event.target.dataset.currentval = event.target.value;
 
-          if (maxCellVal > 0) {
-            this.updateBeltUsage(beltId, maxCellVal);   //todo
-          } else {
-            this.updateBeltUsage(beltId, 0);            //todo
-          }
+        // Save the input field value for the parcel, resource, and beltId
+        this.updateBeltUsage(beltId, resourceName, event.target.value, true);
 
-          // Save the input field values for the parcel and resource
-          this.updateBeltUsage(beltId, resourceName, event.target.value);
-
-          this.update();
+        this.update();
       });
 
       return beltController;
@@ -368,22 +357,23 @@ const ui = (() => {
 
 
 
-    updateBeltUsage(beltId, resourceName, value) {
-        let totalBeltUsage = 0;
-        const beltInputs = this.tableElement.querySelectorAll(`input[data-belt="${beltId}"]`);
+    updateBeltUsage(beltId, resourceName, value, saveInputValue = false) {
+      let totalBeltUsage = 0;
+      const beltInputs = this.tableElement.querySelectorAll(`input[data-belt="${beltId}"]`);
 
-        beltInputs.forEach((input) => {
-          const inputVal = parseInt(input.value, 10);
-          totalBeltUsage += inputVal;
-        });
+      beltInputs.forEach((input) => {
+        const inputVal = parseInt(input.value, 10);
+        totalBeltUsage += inputVal;
+      });
 
-        if (!this.parcel.beltUsage) {
-          this.parcel.beltUsage = {};
-        }
+      if (!this.parcel.beltUsage) {
+        this.parcel.beltUsage = {};
+      }
 
-        this.parcel.beltUsage[beltId] = totalBeltUsage;
+      this.parcel.beltUsage[beltId] = totalBeltUsage;
 
-        // Save the input field values for the parcel and resource
+      // Save the input field values for the parcel, resource, and beltId
+      if (saveInputValue) {
         if (!this.parcel.inputValues) {
           this.parcel.inputValues = {};
         }
@@ -392,6 +382,7 @@ const ui = (() => {
         }
         this.parcel.inputValues[resourceName][beltId] = parseInt(value, 10) || 0;
       }
+    }
 
   }
 

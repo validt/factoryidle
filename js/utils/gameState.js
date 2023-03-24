@@ -41,6 +41,10 @@ window.loadGame = function() {
       Object.assign(parcel.buildingProductionRateModifiers, parcelData.buildingProductionRateModifiers);
       Object.assign(parcel.buildingConsumptionRateModifiers, parcelData.buildingConsumptionRateModifiers);
 
+      // Assign the inputValues property from the saved parcel data
+      Object.assign(parcel.inputValues, parcelData.inputValues);
+
+
       // Update the existing parcel object with the new one
       window.parcels.parcelList[index] = parcel;
 

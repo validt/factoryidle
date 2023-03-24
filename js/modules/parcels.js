@@ -62,6 +62,7 @@ class Parcel {
         this.consumptionRateModifier = 0;
         this.buildingProductionRateModifiers = {};
         this.buildingConsumptionRateModifiers = {};
+        this.inputValues = {};
     }
 
     updatePreviousResources() {
