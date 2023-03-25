@@ -53,7 +53,7 @@ class ProgressionManager {
 
     for (const parcel of parcels) {
       if (parcel.buildings.coalPowerPlant > 0) {
-        ui.updateSectionVisibility("energy-section", true);
+        gameState.sectionVisibility.projectSection = true;
       }
 
       if (
@@ -62,8 +62,10 @@ class ProgressionManager {
         parcel.buildings.coalPowerPlant > 0
       ) {
         const shouldBeVisible = parcel.buildings.ironMiner > 0 || parcel.buildings.stoneMiner > 0 || parcel.buildings.coalMiner > 0;
-        ui.updateSectionVisibility("project-section", shouldBeVisible);
-        ui.updateSectionVisibility("research-section", shouldBeVisible);
+        if (shouldBeVisible) {
+          gameState.sectionVisibility.projectSection = true;
+          gameState.sectionVisibility.researchSection = true;
+        }
       }
     }
 

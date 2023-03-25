@@ -6,6 +6,11 @@ const gameState = {
   progression: {
     unlockedBuildings: new Set(), // Store the unlocked buildings here
   },
+  sectionVisibility: {
+    energySection: false,
+    projectSection: false,
+    researchSection: false,
+  },
   // Add other relevant game state data as needed
 };
 
@@ -54,6 +59,11 @@ window.loadGame = function() {
     // Assign the research data
     if (parsedState.research) {
       window.gameState.research = parsedState.research;
+    }
+
+    // Assign section visibility
+    if (parsedState.sectionVisibility) {
+      window.gameState.sectionVisibility = parsedState.sectionVisibility;
     }
 
     const researchData = localStorage.getItem("researchData");
