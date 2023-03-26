@@ -52,17 +52,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let canAfford = true;
             for (const [resourceName, cost] of resourceCost) {
-                if (isNaN(selectedParcel.resources[resourceName]) || selectedParcel.resources[resourceName] < cost) {
+                const totalResource = (selectedParcel.resources[resourceName] || 0) + getResourcesFromRemoteConstructionFacilities(parcels.parcelList, resourceName);
+                if (totalResource < cost) {
                     canAfford = false;
                     break;
                 }
             }
 
+
             if (canAfford) {
                 if (parcels.addBuildingToParcel(selectedParcelIndex, selectedBuildingId)) {
-                    for (const [resourceName, cost] of resourceCost) {
-                        selectedParcel.resources[resourceName] -= cost;
-                    }
+                  for (const [resourceName, cost] of resourceCost) {
+                      if (selectedParcel.resources[resourceName] >= cost) {
+                          selectedParcel.resources[resourceName] -= cost;
+                      } else {
+                          const remainingResource = cost - selectedParcel.resources[resourceName];
+                          selectedParcel.resources[resourceName] = 0;
+                          deductResourcesFromRemoteConstructionFacilities(parcels.parcelList, resourceName, remainingResource);
+                      }
+                  }
 
                     // Initialize Output resources for any building
                     initializeResourceOutput(selectedParcel, selectedBuilding);
@@ -70,6 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Update resources when a kiln is built
                     if (selectedBuildingId === "kiln" && !selectedParcel.resources.coal) {
                         selectedParcel.resources = { coal: 0, ...selectedParcel.resources };
+                    }
+
+                    // Update resources when a ironSmelter is built
+                    if (selectedBuildingId === "ironSmelter" && !selectedParcel.resources.ironOre) {
+                        selectedParcel.resources = { ironOre: 0, ...selectedParcel.resources };
                     }
 
                     //ui.updateResourceDisplay(selectedParcel);
@@ -91,6 +104,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
+    //Remote Construction Facility Helper Functions
+    function getResourcesFromRemoteConstructionFacilities(parcels, resourceName) {
+        let totalResource = 0;
+        console.log(parcels);
+        console.log(resourceName);
+        for (const parcel of parcels) {
+            if (parcel.buildings.remoteConstructionFacility) {
+                totalResource += parcel.resources[resourceName] || 0;
+            }
+        }
+        console.log(totalResource);
+        return totalResource;
+    }
+
+    function deductResourcesFromRemoteConstructionFacilities(parcels, resourceName, requiredResource) {
+        for (const parcel of parcels) {
+            if (parcel.buildings.remoteConstructionFacility) {
+                const availableResource = parcel.resources[resourceName] || 0;
+                const resourceToDeduct = Math.min(availableResource, requiredResource);
+                parcel.resources[resourceName] -= resourceToDeduct;
+                requiredResource -= resourceToDeduct;
+
+                if (requiredResource <= 0) {
+                    break;
+                }
+            }
+        }
+    }
 
     //Start Research button event listener
     startResearchButton.addEventListener("click", () => {

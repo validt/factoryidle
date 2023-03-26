@@ -43,13 +43,14 @@ const gameLoop = (() => {
                 // Check if there's at least one building of the current type
                 if (buildingCount && buildingCount > 0) {
                     const building = window.buildingManager.getBuilding(buildingId);
+                    const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? 0.5 : 0;
 
                     const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[buildingId] && parcel.buildingProductionRateModifiers[buildingId].energyModifier || 0;
                     const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[buildingId] && parcel.buildingConsumptionRateModifiers[buildingId].energyModifier || 0;
                     // console.log(buildingId + ": buildingConsumptionRateModifier: " + buildingConsumptionRateModifier);
 
-                    const totalProductionRateModifier = parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier;
-                    const totalConsumptionRateModifier = parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier;
+                    const totalProductionRateModifier = parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier + remoteConstructionFacilityModifier;
+                    const totalConsumptionRateModifier = parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier + remoteConstructionFacilityModifier;
                     // console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
 
                     // Check if the building has any input resources required for production

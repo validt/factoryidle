@@ -645,25 +645,29 @@ const ui = (() => {
     const addedToDropdown = new Set();
 
     function updateBuildingDropdown() {
-      const buildNewBuildingSelect = document.getElementById("buildingSelect");
+        const buildNewBuildingSelect = document.getElementById("buildingSelect");
 
-      // Iterate through all unlocked buildings
-      for (const buildingId of window.progressionManager.unlockedBuildings) {
-        // If the building hasn't been added to the dropdown yet
-        if (!addedToDropdown.has(buildingId)) {
-          // Add the building to the dropdown
-          const building = window.buildingManager.getBuilding(buildingId);
-          const optionElement = document.createElement("option");
-          const firstChild = buildNewBuildingSelect.firstChild;
-          optionElement.value = building.id;
-          optionElement.textContent = `${building.name} - ${JSON.stringify(building.cost)}`;
-          //buildNewBuildingSelect.appendChild(optionElement);
-          buildNewBuildingSelect.insertBefore(optionElement, firstChild);
+        // Iterate through all unlocked buildings
+        for (const buildingId of window.progressionManager.unlockedBuildings) {
+            // If the building hasn't been added to the dropdown yet
+            if (!addedToDropdown.has(buildingId)) {
+                // Add the building to the dropdown
+                const building = window.buildingManager.getBuilding(buildingId);
+                const optionElement = document.createElement("option");
+                const firstChild = buildNewBuildingSelect.firstChild;
+                optionElement.value = building.id;
 
-          // Mark the building as added to the dropdown
-          addedToDropdown.add(buildingId);
+                // Include the building description if it exists
+                const buildingDescription = building.description ? ` - ${building.description}` : "";
+                optionElement.textContent = `${building.name} - ${JSON.stringify(building.cost)}${buildingDescription}`;
+
+                //buildNewBuildingSelect.appendChild(optionElement);
+                buildNewBuildingSelect.insertBefore(optionElement, firstChild);
+
+                // Mark the building as added to the dropdown
+                addedToDropdown.add(buildingId);
+            }
         }
-      }
     }
 
     function getResourceRateColor(parcel, resourceName) {

@@ -355,6 +355,7 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.remoteConstruction,
+      description: "Allows to build buildings using resources from this parcel. Slows down Parcel Production Rate by 50%"
     },
     {
       id: "speedBeaconT1",
