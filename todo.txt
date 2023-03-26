@@ -1,6 +1,16 @@
-### Bug
-- Coal Plant in Every Parcel = Missions Removed
+### Next Big push
+- New Buildings
+- Remote Construction Center
+- Blueprint Center
+    - Whats the easiest implementation? Just let it cost the sum of resources?
+    - Or it could be +1 Blueprint point per building built
+- Speed Module
+    - 
 
+### Increase Mobile Support:
+- Auto Zoom in on double click -> disable
+- Figure out to handle tooltips
+- Greying out button is a good workaround
 
 ### General overarching problem
 - When coming back after some time, it's hard to find out what one has been working on. What the goal has been.
