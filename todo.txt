@@ -5,7 +5,11 @@
     - Whats the easiest implementation? Just let it cost the sum of resources?
     - Or it could be +1 Blueprint point per building built
 - Speed Module
-    - 
+    -
+- Bug: Building on Bottom of Screen Tooltip flickers
+- QoL: Energy System Explainer: Question Mark Icon?
+- QoL: Display Gain (Average over last 10 Ticks)
+- QoL: On-Off Button for Buildings
 
 ### Increase Mobile Support:
 - Auto Zoom in on double click -> disable
