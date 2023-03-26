@@ -43,7 +43,7 @@ const gameLoop = (() => {
                 // Check if there's at least one building of the current type
                 if (buildingCount && buildingCount > 0) {
                     const building = window.buildingManager.getBuilding(buildingId);
-                    const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? 0.5 : 0;
+                    const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? -0.5 : 0;
 
                     const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[buildingId] && parcel.buildingProductionRateModifiers[buildingId].energyModifier || 0;
                     const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[buildingId] && parcel.buildingConsumptionRateModifiers[buildingId].energyModifier || 0;
