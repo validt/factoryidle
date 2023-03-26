@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const firstParcel = parcels.createNewParcel();
     ui.addParcelToUI(firstParcel);
 
-    
+
 
     // Select the first parcel
     const firstParcelTab = document.getElementById(`tab-${firstParcel.id}`);
@@ -64,23 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         selectedParcel.resources[resourceName] -= cost;
                     }
 
+                    // Initialize Output resources for any building
+                    initializeResourceOutput(selectedParcel, selectedBuilding);
+
                     // Update resources when a kiln is built
                     if (selectedBuildingId === "kiln" && !selectedParcel.resources.coal) {
                         selectedParcel.resources = { coal: 0, ...selectedParcel.resources };
-                    }
-
-                    // Update resources when an ironSmelter is built
-                    if (selectedBuildingId === "ironSmelter" && !selectedParcel.resources.ironOre) {
-                        const [firstResourceKey, ...otherResourceKeys] = Object.keys(selectedParcel.resources);
-                        const firstResourceValue = selectedParcel.resources[firstResourceKey];
-                        selectedParcel.resources = {
-                            [firstResourceKey]: firstResourceValue,
-                            ironOre: 0,
-                            ...otherResourceKeys.reduce((obj, key) => {
-                                obj[key] = selectedParcel.resources[key];
-                                return obj;
-                            }, {}),
-                        };
                     }
 
                     //ui.updateResourceDisplay(selectedParcel);
@@ -92,6 +81,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
+
+    // Initializes resources for resource table (used in Buy Building event listener)
+    function initializeResourceOutput(parcel, building) {
+        for (const outputResource in building.outputs) {
+            if (!parcel.resources.hasOwnProperty(outputResource)) {
+                parcel.resources[outputResource] = 0;
+            }
+        }
+    }
+
 
     //Start Research button event listener
     startResearchButton.addEventListener("click", () => {

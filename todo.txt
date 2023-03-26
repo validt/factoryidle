@@ -1,5 +1,4 @@
 ### Next Big push
-- New Buildings
 - Remote Construction Center
 - Blueprint Center
     - Whats the easiest implementation? Just let it cost the sum of resources?
@@ -10,6 +9,7 @@
 - QoL: Energy System Explainer: Question Mark Icon?
 - QoL: Display Gain (Average over last 10 Ticks)
 - QoL: On-Off Button for Buildings
+- Sneaky: Follow Twitter Checker
 
 ### Increase Mobile Support:
 - Auto Zoom in on double click -> disable

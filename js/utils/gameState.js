@@ -16,8 +16,6 @@ const gameState = {
 
 window.gameState = gameState;
 
-window.gameState = gameState;
-
 window.saveGame = function() {
   localStorage.setItem('gameState', JSON.stringify(window.gameState));
   const projectsJSON = JSON.stringify(projectsModule.projects);
@@ -103,6 +101,47 @@ window.loadGame = function() {
 
 // Save the game state every minute
 setInterval(window.saveGame, 60 * 1000);
+
+function getSaveStateString() {
+  const saveData = {
+    gameState: JSON.parse(localStorage.getItem('gameState')),
+    savedProjects: JSON.parse(localStorage.getItem('savedProjects')),
+    researchData: localStorage.getItem('researchData'),
+  };
+  return JSON.stringify(saveData);
+}
+
+function loadSaveStateFromString(saveStateString) {
+  try {
+    const saveData = JSON.parse(saveStateString);
+    localStorage.setItem('gameState', JSON.stringify(saveData.gameState));
+    localStorage.setItem('savedProjects', JSON.stringify(saveData.savedProjects));
+    localStorage.setItem('researchData', saveData.researchData);
+
+    // Reload the page to apply the changes
+    location.reload();
+  } catch (error) {
+    console.error("Invalid save state string:", error);
+    alert("Invalid save state string. Please check the input and try again.");
+  }
+}
+
+document.getElementById("exportButton").addEventListener("click", function () {
+  const saveStateString = getSaveStateString();
+  document.getElementById("exportTextarea").value = saveStateString;
+  document.getElementById("exportContainer").style.display = "block";
+  document.getElementById("importContainer").style.display = "none";
+});
+
+document.getElementById("importButton").addEventListener("click", function () {
+  document.getElementById("exportContainer").style.display = "none";
+  document.getElementById("importContainer").style.display = "block";
+});
+
+document.getElementById("loadSaveStateButton").addEventListener("click", function () {
+  const saveStateString = document.getElementById("importTextarea").value;
+  loadSaveStateFromString(saveStateString);
+});
 
 function showResetConfirmation() {
   const resetConfirmation = document.getElementById('resetConfirmation');
