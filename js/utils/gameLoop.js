@@ -43,14 +43,9 @@ const gameLoop = (() => {
                 // Check if there's at least one building of the current type
                 if (buildingCount && buildingCount > 0) {
                     const building = window.buildingManager.getBuilding(buildingId);
-                    const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? -0.5 : 0;
 
-                    const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[buildingId] && parcel.buildingProductionRateModifiers[buildingId].energyModifier || 0;
-                    const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[buildingId] && parcel.buildingConsumptionRateModifiers[buildingId].energyModifier || 0;
-                    // console.log(buildingId + ": buildingConsumptionRateModifier: " + buildingConsumptionRateModifier);
-
-                    const totalProductionRateModifier = parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier + remoteConstructionFacilityModifier;
-                    const totalConsumptionRateModifier = parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier + remoteConstructionFacilityModifier;
+                    const totalProductionRateModifier = calculateProductionRateModifier(parcel, building, buildingCount);
+                    const totalConsumptionRateModifier = calculateConsumptionRateModifier(parcel, building, buildingCount);
                     // console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
 
                     // Check if the building has any input resources required for production
@@ -98,6 +93,17 @@ const gameLoop = (() => {
         ui.updateResourceDisplay(selectedParcel);
     }
 
+    function calculateProductionRateModifier(parcel, building, buildingCount) {
+        const buildingProductionRateModifier = parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier || 0;
+        const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? 0.5 : 0;
+        return Math.max(-1, parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier - remoteConstructionFacilityModifier);
+    }
+
+    function calculateConsumptionRateModifier(parcel, building, buildingCount) {
+        const buildingConsumptionRateModifier = parcel.buildingConsumptionRateModifiers[building.id] && parcel.buildingConsumptionRateModifiers[building.id].energyModifier || 0;
+        const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? 0.5 : 0;
+        return Math.max(-1, parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier - remoteConstructionFacilityModifier);
+    }
 
     function updateBeltLogistics() {
       for (let i = 0; i < parcels.getParcelCount(); i++) {
@@ -140,6 +146,8 @@ const gameLoop = (() => {
     return {
         start,
         stop,
+        calculateProductionRateModifier,
+        calculateConsumptionRateModifier,
     };
 })();
 

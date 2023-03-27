@@ -88,20 +88,72 @@ const ui = (() => {
       });
     }
 
-
     addResourceTooltips(parcel) {
       const resourceNames = this.tableElement.querySelectorAll(".resource-name");
       resourceNames.forEach((resourceName) => {
         resourceName.addEventListener("mouseover", (event) => {
           const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
-          const inputText = Object.entries(resource.inputs || {})
-            .map(([inputResource, amount]) => `${amount} ${inputResource}`)
-            .join("<br>");
-          const outputText = Object.entries(resource.outputs || {})
-            .map(([outputResource, amount]) => `${amount} ${outputResource}`)
-            .join("<br>");
+          const buildingCount = parcel.buildings[resource.id];
 
-          const tooltipText = `Input:<br>${inputText || "None"}<br>Output:<br>${outputText || "None"}`;
+          const inputText = Object.entries(resource.inputs || {})
+          .map(([inputResource, amount]) => `${amount} ${inputResource}`)
+          .join("<br>");
+          const outputText = Object.entries(resource.outputs || {})
+          .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+          .join("<br>");
+
+          const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
+          const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
+
+          const modifiedInputText = Object.entries(resource.inputs || {})
+          .map(([inputResource, amount]) => `${(amount * (1 + consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+          .join("<br>");
+          const modifiedOutputText = Object.entries(resource.outputs || {})
+          .map(([outputResource, amount]) => `${(amount * (1 + productionRateModifier)).toFixed(2)} ${outputResource}`)
+          .join("<br>");
+
+          const tooltipText = `
+          <table>
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: left;"><b>Default</b></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${inputText || "-"}</td>
+                <td> &#x2192; </td>
+                <td>${outputText || "-"}</td>
+              </tr>
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: left;"><b>Modified</b></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tr>
+              <td>${
+                consumptionRateModifier !== undefined
+                  ? (consumptionRateModifier > 0 ? "+" : "") + Math.round(consumptionRateModifier * 100) + "%"
+                  : ""
+              }</td>
+              <td></td>
+              <td>${
+                productionRateModifier !== undefined
+                  ? (productionRateModifier > 0 ? "+" : "") + Math.round(productionRateModifier * 100) + "%"
+                  : ""
+              }</td>
+            </tr>
+              <tr>
+                <td>${modifiedInputText || "-"}</td>
+                <td> &#x2192; </td>
+                <td>${modifiedOutputText || "-"}</td>
+              </tr>
+            </tbody>
+          </table>`;
 
           tooltip.innerHTML = tooltipText;
           tooltip.style.display = "block";
