@@ -195,6 +195,7 @@ const ui = (() => {
       const headerLabels = [
         "Resource",
         "Amount",
+        "Utilization",
         "Action",
         "Count",
         "Production",
@@ -243,6 +244,42 @@ const ui = (() => {
       const color = getResourceRateColor(this.parcel, resourceName);
       row.appendChild(this.createCell(Math.round(this.parcel.resources[resourceName] * 10) / 10, color));
 
+      // Create the utilization cell
+      const utilization = this.parcel.utilization && this.parcel.utilization[building.id] ? this.parcel.utilization[building.id].percentage : 0;
+      const roundedUtilization = Math.ceil(utilization);
+      const utilizationCell = this.createCell(`${roundedUtilization}%`);
+      row.appendChild(utilizationCell);
+
+      // Get a reference to the tooltip element
+      const tooltip = document.getElementById("tooltip");
+
+      // Display bottleneck information on mouseover
+      utilizationCell.addEventListener("mouseover", (event) => {
+        if (this.parcel.utilization && this.parcel.utilization[building.id]) {
+          const bottleneckInfo = this.parcel.utilization[building.id].bottlenecks;
+          const bottleneckText = Object.entries(bottleneckInfo)
+            .map(([resource, amount]) => `${resource}: ${amount.toFixed(2)}`)
+            .join(", ");
+
+          tooltip.innerHTML = `Bottleneck: ${bottleneckText}`;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.pageX + 10 + "px";
+          tooltip.style.top = event.pageY + 10 + "px";
+        }
+      });
+
+      // Hide the tooltip on mouseout
+      utilizationCell.addEventListener("mouseout", () => {
+        tooltip.style.display = "none";
+      });
+
+      // Update the tooltip position on mousemove
+      utilizationCell.addEventListener("mousemove", (event) => {
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+
+      //Create action cells
       const actionCell = document.createElement("td");
       if (building && building.minable) {
           const mineButton = this.createMineButton(resourceName);
