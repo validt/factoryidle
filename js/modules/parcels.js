@@ -69,6 +69,25 @@ class Parcel {
       this.previousResources = { ...this.resources };
     }
 
+    updatePreviousResourceHistory() {
+      if (!this.previousResourceHistory) {
+        this.previousResourceHistory = {};
+      }
+
+      for (const [resourceKey, resourceValue] of Object.entries(this.resources)) {
+        if (!this.previousResourceHistory[resourceKey]) {
+          this.previousResourceHistory[resourceKey] = [];
+        }
+
+        this.previousResourceHistory[resourceKey].push(resourceValue);
+
+        // Limit the history array to 16 values
+        if (this.previousResourceHistory[resourceKey].length > 16) {
+          this.previousResourceHistory[resourceKey].shift();
+        }
+      }
+    }
+
     addBuilding(buildingType) {
         const totalBuildings = Object.values(this.buildings).reduce((a, b) => a + b, 0);
         if (totalBuildings < this.maxBuildings) {

@@ -628,28 +628,47 @@ const ui = (() => {
 
     function buyBuilding(parcel, buildingId) {
         const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+        console.log("buyBuilding")
         if (totalBuildings < parcel.maxBuildings) {
             const building = buildingManager.getBuilding(buildingId);
 
-            // Check if there are enough resources to buy the building
-            let canBuy = true;
-            for (const [resource, cost] of Object.entries(building.cost)) {
-                if (!parcel.resources[resource] || parcel.resources[resource] < cost) {
-                    canBuy = false;
+            const resourceCost = Object.entries(building.cost);
+
+            let canAfford = true;
+            for (const [resourceName, cost] of resourceCost) {
+                const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+                if (totalResource < cost) {
+                    canAfford = false;
                     break;
                 }
             }
 
-            // If the building can be bought, deduct the cost and add the building
-            if (canBuy) {
-                for (const [resource, cost] of Object.entries(building.cost)) {
-                    parcel.resources[resource] -= cost;
+            if (canAfford) {
+                if (parcel.buildings[buildingId] === undefined) {
+                    parcel.buildings[buildingId] = 0;
                 }
-
-                // Update building count
                 parcel.buildings[buildingId]++;
 
-                // Update building display
+                for (const [resourceName, cost] of resourceCost) {
+                    if (parcel.resources[resourceName] >= cost) {
+                        parcel.resources[resourceName] -= cost;
+                    } else {
+                        const remainingResource = cost - parcel.resources[resourceName];
+                        parcel.resources[resourceName] = 0;
+                        buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
+                    }
+                }
+
+                buildingManager.initializeResourceOutput(parcel, building);
+
+                if (buildingId === "kiln" && !parcel.resources.coal) {
+                    parcel.resources = { coal: 0, ...parcel.resources };
+                }
+
+                if (buildingId === "ironSmelter" && !parcel.resources.ironOre) {
+                    parcel.resources = { ironOre: 0, ...parcel.resources };
+                }
+
                 updateBuildingDisplay(parcel);
             }
         }
@@ -860,6 +879,7 @@ const ui = (() => {
         updateParcelsSectionVisibility,
         updateEnergyDisplay,
         updateSectionVisibility,
+        buyBuilding,
     };
     })();
 

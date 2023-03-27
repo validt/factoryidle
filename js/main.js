@@ -44,95 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
     buyBuildingButton.addEventListener("click", () => {
         const selectedParcelIndex = ui.getSelectedParcelIndex();
         const selectedBuildingId = buildingSelect.value;
-        const selectedBuilding = buildingManager.getBuilding(selectedBuildingId);
-        const resourceCost = Object.entries(selectedBuilding.cost);
 
         if (selectedParcelIndex !== null) {
             const selectedParcel = parcels.getParcel(selectedParcelIndex);
 
-            let canAfford = true;
-            for (const [resourceName, cost] of resourceCost) {
-                const totalResource = (selectedParcel.resources[resourceName] || 0) + getResourcesFromRemoteConstructionFacilities(parcels.parcelList, resourceName);
-                if (totalResource < cost) {
-                    canAfford = false;
-                    break;
-                }
-            }
+            // Call the buyBuilding function instead of repeating the code
+            ui.buyBuilding(selectedParcel, selectedBuildingId);
 
+            // Update the UI
+            ui.updateBuildingDisplay(selectedParcel);
 
-            if (canAfford) {
-                if (parcels.addBuildingToParcel(selectedParcelIndex, selectedBuildingId)) {
-                  for (const [resourceName, cost] of resourceCost) {
-                      if (selectedParcel.resources[resourceName] >= cost) {
-                          selectedParcel.resources[resourceName] -= cost;
-                      } else {
-                          const remainingResource = cost - selectedParcel.resources[resourceName];
-                          selectedParcel.resources[resourceName] = 0;
-                          deductResourcesFromRemoteConstructionFacilities(parcels.parcelList, resourceName, remainingResource);
-                      }
-                  }
-
-                    // Initialize Output resources for any building
-                    initializeResourceOutput(selectedParcel, selectedBuilding);
-
-                    // Update resources when a kiln is built
-                    if (selectedBuildingId === "kiln" && !selectedParcel.resources.coal) {
-                        selectedParcel.resources = { coal: 0, ...selectedParcel.resources };
-                    }
-
-                    // Update resources when a ironSmelter is built
-                    if (selectedBuildingId === "ironSmelter" && !selectedParcel.resources.ironOre) {
-                        selectedParcel.resources = { ironOre: 0, ...selectedParcel.resources };
-                    }
-
-                    //ui.updateResourceDisplay(selectedParcel);
-                    ui.updateBuildingDisplay(selectedParcel);
-
-                    const totalBuildings = Object.values(selectedParcel.buildings).reduce((a, b) => a + b, 0);
-                    //ui.updateParcelBuildingCount(selectedParcelIndex, totalBuildings);
-                }
-            }
+            const totalBuildings = Object.values(selectedParcel.buildings).reduce((a, b) => a + b, 0);
+            //ui.updateParcelBuildingCount(selectedParcelIndex, totalBuildings);
         }
     });
 
-    // Initializes resources for resource table (used in Buy Building event listener)
-    function initializeResourceOutput(parcel, building) {
-        for (const outputResource in building.outputs) {
-            if (!parcel.resources.hasOwnProperty(outputResource)) {
-                parcel.resources[outputResource] = 0;
-            }
-        }
-    }
 
-
-    //Remote Construction Facility Helper Functions
-    function getResourcesFromRemoteConstructionFacilities(parcels, resourceName) {
-        let totalResource = 0;
-        console.log(parcels);
-        console.log(resourceName);
-        for (const parcel of parcels) {
-            if (parcel.buildings.remoteConstructionFacility) {
-                totalResource += parcel.resources[resourceName] || 0;
-            }
-        }
-        console.log(totalResource);
-        return totalResource;
-    }
-
-    function deductResourcesFromRemoteConstructionFacilities(parcels, resourceName, requiredResource) {
-        for (const parcel of parcels) {
-            if (parcel.buildings.remoteConstructionFacility) {
-                const availableResource = parcel.resources[resourceName] || 0;
-                const resourceToDeduct = Math.min(availableResource, requiredResource);
-                parcel.resources[resourceName] -= resourceToDeduct;
-                requiredResource -= resourceToDeduct;
-
-                if (requiredResource <= 0) {
-                    break;
-                }
-            }
-        }
-    }
 
     //Start Research button event listener
     startResearchButton.addEventListener("click", () => {

@@ -30,63 +30,66 @@ const gameLoop = (() => {
       for (const parcel of window.parcels.parcelList) {
         // Call updatePreviousResources method for each parcel
         parcel.updatePreviousResources();
+        parcel.updatePreviousResourceHistory();
       }
     }
 
     function updateResources() {
-        // Iterate through all the parcels
-        for (const parcel of window.parcels.parcelList) {
-            // Iterate through each building type in the current parcel
-            for (const buildingId in parcel.buildings) {
-                const buildingCount = parcel.buildings[buildingId];
+      // Iterate through all the parcels
+      for (const parcel of window.parcels.parcelList) {
+        // Iterate through each building type in the current parcel
+        for (const buildingId in parcel.buildings) {
+          const buildingCount = parcel.buildings[buildingId];
 
-                // Check if there's at least one building of the current type
-                if (buildingCount && buildingCount > 0) {
-                    const building = window.buildingManager.getBuilding(buildingId);
+          // Check if there's at least one building of the current type
+          if (buildingCount && buildingCount > 0) {
+            const building = window.buildingManager.getBuilding(buildingId);
 
-                    const totalProductionRateModifier = calculateProductionRateModifier(parcel, building, buildingCount);
-                    const totalConsumptionRateModifier = calculateConsumptionRateModifier(parcel, building, buildingCount);
-                    // console.log(buildingId + ": totalConsumptionRateModifier: " + totalConsumptionRateModifier);
+            const totalProductionRateModifier = calculateProductionRateModifier(parcel, building, buildingCount);
+            const totalConsumptionRateModifier = calculateConsumptionRateModifier(parcel, building, buildingCount);
 
-                    // Check if the building has any input resources required for production
-                    if (building.inputs && !(building.energyOutput > 0)) { // Add !building.energyOutput to the condition
-                        let canProduce = true;
+            // Check if the building has any input resources required for production
+            if (building.inputs && !(building.energyOutput > 0)) {
+              let maxProducingBuildings = buildingCount;
 
-                        // Check if the parcel has enough resources to meet the input requirements
-                        for (const [key, value] of Object.entries(building.inputs)) {
-                            if (!parcel.resources[key] || parcel.resources[key] < value * buildingCount * (1 + totalConsumptionRateModifier)) {
-                                canProduce = false;
-                                break;
-                            }
-                        }
-
-                        // If the building can produce, consume the input resources and produce output resources
-                        if (canProduce) {
-                            for (const [key, value] of Object.entries(building.inputs)) {
-                                const updatedValue = parcel.resources[key] - value * buildingCount * building.rate * (1 + totalConsumptionRateModifier);
-                                parcel.resources[key] = Math.round(updatedValue * 10) / 10;
-                            }
-
-                            for (const [key, value] of Object.entries(building.outputs)) {
-                                if (!parcel.resources[key]) {
-                                    parcel.resources[key] = 0;
-                                }
-                                const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (1 + totalProductionRateModifier);
-                                parcel.resources[key] = Math.round(updatedValue * 10) / 10;
-                            }
-                        }
-                    } else {
-                        for (const [key, value] of Object.entries(building.outputs)) {
-                            if (!parcel.resources[key]) {
-                                parcel.resources[key] = 0;
-                            }
-                            const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (1 + totalProductionRateModifier);
-                            parcel.resources[key] = Math.round(updatedValue * 10) / 10;
-                        }
-                    }
+              // Check if the parcel has enough resources to meet the input requirements
+              for (const [key, value] of Object.entries(building.inputs)) {
+                if (parcel.resources[key]) {
+                  const availableBuildings = Math.floor(parcel.resources[key] / (value * (1 + totalConsumptionRateModifier)));
+                  maxProducingBuildings = Math.min(maxProducingBuildings, availableBuildings);
+                } else {
+                  maxProducingBuildings = 0;
+                  break;
                 }
+              }
+
+              // If there are buildings that can produce, consume the input resources and produce output resources
+              if (maxProducingBuildings > 0) {
+                for (const [key, value] of Object.entries(building.inputs)) {
+                  const updatedValue = parcel.resources[key] - value * maxProducingBuildings * building.rate * (1 + totalConsumptionRateModifier);
+                  parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+                }
+
+                for (const [key, value] of Object.entries(building.outputs)) {
+                  if (!parcel.resources[key]) {
+                    parcel.resources[key] = 0;
+                  }
+                  const updatedValue = parcel.resources[key] + value * maxProducingBuildings * building.rate * (1 + totalProductionRateModifier);
+                  parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+                }
+              }
+            } else {
+              for (const [key, value] of Object.entries(building.outputs)) {
+                if (!parcel.resources[key]) {
+                  parcel.resources[key] = 0;
+                }
+                const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (1 + totalProductionRateModifier);
+                parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+              }
             }
+          }
         }
+      }
 
         // Update the resource display for the currently selected parcel
         const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());

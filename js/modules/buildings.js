@@ -443,10 +443,52 @@
     }
   }
 
+  // Initializes resources for resource table (used in Buy Building event listener)
+  function initializeResourceOutput(parcel, building) {
+      for (const outputResource in building.outputs) {
+          if (!parcel.resources.hasOwnProperty(outputResource)) {
+              parcel.resources[outputResource] = 0;
+          }
+      }
+  }
+
+
+  //Remote Construction Facility Helper Functions
+  function getResourcesFromRemoteConstructionFacilities(parcels, resourceName) {
+      let totalResource = 0;
+      console.log(parcels);
+      console.log(resourceName);
+      for (const parcel of parcels) {
+          if (parcel.buildings.remoteConstructionFacility) {
+              totalResource += parcel.resources[resourceName] || 0;
+          }
+      }
+      console.log(totalResource);
+      return totalResource;
+  }
+
+  function deductResourcesFromRemoteConstructionFacilities(parcels, resourceName, requiredResource) {
+      for (const parcel of parcels) {
+          if (parcel.buildings.remoteConstructionFacility) {
+              const availableResource = parcel.resources[resourceName] || 0;
+              const resourceToDeduct = Math.min(availableResource, requiredResource);
+              parcel.resources[resourceName] -= resourceToDeduct;
+              requiredResource -= resourceToDeduct;
+
+              if (requiredResource <= 0) {
+                  break;
+              }
+          }
+      }
+  }
+
   window.buildingManager = {
     getBuilding,
     getBuildingList,
     getBuildingByResourceName,
     updateBuildingProductionRateModifier,
     updateBuildingConsumptionRateModifier,
+    initializeResourceOutput,
+    getResourcesFromRemoteConstructionFacilities,
+    deductResourcesFromRemoteConstructionFacilities,
   };
