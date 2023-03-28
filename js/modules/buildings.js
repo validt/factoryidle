@@ -180,7 +180,7 @@
       id: "researchCenter",
       name: "Research Center",
       cost: { greenChips: 150, copperCables: 200, gears: 200, bricks: 400 },
-      inputs: { redScience: 100 },
+      inputs: { redScience: 50 },
       outputs: { researchPoints: 1 },
       energyInput: 4,
       rate: 1,
