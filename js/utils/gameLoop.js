@@ -139,21 +139,21 @@ const gameLoop = (() => {
                   break;
                 }
               }
-
-              // Calculate utilization as a percentage
-              const utilization = (maxProducingBuildings / buildingCount) * 100;
-
-              // Calculate bottlenecks
-              const bottlenecks = calculateBottlenecks(parcel, building, buildingCount, totalConsumptionRateModifier);
-
-              // Store the utilization and bottleneck information in the parcel
-              if (!parcel.utilization) {
-                parcel.utilization = {};
-              }
-              parcel.utilization[buildingId] = {
-                percentage: utilization,
-                bottlenecks: bottlenecks
-              };
+              //
+              // // Calculate utilization as a percentage
+              // const utilization = (maxProducingBuildings / buildingCount) * 100;
+              //
+              // // Calculate bottlenecks
+              // const bottlenecks = calculateBottlenecks(parcel, building, buildingCount, totalConsumptionRateModifier);
+              //
+              // // Store the utilization and bottleneck information in the parcel
+              // if (!parcel.utilization) {
+              //   parcel.utilization = {};
+              // }
+              // parcel.utilization[buildingId] = {
+              //   percentage: utilization,
+              //   bottlenecks: bottlenecks
+              // };
 
               // If there are buildings that can produce, consume the input resources and produce output resources
               if (maxProducingBuildings > 0) {
