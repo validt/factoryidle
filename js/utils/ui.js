@@ -15,6 +15,14 @@ const ui = (() => {
         this.createHeader();
       }
 
+      // Update the Pracel Name Display
+      const parcelTitle = document.getElementById("parcelNameDisplay");
+      if (parcels.parcelList[selectedParcelIndex].name) {
+        parcelTitle.textContent = parcels.parcelList[selectedParcelIndex].name;
+      } else {
+        parcelTitle.textContent = parcels.parcelList[selectedParcelIndex].id;
+      }
+
       // Update the header row
       this.updateHeader();
 
@@ -475,26 +483,30 @@ const ui = (() => {
 
   }
 
-    function addParcelToUI(parcel) {
-        const parcelTab = document.createElement("button");
-        parcelTab.className = "parcel-tab";
-        parcelTab.id = `tab-${parcel.id}`;
-        parcelTab.textContent = parcel.id;
+  function addParcelToUI(parcel) {
+      const parcelTab = document.createElement("button");
+      parcelTab.className = "parcel-tab";
+      parcelTab.id = `tab-${parcel.id}`;
+      parcelTab.textContent = parcel.id;
 
-        // Select Parcel
-        parcelTab.addEventListener("click", () => {
-            const prevSelected = document.querySelector(".parcel-tab.selected");
-            if (prevSelected) {
-                prevSelected.classList.remove("selected");
-            }
-            parcelTab.classList.add("selected");
-            selectedParcelIndex = parseInt(parcel.id.split("-")[1]) - 1;
-            updateResourceDisplay(parcels.getParcel(selectedParcelIndex));
-            updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
-        });
+      // Add event listener for selecting the parcel
+      addParcelClickListener(parcelTab);
 
-        parcelContainer.appendChild(parcelTab);
-    }
+      parcelContainer.appendChild(parcelTab);
+  }
+
+  function addParcelClickListener(parcelTab) {
+      parcelTab.addEventListener("click", () => {
+          const prevSelected = document.querySelector(".parcel-tab.selected");
+          if (prevSelected) {
+              prevSelected.classList.remove("selected");
+          }
+          parcelTab.classList.add("selected");
+          selectedParcelIndex = parseInt(parcelTab.id.split("-")[2]) - 1;
+          updateResourceDisplay(parcels.getParcel(selectedParcelIndex));
+          updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
+      });
+  }
 
     function updateResourceDisplay(parcel) {
       const resourceTable = new ResourceTable(parcel);
@@ -917,6 +929,7 @@ const ui = (() => {
         updateEnergyDisplay,
         updateSectionVisibility,
         buyBuilding,
+        addParcelClickListener,
     };
     })();
 
