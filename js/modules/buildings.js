@@ -355,7 +355,7 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.remoteConstruction,
-      description: "Allows to build buildings using resources from this parcel. Slows down Parcel Production Rate by 50%"
+      description: "Spend resources from this parcel globally. -30% Production Rate. +30% Consumption Rate.",
     },
     {
       id: "speedBeaconT1",
@@ -371,6 +371,7 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.beaconTech,
+      description: "+2% Production Rate. +2.5% Consumption Rate.",
     },
     {
       id: "productivityBeaconT1",
@@ -386,6 +387,7 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.beaconTech,
+      description: "+1% Production Rate. +0.5% Consumption Rate.",
     },
     {
       id: "blueprintLibrary",

@@ -114,10 +114,10 @@ const ui = (() => {
           const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
 
           const modifiedInputText = Object.entries(resource.inputs || {})
-          .map(([inputResource, amount]) => `${(amount * (1 + consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+          .map(([inputResource, amount]) => `${(amount * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
           .join("<br>");
           const modifiedOutputText = Object.entries(resource.outputs || {})
-          .map(([outputResource, amount]) => `${(amount * (1 + productionRateModifier)).toFixed(2)} ${outputResource}`)
+          .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
           .join("<br>");
 
           const tooltipText = `
@@ -145,13 +145,13 @@ const ui = (() => {
             <tr>
               <td>${
                 consumptionRateModifier !== undefined
-                  ? (consumptionRateModifier > 0 ? "+" : "") + Math.round(consumptionRateModifier * 100) + "%"
+                  ? (consumptionRateModifier > 0 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
                   : ""
               }</td>
               <td></td>
               <td>${
                 productionRateModifier !== undefined
-                  ? (productionRateModifier > 0 ? "+" : "") + Math.round(productionRateModifier * 100) + "%"
+                  ? (productionRateModifier > 0 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
                   : ""
               }</td>
             </tr>
