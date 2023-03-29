@@ -484,16 +484,21 @@ const ui = (() => {
   }
 
   function addParcelToUI(parcel) {
-      const parcelTab = document.createElement("button");
-      parcelTab.className = "parcel-tab";
-      parcelTab.id = `tab-${parcel.id}`;
-      parcelTab.textContent = parcel.id;
+    const parcelTab = document.createElement("button");
+    parcelTab.className = "parcel-tab";
+    parcelTab.id = `tab-${parcel.id}`;
+    parcelTab.textContent = parcel.id;
 
-      // Add event listener for selecting the parcel
-      addParcelClickListener(parcelTab);
+    // Add event listener for selecting the parcel
+    addParcelClickListener(parcelTab);
 
-      parcelContainer.appendChild(parcelTab);
+    parcelContainer.appendChild(parcelTab);
+
+    // Update the parcel tab with color and name if available
+    const parcelIndex = window.parcels.parcelList.findIndex(p => p.id === parcel.id);
+    parcelManipulation.updateParcelTab(parcelIndex);
   }
+
 
   function addParcelClickListener(parcelTab) {
       parcelTab.addEventListener("click", () => {

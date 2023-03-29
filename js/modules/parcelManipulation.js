@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('renameParcelButton').addEventListener('click', () => {
-      renameParcel();
+      parcelManipulation.renameParcel();
       document.getElementById('renameParcelOverlay').style.display = 'none';
   });
 
@@ -36,12 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('applyColorButton').addEventListener('click', () => {
-      changeParcelColor();
+      parcelManipulation.changeParcelColor();
       document.getElementById('colorPickerOverlay').style.display = 'none';
   });
 
   document.getElementById('closeColorPickerOverlay').addEventListener('click', () => {
       document.getElementById('colorPickerOverlay').style.display = 'none';
+  });
+
+  document.getElementById('reset-color-btn').addEventListener('click', () => {
+    parcelManipulation.resetColor();
+    document.getElementById('colorPickerOverlay').style.display = 'none';
   });
 
   // Move
@@ -50,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('moveParcelButton').addEventListener('click', () => {
-      moveParcel();
+      parcelManipulation.moveParcel();
       document.getElementById('moveParcelOverlay').style.display = 'none';
   });
 
@@ -60,7 +65,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+const parcelManipulation = (() => {
 
+/* Update Parcel Tab Function */
+function updateParcelTab(index) {
+    const parcel = window.parcels.parcelList[index];
+    const parcelTab = document.getElementById(`tab-${parcel.id}`);
+    if (parcelTab) {
+        const displayName = parcel.name || `parcel-${index + 1}`;
+        parcelTab.textContent = displayName;
+
+        // Update the color of the parcel tab
+        if (parcel.color) {
+            parcelTab.style.setProperty("background", parcel.color, "important");
+        } else {
+            parcelTab.style.removeProperty("background");
+            parcelTab.style.removeProperty("background", "important");
+        }
+    }
+}
+
+/* Move Parcel Functions */
 function moveParcel() {
     const moveAmount = parseInt(document.getElementById('parcelMoveInput').value);
     if (!isNaN(moveAmount)) {
@@ -125,24 +150,6 @@ function moveParcel() {
     }
 }
 
-// Lets keep this
-function updateParcelTab(index) {
-    const parcel = window.parcels.parcelList[index];
-    const parcelTab = document.getElementById(`tab-${parcel.id}`);
-    if (parcelTab) {
-        const displayName = parcel.name || `Parcel ${index + 1}`;
-        parcelTab.textContent = displayName;
-
-        // Update the color of the parcel tab
-        if (parcel.color) {
-            parcelTab.style.setProperty("background", parcel.color, "important");
-        } else {
-            parcelTab.style.removeProperty("background");
-            parcelTab.style.removeProperty("background", "important");
-        }
-    }
-}
-
 function setSelectedParcelIndex(index) {
     selectedParcelIndex = index;
 }
@@ -162,6 +169,7 @@ function selectParcel(index) {
     }
 }
 
+/* Change Color Functions */
 function changeParcelColor() {
     const selectedColor = document.getElementById('colorPickerInput').value;
     if (selectedColor) {
@@ -173,24 +181,14 @@ function changeParcelColor() {
     }
 }
 
-// // Lets remove this
-// function updateParcelColor(parcelIndex, color) {
-//     const parcelTab = document.getElementById(`tab-parcel-${parcelIndex+1}`);
-//     console.log(`tab-parcel-${parcelIndex}`);
-//     if (parcelTab) {
-//         parcelTab.style.setProperty("background", color, "important");
-//     }
-// }
-//
-// // Lets remove this
-// function updateParcelTab(parcel) {
-//   const parcelTab = document.getElementById(`tab-${parcel.id}`);
-//   if (parcelTab) {
-//     const name = parcel.name || `Parcel ${parcel.id}`;
-//     parcelTab.textContent = name;
-//   }
-// }
+function resetColor() {
+  // Remove the color attribute from the selected parcel
+  const selectedParcelIndex = ui.getSelectedParcelIndex();
+  delete window.parcels.parcelList[selectedParcelIndex].color;
+  updateParcelTab(selectedParcelIndex);
+}
 
+/* Rename Parcel Functions */
 function renameParcel() {
     const newName = document.getElementById('parcelNameInput').value;
     if (newName) {
@@ -201,3 +199,13 @@ function renameParcel() {
         alert('Please enter a valid name for the parcel.');
     }
 }
+
+return {
+    updateParcelTab,
+    moveParcel,
+    renameParcel,
+    resetColor,
+    changeParcelColor,
+};
+
+})();

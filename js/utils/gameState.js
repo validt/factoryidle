@@ -47,6 +47,15 @@ window.loadGame = function() {
       // Assign the inputValues property from the saved parcel data
       Object.assign(parcel.inputValues, parcelData.inputValues);
 
+      // Assign custom color and name if they exist
+      if (parcelData.color) {
+        parcel.color = parcelData.color;
+        //parcelManipulation.updateParcelTab(index);
+      }
+      if (parcelData.name) {
+        parcel.name = parcelData.name;
+        //parcelManipulation.updateParcelTab(index);
+      }
 
       // Update the existing parcel object with the new one
       window.parcels.parcelList[index] = parcel;

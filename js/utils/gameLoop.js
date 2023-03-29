@@ -13,7 +13,6 @@ const gameLoop = (() => {
             ui.updateBuildingDropdown();
             ui.updateParcelsSectionVisibility();
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
-            console.log(selectedParcel);
             window.ui.updateResourceDisplay(selectedParcel);
             updateAllParcels();
             ui.updateEnergyDisplay();
