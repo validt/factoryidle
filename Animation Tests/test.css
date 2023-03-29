@@ -1,0 +1,102 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #222;
+    margin: 0;
+    overflow: hidden;
+}
+
+.oil-well {
+    position: relative;
+}
+
+.well-base {
+    position: absolute;
+    bottom: 0;
+    width: 100px;
+    height: 10px;
+    background: #ff9800;
+    border-radius: 5px;
+}
+
+.well-head {
+    position: absolute;
+    bottom: 10px;
+    left: 45px;
+    width: 10px;
+    height: 50px;
+    background: #ff9800;
+    border-radius: 5px;
+}
+
+.pumpjack {
+    position: absolute;
+    bottom: 60px;
+    width: 100px;
+    height: 100px;
+}
+
+.counterweight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 10px;
+    background: #ff9800;
+    border-radius: 5px;
+}
+
+.beam {
+    position: absolute;
+    top: 0;
+    left: 30px;
+    width: 100px;
+    height: 5px;
+    background: #ff9800;
+    border-radius: 5px;
+    transform-origin: left;
+    animation: beam 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.horsehead {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 50px;
+    background: #ff9800;
+    border-radius: 5px;
+    transform-origin: top;
+}
+
+.bridle {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 2px;
+    height: 40px;
+    background: #ff9800;
+    border-radius: 5px;
+    transform-origin: top;
+    animation: bridle 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes beam {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(-25deg);
+    }
+}
+
+@keyframes bridle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-30px);
+    }
+}

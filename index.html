@@ -105,17 +105,53 @@
 
           <div class="game-section" id="parcels-section">
               <h2>Parcels</h2>
+              <!-- Buy Parcel -->
+              <button id="buyParcel">Buy New Parcel (2 expansion Point)</button>
+
               <div id="parcel-tabs"> <!-- Add this line -->
                   <!-- Parcel tabs will be dynamically added here -->
               </div>
               <div id="parcels">
                   <!-- Parcel content will be dynamically added here -->
               </div>
-              <button id="buyParcel">Buy New Parcel (2 expansion Point)</button>
+              <!-- Parcel Manipulation -->
+
+
           </div>
 
           <div class="game-section">
-              <h3>Resources</h3>
+            <div class="parcel-manipulation">
+              <h2 id="parcelNameDisplay" class="parcel-name">Parcel 1</h2>
+              <button id="parcelManipulationMenuButton" class="menu-button">⚙</button>
+              <div id="parcelManipulationMenu" class="menu hidden">
+                <button id="renameButton" class="menu-item">Rename</button>
+                <button id="changeColorButton" class="menu-item">Change Color</button>
+                <button id="changeIconButton" class="menu-item">Change Icon</button>
+                <button id="moveButton" class="menu-item">Move</button>
+                <button id="copyPasteButton" class="menu-item">Copy</button>
+                <button id="copyPasteButton" class="menu-item">Paste</button>
+              </div>
+              <!-- Rename Popup -->
+              <div id="renameParcelOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+                  <div style="background: white; padding: 20px; border-radius: 5px;">
+                      <label for="parcelNameInput">Rename parcel:</label>
+                      <input type="text" id="parcelNameInput" placeholder="New parcel name">
+                      <button id="renameParcelButton">Rename</button>
+                      <button id="closeRenameParcelOverlay">Cancel</button>
+                  </div>
+              </div>
+              <!-- Color Picker Popup -->
+              <div id="colorPickerOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+                  <div style="background: white; padding: 20px; border-radius: 5px;">
+                      <label for="colorPickerInput">Change parcel color:</label>
+                      <input type="color" id="colorPickerInput">
+                      <button id="applyColorButton">Change</button>
+                      <button id="closeColorPickerOverlay">Cancel</button>
+                  </div>
+              </div>
+
+
+            </div>
               <table class="table" id="resourceTable"></table>
           </div>
 
@@ -148,6 +184,7 @@
     <script src="js/modules/projects.js"></script>
     <script src="js/modules/energy.js"></script>
     <script src="js/modules/resources.js"></script>
+    <script src="js/modules/parcelManipulation.js"></script>
     <script src="js/utils/ui.js"></script>
     <script src="js/utils/gameState.js"></script>
     <script src="js/main.js"></script>

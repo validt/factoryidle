@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Oil Well Icon</title>
+    <style>
+        .oil-well {
+            stroke: currentColor;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        @keyframes pump {
+            0%, 100% {
+                transform: translateY(5%);
+            }
+            50% {
+                transform: translateY(25%);
+            }
+        }
+
+        .pump-head {
+            animation: pump 2s ease-in-out infinite;
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body>
+    <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect class="oil-well" x="40" y="10" width="20" height="80" />
+        <circle class="oil-well" cx="50" cy="35" r="15" />
+        <rect class="oil-well pump-head" x="45" y="20" width="10" height="70"  />
+        <line class="oil-well" x1="50" y1="20" x2="50" y2="10" />
+    </svg>
+</body>
+</html>
