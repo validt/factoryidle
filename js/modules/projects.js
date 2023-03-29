@@ -131,7 +131,9 @@ const projectsModule = (() => {
 
   function hasEnoughResources(parcel, cost) {
     for (const resource in cost) {
-      if (!parcel.resources[resource] || parcel.resources[resource] < cost[resource]) {
+      const totalResource = (parcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+
+      if (!totalResource || totalResource < cost[resource]) {
         return false;
       }
     }
@@ -139,35 +141,44 @@ const projectsModule = (() => {
   }
 
   function startProject(project) {
-    const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+      const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
 
-    if (hasEnoughResources(selectedParcel, project.cost)) {
-      for (const resource in project.cost) {
-        selectedParcel.resources[resource] -= project.cost[resource];
+      if (hasEnoughResources(selectedParcel, project.cost)) {
+          for (const resource in project.cost) {
+              const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+
+              if (selectedParcel.resources[resource] >= project.cost[resource]) {
+                  selectedParcel.resources[resource] -= project.cost[resource];
+              } else {
+                  const parcelResource = selectedParcel.resources[resource] || 0;
+                  const remainingResource = project.cost[resource] - parcelResource;
+                  selectedParcel.resources[resource] = 0;
+                  buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
+              }
+          }
+
+          for (const resource in project.reward) {
+              if (!selectedParcel.resources[resource]) {
+                  selectedParcel.resources[resource] = 0;
+              }
+              selectedParcel.resources[resource] += project.reward[resource];
+          }
+
+          project.completed = true;
+          // Remove the completed project and add the next project in the category (if any)
+          projects[project.category].shift();
+
+          // Hide the tooltip
+          const tooltip = document.getElementById("tooltip");
+          tooltip.style.display = "none";
+
+          // Update the UI to reflect the changes
+          ui.updateResourceDisplay(selectedParcel);
+          //projectsContainer.innerHTML = ""; // Remove this line
+          renderProjects();
+      } else {
+          alert("You don't have enough resources to start this project.");
       }
-
-      for (const resource in project.reward) {
-        if (!selectedParcel.resources[resource]) {
-          selectedParcel.resources[resource] = 0;
-        }
-        selectedParcel.resources[resource] += project.reward[resource];
-      }
-
-      project.completed = true;
-      // Remove the completed project and add the next project in the category (if any)
-      projects[project.category].shift();
-
-      // Hide the tooltip
-      const tooltip = document.getElementById("tooltip");
-      tooltip.style.display = "none";
-
-      // Update the UI to reflect the changes
-      ui.updateResourceDisplay(selectedParcel);
-      //projectsContainer.innerHTML = ""; // Remove this line
-      renderProjects();
-    } else {
-      alert("You don't have enough resources to start this project.");
-    }
   }
 
   function setProjects(newProjects) {

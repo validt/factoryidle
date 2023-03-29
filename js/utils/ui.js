@@ -707,7 +707,8 @@ const ui = (() => {
                     if (parcel.resources[resourceName] >= cost) {
                         parcel.resources[resourceName] -= cost;
                     } else {
-                        const remainingResource = cost - parcel.resources[resourceName];
+                        const parcelResource = parcel.resources[resourceName] || 0;
+                        const remainingResource = cost - parcelResource;
                         parcel.resources[resourceName] = 0;
                         buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
                     }
@@ -732,7 +733,7 @@ const ui = (() => {
         if (parcel.buildings[buildingId] && parcel.buildings[buildingId] > 0) {
             const building = buildingManager.getBuilding(buildingId);
 
-            // Refund 25% of the cost rounded down
+            // Refund 100% of the cost rounded down
             for (const [resource, cost] of Object.entries(building.cost)) {
                 parcel.resources[resource] = (parcel.resources[resource] || 0) + Math.floor(cost * 1);
             }
@@ -819,6 +820,11 @@ const ui = (() => {
 
       updateSectionVisibility("parcels-section", expansionTechCenterBuilt);
       updateSectionVisibility("global-header", expansionTechCenterBuilt);
+      updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
+      updateSectionVisibility("project-section", gameState.sectionVisibility.projectSection);
+      updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
+      updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
+      updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
     }
 
     function calculateFulfillmentAndModifier(energyDemand, energyProduction) {
@@ -934,6 +940,7 @@ const ui = (() => {
         updateEnergyDisplay,
         updateSectionVisibility,
         buyBuilding,
+        sellBuilding,
         addParcelClickListener,
     };
     })();

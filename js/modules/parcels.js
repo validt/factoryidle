@@ -285,7 +285,8 @@ const parcels = {
       }
 
       const canAfford = Object.keys(upgradeCost).every((resource) => {
-        return parcel.resources[resource] >= upgradeCost[resource];
+        const totalResource = (parcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+        return totalResource >= upgradeCost[resource];
       });
 
       if (!canAfford) {
@@ -294,7 +295,14 @@ const parcels = {
       }
 
       Object.keys(upgradeCost).forEach((resource) => {
-        parcel.resources[resource] -= upgradeCost[resource];
+        if (parcel.resources[resource] >= upgradeCost[resource]) {
+          parcel.resources[resource] -= upgradeCost[resource];
+        } else {
+          const parcelResource = parcel.resources[resource] || 0;
+          const remainingResource = upgradeCost[resource] - parcelResource;
+          parcel.resources[resource] = 0;
+          buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
+        }
       });
 
       // Find the upgrade info for the current level
@@ -310,7 +318,7 @@ const parcels = {
 
       parcel.upgrades[upgradeType]++;
       console.log(`Upgraded ${upgradeType} to level ${parcel.upgrades[upgradeType]}`);
-    },
+    }
 
 };
 

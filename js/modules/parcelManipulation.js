@@ -63,7 +63,272 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('moveParcelOverlay').style.display = 'none';
   });
 
+  // Copy & paste
+  document.getElementById("copyDropdownItem").addEventListener("click", () => {
+    const selectedParcelIndex = ui.getSelectedParcelIndex();
+    clipboard.copyParcel(selectedParcelIndex);
+    parcelManipulationMenu.classList.add("hidden");
+  });
+
+  document.getElementById("pasteDropdownItem").addEventListener("click", () => {
+    if (clipboard.isParcelCopied()) {
+      const selectedParcelIndex = ui.getSelectedParcelIndex();
+      clipboard.showPasteSummary(selectedParcelIndex);
+      parcelManipulationMenu.classList.add("hidden");
+    } else {
+      alert("No parcel has been copied. Please copy a parcel before pasting.");
+      parcelManipulationMenu.classList.add("hidden");
+    }
+  });
+
 });
+
+const clipboard = (() => {
+  let copiedParcelIndex = null;
+  let isCopied = false;
+
+  function copyParcel(index) {
+    copiedParcelIndex = index;
+    isCopied = true;
+  }
+
+  function isParcelCopied() {
+    return isCopied;
+  }
+
+  function calculatePasteCosts(sourceParcel, targetParcel) {
+    const requiredUpgrades = calculateRequiredBuildingLimitUpgrades(sourceParcel, targetParcel);
+    const netBuildingCosts = calculateNetBuildingCosts(sourceParcel, targetParcel);
+    return {
+      requiredUpgrades,
+      netBuildingCosts,
+    };
+  }
+
+  function calculateRequiredBuildingLimitUpgrades(sourceParcel, targetParcel) {
+    const requiredBuildings = Object.values(sourceParcel.buildings).reduce((a, b) => a + b, 0);
+    let requiredUpgradeLevel = -1;
+
+    for (const [index, upgrade] of parcels.upgradeCosts.maxBuildingLimit.entries()) {
+      if (upgrade.maxBuildingLimit >= requiredBuildings) {
+        requiredUpgradeLevel = index+1;
+        break;
+      }
+    }
+
+    if (requiredUpgradeLevel < 0 || targetParcel.upgrades.maxBuildingLimit >= requiredUpgradeLevel) {
+      return [];
+    }
+
+    return parcels.upgradeCosts.maxBuildingLimit.slice(targetParcel.upgrades.maxBuildingLimit, requiredUpgradeLevel);
+  }
+
+  function calculateNetBuildingCosts(sourceParcel, targetParcel) {
+    const buildingManager = window.buildingManager;
+    const netCosts = {};
+
+    for (const buildingId in sourceParcel.buildings) {
+      const required = sourceParcel.buildings[buildingId];
+      const existing = targetParcel.buildings[buildingId] || 0;
+      const difference = required - existing;
+
+      if (difference > 0) {
+        const building = buildingManager.getBuilding(buildingId);
+        for (const [resourceName, cost] of Object.entries(building.cost)) {
+          if (!netCosts[resourceName]) {
+            netCosts[resourceName] = 0;
+          }
+          netCosts[resourceName] += cost * difference;
+        }
+      }
+    }
+    return netCosts;
+  }
+
+  function calculateTotalCost(pasteCosts) {
+    const totalCost = {};
+
+    // Handle requiredUpgrades
+    for (const upgrade of pasteCosts.requiredUpgrades) {
+      for (const resourceName in upgrade.cost) {
+        if (upgrade.cost.hasOwnProperty(resourceName) && typeof resourceName === "string") {
+          if (totalCost[resourceName] === undefined) {
+            totalCost[resourceName] = 0;
+          }
+          totalCost[resourceName] += upgrade.cost[resourceName];
+        }
+      }
+    }
+
+    // Handle netBuildingCosts
+    for (const resourceName in pasteCosts.netBuildingCosts) {
+      if (pasteCosts.netBuildingCosts.hasOwnProperty(resourceName) && typeof resourceName === "string") {
+        if (totalCost[resourceName] === undefined) {
+          totalCost[resourceName] = 0;
+        }
+        totalCost[resourceName] += pasteCosts.netBuildingCosts[resourceName];
+      }
+    }
+    return totalCost;
+  }
+
+
+  function canAffordPaste(targetParcel, totalCost) {
+    const buildingManager = window.buildingManager;
+    for (const [resourceName, cost] of Object.entries(totalCost)) {
+      const totalResource = (targetParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+      if (totalResource < cost) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function showPasteSummary(targetParcelIndex) {
+    const sourceParcel = window.parcels.parcelList[copiedParcelIndex];
+    const targetParcel = window.parcels.parcelList[targetParcelIndex];
+
+    const pasteCosts = calculatePasteCosts(sourceParcel, targetParcel);
+    const totalCost = calculateTotalCost(pasteCosts);
+    const canAfford = canAffordPaste(targetParcel, totalCost);
+
+    // Create and display the popup with the paste summary
+    const popup = document.createElement('div');
+    popup.classList.add('paste-summary-popup');
+    popup.innerHTML = generatePasteSummaryHtml(pasteCosts, totalCost, canAfford, targetParcelIndex);
+
+    // Add the "Confirm" and "Cancel" buttons
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = 'Confirm';
+    confirmButton.disabled = !canAfford;
+    confirmButton.addEventListener('click', () => {
+      executePaste(sourceParcel, targetParcel, pasteCosts);
+      copyCustomizations(sourceParcel, targetParcel);
+      popup.remove();
+    });
+
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', () => {
+      popup.remove();
+    });
+
+    popup.appendChild(confirmButton);
+    popup.appendChild(cancelButton);
+
+    document.body.appendChild(popup);
+  }
+
+  function generatePasteSummaryHtml(pasteCosts, totalCost, canAfford, targetParcelIndex) {
+    let html = `
+      <h2>Paste Summary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>Amount Needed</th>
+            <th>Amount Stored</th>
+            <th>Amount Stored After</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    // Combine resource costs from required upgrades and net building costs
+    const combinedCosts = {};
+    // for (const upgrade of pasteCosts.requiredUpgrades) {
+    //   for (const [resource, cost] of Object.entries(upgrade.cost)) {
+    //     if (!combinedCosts[resource]) {
+    //       combinedCosts[resource] = 0;
+    //     }
+    //     combinedCosts[resource] += cost;
+    //   }
+    // }
+
+    for (const [resource, amount] of Object.entries(totalCost)) {
+      if (!combinedCosts[resource]) {
+        combinedCosts[resource] = 0;
+      }
+      combinedCosts[resource] += amount;
+    }
+
+    // Add combined resource costs to the table
+    for (const [resource, amountNeeded] of Object.entries(combinedCosts)) {
+      //const amountStored = window.parcels.parcelList[targetParcelIndex].resources[resource] || 0;
+      const amountStored = (parcels.parcelList[targetParcelIndex].resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource)
+      html += `
+        <tr>
+          <td>${resource}</td>
+          <td>${amountNeeded}</td>
+          <td>${amountStored}</td>
+          <td>${amountStored - amountNeeded}</td>
+        </tr>
+      `;
+    }
+
+    html += `
+        </tbody>
+      </table>
+      <p>${canAfford ? "You can afford this paste operation." : "You cannot afford this paste operation."}</p>
+    `;
+
+    return html;
+  }
+
+  function executePaste(sourceParcel, targetParcel, pasteCosts) {
+      // Buy the required building limit upgrades
+      for (const upgrade of pasteCosts.requiredUpgrades) {
+          parcels.upgradeParcel(targetParcel, 'maxBuildingLimit');
+      }
+
+      // Sell the unnecessary buildings
+      for (const buildingId in targetParcel.buildings) {
+        if (!sourceParcel.buildings[buildingId]) {
+          const buildingCount = targetParcel.buildings[buildingId];
+          for (let i = 0; i < buildingCount; i++) {
+            ui.sellBuilding(targetParcel, buildingId);
+          }
+        }
+      }
+
+      // Buy the necessary buildings
+      for (const buildingId in sourceParcel.buildings) {
+        const required = sourceParcel.buildings[buildingId];
+        const existing = targetParcel.buildings[buildingId] || 0;
+        const difference = required - existing;
+
+        for (let i = 0; i < difference; i++) {
+          ui.buyBuilding(targetParcel, buildingId);
+        }
+      }
+
+      // Set the inputValues of the target parcel
+      targetParcel.inputValues = { ...sourceParcel.inputValues };
+
+      // Update the UI
+      ui.updateBuildingDisplay(targetParcel);
+
+    }
+
+  function copyCustomizations(sourceParcel, targetParcel) {
+    targetParcel.name = sourceParcel.name;
+    targetParcel.color = sourceParcel.color;
+    targetParcel.beltUsage = sourceParcel.beltUsage;
+
+    // Update UI
+    for (let i = 0; i < parcels.parcelList.length; i++) {
+        parcelManipulation.updateParcelTab(i);
+    }
+  }
+
+  return {
+    copyParcel,
+    isParcelCopied,
+    showPasteSummary,
+    executePaste,
+    // Other functions to be implemented
+  };
+})();
 
 const parcelManipulation = (() => {
 

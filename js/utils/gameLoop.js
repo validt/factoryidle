@@ -17,9 +17,6 @@ const gameLoop = (() => {
             updateAllParcels();
             ui.updateEnergyDisplay();
             window.progressionManager.update(gameState);
-            ui.updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
-            ui.updateSectionVisibility("project-section", gameState.sectionVisibility.projectSection);
-            ui.updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
             tickCounter++;
 
         }, tickRate);

@@ -1,0 +1,116 @@
+To upgrade a parcel, we use this function:
+parcels.upgradeParcel(parcel, "maxBuildingLimit")
+
+If we want to upgrade from 3 to 5, we need to call this function two times
+
+
+
+
+
+
+
+1. Provide a button or menu option to copy the selected parcel's configuration --> We have that:
+                <button id="copyDropdownItem" class="menu-item">Copy</button>
+                <button id="pasteDropdownItem" class="menu-item">Paste</button>
+
+ 2. What gets copied are
+  - buildings (parcels.parcelList[copiedParcelIndex].buildings)
+  - input values (parcels.parcelList[copiedParcelIndex].inputValues)
+
+  3. To copy, we mark parcel as "copied", we use this as a pointer when pasting to see where we are pasting from. We can save that in the parcel object.
+
+  4. When pasting, it should check if the target parcel can accommodate the buildings from the copied configuration (maxBuildings constraint).
+      If it cannot, we have to calculate the cost to buy additional parcels.parcelList[target].upgrades.maxBuildingLimit to have enough space.
+      We can find the information on which maxBuildingLimit upgrade gives how many building slots by looking inside the parcels object:
+      const parcels = {
+          parcelList: [],
+          maxBuildingsPerParcel: 8,
+          buyParcelCost: 2,
+          upgradeCosts: {
+            maxBuildingLimit: [
+              {
+                level: 1,
+                cost: {
+                  stone: 50,
+                },
+                maxBuildingLimit: 8,
+              },
+              {
+                level: 2,
+                cost: {
+                  expansionPoints: 1,
+                },
+                maxBuildingLimit: 16,
+              }, ... //rest of code
+
+      If we need to buy additional upgrades, we should note the cost for these
+
+    5. Besides the cost for possible building limit upgrades, we also need to calculate the cost for building the buildings themselves. To do this we
+       - look at what buildings are already built and can stay
+       - what buildings need to be sold
+       - what buildings need to be bought
+       and calculate the net cost based on that. Note that selling gives 100% of the resource cost back.
+
+   6. Then, once we know the full cost for pasting, we evaluate if enough resources are present. Generally we look into the parcel that we paste to and, if the remoteConstructionFacility is present, in those parcels as well. For a better understanding of the buying rules, here is some code for context:
+   function buyBuilding(parcel, buildingId) {
+       const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+       console.log("buyBuilding")
+       if (totalBuildings < parcel.maxBuildings) {
+           const building = buildingManager.getBuilding(buildingId);
+
+           const resourceCost = Object.entries(building.cost);
+
+           let canAfford = true;
+           for (const [resourceName, cost] of resourceCost) {
+               const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+               if (totalResource < cost) {
+                   canAfford = false;
+                   break;
+               }
+           }
+
+           if (canAfford) {
+               if (parcel.buildings[buildingId] === undefined) {
+                   parcel.buildings[buildingId] = 0;
+               }
+               parcel.buildings[buildingId]++;
+
+               for (const [resourceName, cost] of resourceCost) {
+                   if (parcel.resources[resourceName] >= cost) {
+                       parcel.resources[resourceName] -= cost;
+                   } else {
+                       const remainingResource = cost - parcel.resources[resourceName];
+                       parcel.resources[resourceName] = 0;
+                       buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
+                   }
+               }
+
+               buildingManager.initializeResourceOutput(parcel, building);
+
+               if (buildingId === "kiln" && !parcel.resources.coal) {
+                   parcel.resources = { coal: 0, ...parcel.resources };
+               }
+
+               if (buildingId === "ironSmelter" && !parcel.resources.ironOre) {
+                   parcel.resources = { ironOre: 0, ...parcel.resources };
+               }
+
+               updateBuildingDisplay(parcel);
+           }
+       }
+   }
+
+   7. Once we determined if the paste is possible or not, we show in any case a pop-up where we can review the paste. if it's possible, the user can confirm or cancel. If it's not, the confirm button is disabled.
+      We show the user the total cost of the project in a table like this:
+      Resource | Amount Needed | Amount Stored | Amount Stored After
+      Again, the "Amount Stored" might only be related to the target parcel, or include remoteConstructionFacility parcels resources as well if they are availbale.
+
+   8. If the user clicks "confirm", the paste gets executed, the upgrades get bought, the buildings built, inputValues set and resource costs deducted as expected.
+   9. We also paste customization information about the parcel, in this case that is name & color
+
+
+10. Ensure that the UI updates properly when the copied configuration is pasted to the target parcel (resource and building displays).
+
+Handle edge cases and invalid input gracefully, such as trying to paste when there's no copied configuration, pasting to a locked parcel, or pasting an invalid configuration.
+
+Save and load the clipboard state (if necessary) to allow the user to copy and paste configurations across game sessions.

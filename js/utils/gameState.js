@@ -10,6 +10,7 @@ const gameState = {
     energySection: false,
     projectSection: false,
     researchSection: false,
+    blueprints: false,
   },
   // Add other relevant game state data as needed
 };

@@ -391,8 +391,8 @@
       id: "blueprintLibrary",
       name: "Blueprint Library",
       cost: { steel: 250, gears: 250, redChips: 100 },
-      inputs: { sulfur: 1, greenChips: 1, redChips: 1, steel: 4 },
-      outputs: { blueprintPoints: 2 },
+      inputs: {},
+      outputs: {},
       energyInput: 6,
       rate: 1,
       minable: false,
@@ -456,14 +456,11 @@
   //Remote Construction Facility Helper Functions
   function getResourcesFromRemoteConstructionFacilities(parcels, resourceName) {
       let totalResource = 0;
-      console.log(parcels);
-      console.log(resourceName);
       for (const parcel of parcels) {
           if (parcel.buildings.remoteConstructionFacility) {
               totalResource += parcel.resources[resourceName] || 0;
           }
       }
-      console.log(totalResource);
       return totalResource;
   }
 
@@ -471,6 +468,8 @@
       for (const parcel of parcels) {
           if (parcel.buildings.remoteConstructionFacility) {
               const availableResource = parcel.resources[resourceName] || 0;
+              console.log("availableResource", availableResource);
+              console.log("requiredResource", requiredResource);
               const resourceToDeduct = Math.min(availableResource, requiredResource);
               parcel.resources[resourceName] -= resourceToDeduct;
               requiredResource -= resourceToDeduct;

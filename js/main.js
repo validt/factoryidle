@@ -26,10 +26,20 @@ document.addEventListener("DOMContentLoaded", () => {
     buyParcelButton.addEventListener("click", () => {
         const highestParcelIndex = parcels.getParcelCount() - 1;
         const highestParcel = parcels.getParcel(highestParcelIndex);
-        const resourceCount = highestParcel.resources.expansionPoints;
+        const highestParcelResource = highestParcel.resources.expansionPoints || 0;
+        const resourceCount = highestParcelResource + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints');
 
         if (parcels.canBuyParcel(resourceCount)) {
-            highestParcel.resources.expansionPoints -= parcels.buyParcelCost;
+            const cost = parcels.buyParcelCost;
+
+            if (highestParcel.resources.expansionPoints >= cost) {
+                highestParcel.resources.expansionPoints -= cost;
+            } else {
+                const remainingCost = cost - highestParcelResource;
+                highestParcel.resources.expansionPoints = 0;
+                buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints', remainingCost);
+            }
+
             const newParcel = parcels.createNewParcel();
             ui.addParcelToUI(newParcel);
             ui.updateResourceDisplay(newParcel);
@@ -39,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ui.selectParcel(newIndex);
         }
     });
-
     // Buy Building button event listener
     buyBuildingButton.addEventListener("click", () => {
         const selectedParcelIndex = ui.getSelectedParcelIndex();
@@ -71,9 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let canAfford = true;
       for (const [resourceName, cost] of resourceCost) {
-        const resourceAmount = selectedParcel.resources[resourceName];
-
-        if (resourceAmount === undefined || isNaN(resourceAmount) || resourceAmount < cost) {
+        const totalResource = (selectedParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+        if (totalResource < cost) {
           canAfford = false;
           break;
         }
@@ -82,7 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (canAfford) {
         // Deduct the research cost
         for (const [resourceName, cost] of resourceCost) {
-          selectedParcel.resources[resourceName] -= cost;
+          if (selectedParcel.resources[resourceName] >= cost) {
+            selectedParcel.resources[resourceName] -= cost;
+          } else {
+            const parcelResource = selectedParcel.resources[resourceName] || 0;
+            const remainingResource = cost - parcelResource;
+            selectedParcel.resources[resourceName] = 0;
+            buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
+          }
         }
 
         // Perform the research (update gameState.research or any other relevant data)

@@ -67,6 +67,10 @@ class ProgressionManager {
           gameState.sectionVisibility.researchSection = true;
         }
       }
+
+      if (parcel.buildings.blueprintLibrary > 0) {
+        gameState.sectionVisibility.blueprints = true;
+      }
     }
 
     if (building && building.unlockConditions()) {
