@@ -102,12 +102,20 @@ const ui = (() => {
         resourceName.addEventListener("mouseover", (event) => {
           const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
           const buildingCount = parcel.buildings[resource.id];
+          const buildingCountChecked = buildingCount || 0;
 
           const inputText = Object.entries(resource.inputs || {})
           .map(([inputResource, amount]) => `${amount} ${inputResource}`)
           .join("<br>");
           const outputText = Object.entries(resource.outputs || {})
           .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+          .join("<br>");
+
+          const totalInputText = Object.entries(resource.inputs || {})
+          .map(([inputResource, amount]) => `${amount * buildingCountChecked} ${inputResource}`)
+          .join("<br>");
+          const totalOutputText = Object.entries(resource.outputs || {})
+          .map(([outputResource, amount]) => `${amount * buildingCountChecked} ${outputResource}`)
           .join("<br>");
 
           const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
@@ -120,7 +128,7 @@ const ui = (() => {
           .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
           .join("<br>");
 
-          const buildingCountChecked = buildingCount || 0;
+
 
           const totalModifiedInputText = Object.entries(resource.inputs || {})
           .map(([inputResource, amount]) => `${(amount * buildingCountChecked * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
@@ -135,7 +143,7 @@ const ui = (() => {
 
           <thead>
             <tr>
-              <th colspan="2" style="text-align: left;"><b>Total (Potential)</b></th>
+              <th colspan="2" style="text-align: left;"><b>Total (Modified)</b></th>
               <th></th>
               <th></th>
             </tr>
@@ -172,7 +180,18 @@ const ui = (() => {
                 <td>${modifiedOutputText || "-"}</td>
               </tr>
 
-
+              <thead>
+                <tr>
+                  <th colspan="2" style="text-align: left;"><b>Total (Default)</b></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tr>
+                <td>${totalInputText || "-"}</td>
+                <td> &#x2192; </td>
+                <td>${totalOutputText || "-"}</td>
+              </tr>
 
               <thead>
                 <tr>
