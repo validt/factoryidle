@@ -269,7 +269,7 @@
     {
       id: "oilWell",
       name: "Oil Well",
-      cost: { steel: 50, gears: 50, greenChips: 20 },
+      cost: { steel: 250, gears: 250, greenChips: 200 },
       inputs: {},
       outputs: { oilBarrel: 1 },
       energyInput: 2,
@@ -284,8 +284,8 @@
     {
       id: "oilRefinery",
       name: "Oil Refinery",
-      cost: { steel: 50, gears: 50, greenChips: 20 },
-      inputs: { oilBarrel: 4 },
+      cost: { steel: 250, gears: 250, greenChips: 200 },
+      inputs: { oilBarrel: 10 },
       outputs: { petroleumBarrel: 1 },
       energyInput: 3,
       rate: 1,
@@ -299,7 +299,7 @@
     {
       id: "plasticsPlant",
       name: "Plastics Plant",
-      cost: { steel: 50, gears: 50, greenChips: 20 },
+      cost: { steel: 250, gears: 250, greenChips: 200 },
       inputs: { petroleumBarrel: 1, coal: 0.5 },
       outputs: { plastics: 3 },
       energyInput: 2,
@@ -314,7 +314,7 @@
     {
       id: "sulfurPlant",
       name: "Sulfur Plant",
-      cost: { steel: 50, gears: 50, greenChips: 20 },
+      cost: { steel: 500, gears: 500, greenChips: 200 },
       inputs: { petroleumBarrel: 1 },
       outputs: { sulfur: 2 },
       energyInput: 2,
@@ -329,7 +329,7 @@
     {
       id: "redChipFactory",
       name: "Red Chip Factory",
-      cost: { steel: 50, gears: 50, greenChips: 20 },
+      cost: { steel: 500, gears: 500, greenChips: 500 },
       inputs: { copperCables: 4, greenChips: 2, plastics: 2 },
       outputs: { redChips: 1 },
       energyInput: 6,
@@ -360,7 +360,7 @@
     {
       id: "speedBeaconT1",
       name: "Speed Beacon T1",
-      cost: { steel: 50, redChips: 50 },
+      cost: { steel: 100, redChips: 100 },
       inputs: {},
       outputs: {},
       energyInput: 2,
@@ -376,7 +376,7 @@
     {
       id: "productivityBeaconT1",
       name: "Productivity Beacon T1",
-      cost: { steel: 50, redChips: 50 },
+      cost: { steel: 100, redChips: 100 },
       inputs: {},
       outputs: {},
       energyInput: 2,
@@ -392,7 +392,7 @@
     {
       id: "blueprintLibrary",
       name: "Blueprint Library",
-      cost: { steel: 250, gears: 250, redChips: 100 },
+      cost: { steel: 2000, gears: 5000, redChips: 1000 },
       inputs: {},
       outputs: {},
       energyInput: 6,

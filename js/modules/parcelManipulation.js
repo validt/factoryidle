@@ -192,31 +192,39 @@ const clipboard = (() => {
     const totalCost = calculateTotalCost(pasteCosts);
     const canAfford = canAffordPaste(targetParcel, totalCost);
 
-    // Create and display the popup with the paste summary
-    const popup = document.createElement('div');
-    popup.classList.add('paste-summary-popup');
-    popup.innerHTML = generatePasteSummaryHtml(pasteCosts, totalCost, canAfford, targetParcelIndex);
+    // Update the paste summary content
+    const pasteSummaryContent = document.getElementById("pasteSummaryContent");
+    pasteSummaryContent.innerHTML = generatePasteSummaryHtml(pasteCosts, totalCost, canAfford, targetParcelIndex);
 
-    // Add the "Confirm" and "Cancel" buttons
-    const confirmButton = document.createElement('button');
-    confirmButton.textContent = 'Confirm';
+    // Show the paste summary overlay
+    const pasteSummaryOverlay = document.getElementById("pasteSummaryOverlay");
+    pasteSummaryOverlay.style.display = "flex";
+
+    // Set up the "Confirm" and "Cancel" buttons
+    const confirmButton = document.getElementById("confirmPasteButton");
+    const cancelButton = document.getElementById("cancelPasteButton");
+
+    // Add new event listeners
     confirmButton.disabled = !canAfford;
-    confirmButton.addEventListener('click', () => {
+    confirmButton.addEventListener("click", onConfirmButtonClick);
+
+    cancelButton.addEventListener("click", onCancelButtonClick);
+
+    function onConfirmButtonClick() {
       executePaste(sourceParcel, targetParcel, pasteCosts);
       copyCustomizations(sourceParcel, targetParcel);
-      popup.remove();
-    });
+      pasteSummaryOverlay.style.display = "none";
+      // Remove event listeners to avoid multiple executions
+      confirmButton.removeEventListener("click", onConfirmButtonClick);
+      cancelButton.removeEventListener("click", onCancelButtonClick);
+    }
 
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.addEventListener('click', () => {
-      popup.remove();
-    });
-
-    popup.appendChild(confirmButton);
-    popup.appendChild(cancelButton);
-
-    document.body.appendChild(popup);
+    function onCancelButtonClick() {
+      pasteSummaryOverlay.style.display = "none";
+      // Remove event listeners to avoid multiple executions
+      confirmButton.removeEventListener("click", onConfirmButtonClick);
+      cancelButton.removeEventListener("click", onCancelButtonClick);
+    }
   }
 
   function generatePasteSummaryHtml(pasteCosts, totalCost, canAfford, targetParcelIndex) {
@@ -236,14 +244,6 @@ const clipboard = (() => {
 
     // Combine resource costs from required upgrades and net building costs
     const combinedCosts = {};
-    // for (const upgrade of pasteCosts.requiredUpgrades) {
-    //   for (const [resource, cost] of Object.entries(upgrade.cost)) {
-    //     if (!combinedCosts[resource]) {
-    //       combinedCosts[resource] = 0;
-    //     }
-    //     combinedCosts[resource] += cost;
-    //   }
-    // }
 
     for (const [resource, amount] of Object.entries(totalCost)) {
       if (!combinedCosts[resource]) {
@@ -254,14 +254,13 @@ const clipboard = (() => {
 
     // Add combined resource costs to the table
     for (const [resource, amountNeeded] of Object.entries(combinedCosts)) {
-      //const amountStored = window.parcels.parcelList[targetParcelIndex].resources[resource] || 0;
-      const amountStored = (parcels.parcelList[targetParcelIndex].resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource)
+      const amountStored = (parcels.parcelList[targetParcelIndex].resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
       html += `
         <tr>
           <td>${resource}</td>
-          <td>${amountNeeded}</td>
-          <td>${amountStored}</td>
-          <td>${amountStored - amountNeeded}</td>
+          <td>${parseFloat(amountNeeded).toFixed(1)}</td>
+          <td>${parseFloat(amountStored).toFixed(1)}</td>
+          <td>${parseFloat(amountStored - amountNeeded).toFixed(1)}</td>
         </tr>
       `;
     }

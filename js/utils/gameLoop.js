@@ -35,8 +35,8 @@ const gameLoop = (() => {
         }
 
         if (parcel.buildings.productivityBeaconT1) {
-          parcel.productionRateModifier += parcel.buildings.productivityBeaconT1 * 0.005;
-          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT1 * 0.01;
+          parcel.productionRateModifier += parcel.buildings.productivityBeaconT1 * 0.01;
+          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT1 * 0.005;
         }
 
         // Call updatePreviousResources method for each parcel

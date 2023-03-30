@@ -11,11 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const startResearchButton = document.getElementById("startResearch");
     const researchSelect = document.getElementById("researchSelect");
 
-    // Initialize the first parcel
-    const firstParcel = parcels.createNewParcel();
-    ui.addParcelToUI(firstParcel);
+    let firstParcel;
 
-
+    // Initialize the first parcel if parcels.parcelList is undefined or there's no parcel in the parcelList
+    if (parcels.parcelList === undefined || parcels.parcelList.length === 0) {
+      firstParcel = parcels.createNewParcel();
+      ui.addParcelToUI(firstParcel);
+    } else {
+      firstParcel = parcels.parcelList[0];
+    }
 
     // Select the first parcel
     const firstParcelTab = document.getElementById(`tab-${firstParcel.id}`);

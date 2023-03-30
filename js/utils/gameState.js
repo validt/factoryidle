@@ -97,6 +97,9 @@ window.loadGame = function() {
       }
     });
 
+    //Update First Parcel
+    parcelManipulation.updateParcelTab(0);
+
     //Load saved Projects
     const savedProjects = localStorage.getItem("savedProjects");
 
