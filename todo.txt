@@ -1,14 +1,18 @@
-### Next Big push
-- Remote Construction Center
-- Blueprint Center
-    - Whats the easiest implementation? Just let it cost the sum of resources?
-    - Or it could be +1 Blueprint point per building built
-- Speed Module
-    -
-- Bug: Building on Bottom of Screen Tooltip flickers
+### Bug & Small Fixes
+- Perforamnce Issues --> Cleaning DOM & Event listeners. --> Resource Table?
+- Belt Inputs linked after Copy Pasting? ID thing?
+- "For example, parcel name change window should accept when you hit enter, and dismiss if you press escape, or click away. I also keep instinctively right clicking the parcel buttons when I try to rename or change color of a parcel lol."
+- Autosave apparently doesnt save parcel name & color
+
+### Balance
+- Buy New Parcel increases cost by +1
+
+### QoL
+- QoL: RCF --> Selling adds resources back into RCF
 - QoL: Energy System Explainer: Question Mark Icon?
 - QoL: Display Gain (Average over last 10 Ticks)
 - QoL: On-Off Button for Buildings
+- QoL: Make Intro Skippable with Click
 - Sneaky: Follow Twitter Checker
 
 ### Increase Mobile Support:

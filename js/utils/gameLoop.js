@@ -50,7 +50,7 @@ const gameLoop = (() => {
       function calculateBottlenecks(parcel, building, buildingCount, totalConsumptionRateModifier) {
         const bottlenecks = {};
         for (const [key, value] of Object.entries(building.inputs)) {
-          const requiredResourcesForFullProduction = value * buildingCount * (1 + totalConsumptionRateModifier);
+          const requiredResourcesForFullProduction = value * buildingCount * (totalConsumptionRateModifier);
           const availableResources = parcel.resources[key];
           const missingResources = requiredResourcesForFullProduction - availableResources;
 
@@ -88,7 +88,7 @@ const gameLoop = (() => {
                   break;
                 }
               }
-              
+
               // Calculate utilization as a percentage
               const utilization = (maxProducingBuildings / buildingCount) * 100;
 
