@@ -2,6 +2,7 @@ const ui = (() => {
   const parcelContainer = document.getElementById("parcels");
   const buildingDisplay = document.getElementById("buildings");
   let selectedParcelIndex = 0;
+  let createRowCounter = 0;
 
   class ResourceTable {
     constructor(parcel) {
@@ -281,6 +282,7 @@ const ui = (() => {
     }
 
     createRow(resourceName) {
+      console.log(resourceName, createRowCounter++);
       const building = buildingManager.getBuildingByResourceName(resourceName);
       const row = document.createElement("tr");
       row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
@@ -407,9 +409,6 @@ const ui = (() => {
       return row;
     }
 
-    // const inputValue = this.parcel.inputValues && this.parcel.inputValues[resourceName] && this.parcel.inputValues[resourceName][beltId] ? this.parcel.inputValues[resourceName][beltId] : 0;
-    // directionInput.value = inputValue;
-
     createDirectionInput(beltId, resourceName) {
       // Create elements
       const beltController = document.createElement("div");
@@ -502,8 +501,6 @@ const ui = (() => {
 
       return cell;
     }
-
-
 
     updateBeltUsage(beltId, resourceName, value, saveInputValue = false) {
       let totalBeltUsage = 0;
