@@ -69,7 +69,11 @@ const ui = (() => {
       if (color === "green") {
         resourceCell.style.color = "white";
       } else {
-        resourceCell.style.color = "black";
+        if (localStorage.getItem('darkMode') === 'true') {
+          return "#E8E6E3";
+        } else {
+          return "black";
+        }
       }
 
       // Update the building count cell
@@ -570,7 +574,13 @@ const ui = (() => {
         cell.appendChild(content);
       }
 
-      cell.style.backgroundColor = bgColor;
+      if (localStorage.getItem('darkMode') === 'true') {
+        
+      } else {
+        cell.style.backgroundColor = bgColor;
+      }
+
+
 
       if (bgColor === "green") {
         cell.style.color = "white";
@@ -946,7 +956,11 @@ const ui = (() => {
       } else if (productionRate < 0) {
         return "red";
       } else {
-        return "white";
+        if (localStorage.getItem('darkMode') === 'true') {
+          return "#222426";
+        } else {
+          return "white";
+        }
       }
     }
 

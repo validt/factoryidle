@@ -8,6 +8,7 @@
 - Buy New Parcel increases cost by +1
 
 ### QoL
+- QoL: it'd be nice to see power consumption stats for buildings in the build menu eventually
 - QoL: RCF --> Selling adds resources back into RCF
 - QoL: Energy System Explainer: Question Mark Icon?
 - QoL: Display Gain (Average over last 10 Ticks)

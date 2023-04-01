@@ -1,3 +1,74 @@
+/* Dark Mode */
+.dark-mode #intro {
+  background-color: rgb(34, 36, 38);
+}
+
+.dark-mode {
+  background-color: rgb(34, 36, 38);
+  color: rgb(232, 230, 227);
+  color-scheme: dark !important;
+}
+
+.dark-mode button {
+  border-color: rgb(131, 122, 108);
+  background-image: -webkit-linear-gradient(top, rgb(24, 26, 27), rgb(91, 99, 103));
+  background-color: initial;
+  box-shadow: rgba(24, 26, 27, 0.4) 0px 0px 0px, rgba(24, 26, 27, 0.4) 0px 1px 0px inset;
+  text-shadow: rgb(53, 57, 59) 0px 1px 0px;
+  color: rgb(232, 230, 227);
+  text-decoration-color: initial;
+  outline-color: initial;
+}
+
+.dark-mode button:hover {
+    background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+    background-color: initial;
+}
+
+.dark-mode .belt-btn:hover{
+  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+  background-color: initial;
+  cursor:pointer;
+}
+
+.dark-mode .parcel-tab.selected {
+    background-image: -webkit-linear-gradient(top, rgb(53, 57, 59), rgb(24, 26, 27));
+    background-color: initial;
+    border-color: rgb(82, 88, 92);
+}
+
+.dark-mode :root {
+    --darkreader-neutral-background: #131516;
+    --darkreader-neutral-text: #d8d4cf;
+    --darkreader-selection-background: #004daa;
+    --darkreader-selection-text: #e8e6e3;
+}
+
+/* Projects */
+.dark-mode .project-box {
+  border-color: rgb(140, 130, 115);
+  background-color: rgb(24, 26, 27);
+}
+
+.dark-mode td {
+  background-color: #222426;
+}
+
+.dark-mode .belt-btn {
+    background-color: #35393B;
+}
+
+.dark-mode .belt-controller {
+    border-color: rgb(140, 130, 115);
+}
+
+.dark-mode .belt-display {
+    border-left-color: rgb(140, 130, 115);
+    border-top-color: initial;
+    border-right-color: rgb(140, 130, 115);
+    border-bottom-color: initial;
+}
+
 /* General styles */
 body {
     font-family: Helvetica, Arial, sans-serif;
@@ -15,7 +86,6 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 20px;
-    color: #000000;
     font-size: 28px;
 }
 
@@ -208,29 +278,7 @@ button:disabled {
   background-color: #fff;
 }
 
-/* Feedback Button */
 
-#feedback-button {
-  border: 1px solid #1a1a1a;
-  background: -webkit-linear-gradient(top, #ffffff, #888888);
-  padding: 4px 8px;
-  border-radius: 2px;
-  box-shadow: rgba(255,255,255,0.4) 0 0px 0, inset rgba(255,255,255,0.4) 0 1px 0;
-  text-shadow: #cccccc 0 1px 0;
-  color: #000000;
-  font-size: 14px;
-  font-family: helvetica, serif;
-  text-decoration: none;
-  vertical-align: middle;
-  outline: none;
-  cursor: pointer;
-  display: inline-block;
-  z-index: 100;
-}
-
-#feedback-button:hover {
-  background: -webkit-linear-gradient(top, #888888, #ffffff);
-}
 
 /* Intro Animation */
 

@@ -135,3 +135,19 @@ function saveGameWithAnimation() {
     saveCheckmark.style.transform = 'translateY(-100%)';
   }, 1000);
 }
+
+const darkModeToggle = document.getElementById('darkModeToggle');
+const body = document.querySelector('body');
+
+// Check the user's preference when the page is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('darkMode') === 'true') {
+    body.classList.add('dark-mode');
+  }
+});
+
+// Toggle dark mode and save the user's preference
+darkModeToggle.addEventListener('click', () => {
+  body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+});
