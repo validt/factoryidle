@@ -8,7 +8,6 @@ const gameLoop = (() => {
         projects.renderProjects();
         ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
         gameInterval = setInterval(() => {
-            console.log("Tick: ", tickCounter);
             updateResources();
             updateBeltLogistics();
             ui.updateBuildingDropdown();

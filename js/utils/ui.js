@@ -8,6 +8,7 @@ const ui = (() => {
     constructor(parcel) {
       this.parcel = parcel;
       this.tableElement = document.getElementById("resourceTable");
+      this.eventListeners = new WeakMap();
     }
 
     update() {
@@ -46,9 +47,9 @@ const ui = (() => {
         }
       }
 
-      // Add event listeners to buttons after updating all rows
-      this.addEventListenerToButtons(".buy-building-resource", buyBuilding);
-      this.addEventListenerToButtons(".sell-building-resource", sellBuilding);
+      // // Add event listeners to buttons after updating all rows
+      // this.addEventListenerToButtons(".buy-building-resource", buyBuilding);
+      // this.addEventListenerToButtons(".sell-building-resource", sellBuilding);
 
       // Add tooltips to the Buy buttons
       this.addTooltipToButtons(".buy-building-resource", this.parcel);
@@ -99,23 +100,44 @@ const ui = (() => {
           productionCell.textContent = "";
         }
       }
+
+      // Update the buy and sell buttons
+      const buyButton = row.querySelector('.buy-building-resource');
+      const sellButton = row.querySelector('.sell-building-resource');
+
+      if (buyButton && buyButton.dataset.listenerAttached !== 'true') {
+        this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
+      }
+
+      if (sellButton && sellButton.dataset.listenerAttached !== 'true') {
+        this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
+      }
     }
 
-    addEventListenerToButtons(buttonClass, actionFunction) {
-      const buttons = this.tableElement.querySelectorAll(buttonClass);
+    addEventListenerToButtons(buttonClass, actionFunction, buttonElement = null) {
+      const buttons = buttonElement ? [buttonElement] : this.tableElement.querySelectorAll(buttonClass);
       buttons.forEach((button) => {
-        button.addEventListener("click", (event) => {
+        // Create a new event listener
+        const newListener = (event) => {
           const buildingId = event.target.dataset.buildingId;
           actionFunction(this.parcel, buildingId);
-        });
+        };
+
+        // Add the new event listener and store it in the WeakMap
+        button.addEventListener("click", newListener);
+        this.eventListeners.set(button, newListener);
+
+        // Mark the button as having an event listener attached
+        button.dataset.listenerAttached = 'true';
       });
     }
 
     addTooltipToButtons(buttonClass, parcel) {
       const buttons = this.tableElement.querySelectorAll(buttonClass);
       buttons.forEach((button) => {
+
         // Show tooltip on mouseover for Buy buttons only
-        if (buttonClass.includes("buy-building")) {
+        if (buttonClass.includes("buy-building") && button.dataset.tooltipListenerAttached !== 'true') {
           button.addEventListener("mouseover", (event) => {
             const buildingId = event.target.dataset.buildingId;
             const building = buildingManager.getBuilding(buildingId);
@@ -140,6 +162,9 @@ const ui = (() => {
             tooltip.style.left = event.pageX + 10 + "px";
             tooltip.style.top = event.pageY + 10 + "px";
           });
+
+          // Mark the button as having tooltip event listeners attached
+          button.dataset.tooltipListenerAttached = 'true';
         }
       });
     }
@@ -147,129 +172,133 @@ const ui = (() => {
     addResourceTooltips(parcel) {
       const resourceNames = this.tableElement.querySelectorAll(".resource-name");
       resourceNames.forEach((resourceName) => {
-        resourceName.addEventListener("mouseover", (event) => {
-          const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
-          const buildingCount = parcel.buildings[resource.id];
-          const buildingCountChecked = buildingCount || 0;
+        if (resourceName.dataset.tooltipListenerAttached !== 'true') {
+            resourceName.addEventListener("mouseover", (event) => {
+              const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
+              const buildingCount = parcel.buildings[resource.id];
+              const buildingCountChecked = buildingCount || 0;
 
-          const inputText = Object.entries(resource.inputs || {})
-          .map(([inputResource, amount]) => `${amount} ${inputResource}`)
-          .join("<br>");
-          const outputText = Object.entries(resource.outputs || {})
-          .map(([outputResource, amount]) => `${amount} ${outputResource}`)
-          .join("<br>");
+              const inputText = Object.entries(resource.inputs || {})
+              .map(([inputResource, amount]) => `${amount} ${inputResource}`)
+              .join("<br>");
+              const outputText = Object.entries(resource.outputs || {})
+              .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+              .join("<br>");
 
-          const totalInputText = Object.entries(resource.inputs || {})
-          .map(([inputResource, amount]) => `${amount * buildingCountChecked} ${inputResource}`)
-          .join("<br>");
-          const totalOutputText = Object.entries(resource.outputs || {})
-          .map(([outputResource, amount]) => `${amount * buildingCountChecked} ${outputResource}`)
-          .join("<br>");
+              const totalInputText = Object.entries(resource.inputs || {})
+              .map(([inputResource, amount]) => `${amount * buildingCountChecked} ${inputResource}`)
+              .join("<br>");
+              const totalOutputText = Object.entries(resource.outputs || {})
+              .map(([outputResource, amount]) => `${amount * buildingCountChecked} ${outputResource}`)
+              .join("<br>");
 
-          const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
-          const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
+              const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
+              const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
 
-          const modifiedInputText = Object.entries(resource.inputs || {})
-          .map(([inputResource, amount]) => `${(amount * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
-          .join("<br>");
-          const modifiedOutputText = Object.entries(resource.outputs || {})
-          .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
-          .join("<br>");
+              const modifiedInputText = Object.entries(resource.inputs || {})
+              .map(([inputResource, amount]) => `${(amount * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+              .join("<br>");
+              const modifiedOutputText = Object.entries(resource.outputs || {})
+              .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
+              .join("<br>");
 
 
 
-          const totalModifiedInputText = Object.entries(resource.inputs || {})
-          .map(([inputResource, amount]) => `${(amount * buildingCountChecked * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
-          .join("<br>");
-          const totalModifiedOutputText = Object.entries(resource.outputs || {})
-          .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
-          .join("<br>");
+              const totalModifiedInputText = Object.entries(resource.inputs || {})
+              .map(([inputResource, amount]) => `${(amount * buildingCountChecked * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+              .join("<br>");
+              const totalModifiedOutputText = Object.entries(resource.outputs || {})
+              .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
+              .join("<br>");
 
-          const tooltipText = `
-          <table>
-          <tbody>
-
-          <thead>
-            <tr>
-              <th colspan="2" style="text-align: left;"><b>Total (Modified)</b></th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tr>
-            <td>${totalModifiedInputText || "-"}</td>
-            <td> &#x2192; </td>
-            <td>${totalModifiedOutputText || "-"}</td>
-          </tr>
-
-            <thead>
-              <tr>
-                <th colspan="2" style="text-align: left;"><b>Modified</b></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tr>
-              <td>${
-                consumptionRateModifier !== undefined
-                  ? (consumptionRateModifier > 0 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
-                  : ""
-              }</td>
-              <td></td>
-              <td>${
-                productionRateModifier !== undefined
-                  ? (productionRateModifier > 0 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
-                  : ""
-              }</td>
-            </tr>
-              <tr>
-                <td>${modifiedInputText || "-"}</td>
-                <td> &#x2192; </td>
-                <td>${modifiedOutputText || "-"}</td>
-              </tr>
+              const tooltipText = `
+              <table>
+              <tbody>
 
               <thead>
                 <tr>
-                  <th colspan="2" style="text-align: left;"><b>Total (Default)</b></th>
+                  <th colspan="2" style="text-align: left;"><b>Total (Modified)</b></th>
                   <th></th>
                   <th></th>
                 </tr>
               </thead>
               <tr>
-                <td>${totalInputText || "-"}</td>
+                <td>${totalModifiedInputText || "-"}</td>
                 <td> &#x2192; </td>
-                <td>${totalOutputText || "-"}</td>
+                <td>${totalModifiedOutputText || "-"}</td>
               </tr>
 
-              <thead>
+                <thead>
+                  <tr>
+                    <th colspan="2" style="text-align: left;"><b>Modified</b></th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
                 <tr>
-                  <th colspan="2" style="text-align: left;"><b>Default</b></th>
-                  <th></th>
-                  <th></th>
+                  <td>${
+                    consumptionRateModifier !== undefined
+                      ? (consumptionRateModifier > 0 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
+                      : ""
+                  }</td>
+                  <td></td>
+                  <td>${
+                    productionRateModifier !== undefined
+                      ? (productionRateModifier > 0 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
+                      : ""
+                  }</td>
                 </tr>
-              </thead>
-                <tr>
-                  <td>${inputText || "-"}</td>
-                  <td> &#x2192; </td>
-                  <td>${outputText || "-"}</td>
-                </tr>
-            </tbody>
-          </table>`;
+                  <tr>
+                    <td>${modifiedInputText || "-"}</td>
+                    <td> &#x2192; </td>
+                    <td>${modifiedOutputText || "-"}</td>
+                  </tr>
 
-          tooltip.innerHTML = tooltipText;
-          tooltip.style.display = "block";
-          tooltip.style.left = event.pageX + 10 + "px";
-          tooltip.style.top = event.pageY + 10 + "px";
-        });
+                  <thead>
+                    <tr>
+                      <th colspan="2" style="text-align: left;"><b>Total (Default)</b></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tr>
+                    <td>${totalInputText || "-"}</td>
+                    <td> &#x2192; </td>
+                    <td>${totalOutputText || "-"}</td>
+                  </tr>
 
-        resourceName.addEventListener("mouseout", () => {
-          tooltip.style.display = "none";
-        });
+                  <thead>
+                    <tr>
+                      <th colspan="2" style="text-align: left;"><b>Default</b></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                    <tr>
+                      <td>${inputText || "-"}</td>
+                      <td> &#x2192; </td>
+                      <td>${outputText || "-"}</td>
+                    </tr>
+                </tbody>
+              </table>`;
 
-        resourceName.addEventListener("mousemove", (event) => {
-          tooltip.style.left = event.pageX + 10 + "px";
-          tooltip.style.top = event.pageY + 10 + "px";
-        });
+              tooltip.innerHTML = tooltipText;
+              tooltip.style.display = "block";
+              tooltip.style.left = event.pageX + 10 + "px";
+              tooltip.style.top = event.pageY + 10 + "px";
+            });
+
+            resourceName.addEventListener("mouseout", () => {
+              tooltip.style.display = "none";
+            });
+
+            resourceName.addEventListener("mousemove", (event) => {
+              tooltip.style.left = event.pageX + 10 + "px";
+              tooltip.style.top = event.pageY + 10 + "px";
+            });
+            // Mark the resourceName as having tooltip event listeners attached
+            resourceName.dataset.tooltipListenerAttached = 'true';
+          }
       });
     }
 
@@ -290,8 +319,6 @@ const ui = (() => {
         const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["backwardBelt"] || 0), 0);
         forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
         backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
-        console.log(backwardBeltCount);
-        console.log(backwardBeltLabel.textContent);
         }
     }
 
@@ -333,7 +360,6 @@ const ui = (() => {
     }
 
     createRow(resourceName) {
-      console.log(resourceName, createRowCounter++);
       const building = buildingManager.getBuildingByResourceName(resourceName);
       const row = document.createElement("tr");
       row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
