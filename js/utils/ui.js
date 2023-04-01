@@ -66,12 +66,15 @@ const ui = (() => {
       const resourceCell = row.cells[1];
       resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
       resourceCell.style.backgroundColor = color;
+      console.log(resourceName, color);
       if (color === "green") {
         resourceCell.style.color = "white";
       } else {
         if (localStorage.getItem('darkMode') === 'true') {
+          resourceCell.style.color = "#E8E6E3";
           return "#E8E6E3";
         } else {
+          resourceCell.style.color = "black";
           return "black";
         }
       }
@@ -575,7 +578,7 @@ const ui = (() => {
       }
 
       if (localStorage.getItem('darkMode') === 'true') {
-        
+
       } else {
         cell.style.backgroundColor = bgColor;
       }
@@ -950,7 +953,8 @@ const ui = (() => {
       const currentResourceCount = parcel.resources[resourceName] || 0;
       const previousResourceCount = parcel.previousResources[resourceName] || 0;
       const productionRate = currentResourceCount - previousResourceCount;
-
+      console.log("getResourceRate current, prev", currentResourceCount, previousResourceCount);
+      console.log("getResourceRate: ", resourceName, productionRate);
       if (productionRate > 0) {
         return "green";
       } else if (productionRate < 0) {
@@ -959,7 +963,7 @@ const ui = (() => {
         if (localStorage.getItem('darkMode') === 'true') {
           return "#222426";
         } else {
-          return "white";
+          return "#eee";
         }
       }
     }

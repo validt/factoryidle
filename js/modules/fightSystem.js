@@ -9,7 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize your factoryUnits and biterUnits here
   // For example:
   const factoryUnits = [
-    new FactoryUnit("Soldier", 100, 30, 10, 1),
+    new FactoryUnit("Wall", 150, 0, 0, 0),
+    new FactoryUnit("Wall", 150, 0, 0, 0),
+    new FactoryUnit("Turret", 100, 30, 3, 1),
+    new FactoryUnit("Turret", 100, 30, 3, 1),
+    new FactoryUnit("Turret", 100, 30, 3, 1),
     // Add more units...
   ];
 
@@ -18,10 +22,20 @@ document.addEventListener("DOMContentLoaded", () => {
     new BiterUnit("Biter", 80, 5, 5),
     new BiterUnit("Biter", 80, 5, 5),
     new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 5),
     // Add more units...
   ];
 
-  const ammunition = 100;
+  const ammunition = 60;
 
   const battle = new Battle(factoryUnits, biterUnits, ammunition, updateUI);
 
@@ -134,7 +148,7 @@ class Battle {
       await this.sleep(1000);
 
       // Update the UI
-      this.updateUI();
+      this.updateUI(this.factoryUnits, this.biterUnits, this.ammunition);
 
       // Log the current step
       for (const log of this.logs) {
@@ -220,13 +234,13 @@ class Battle {
   }
 }
 
-function updateUI() {
+function updateUI(factoryUnits, biterUnits, ammunition) {
   // Clear the tables
   factoryUnitsTable.innerHTML = "";
   biterUnitsTable.innerHTML = "";
 
   // Update the factory units table
-  for (const unit of battle.factoryUnits) {
+  for (const unit of factoryUnits) {
     const row = factoryUnitsTable.insertRow(-1);
     row.insertCell(0).innerText = unit.name;
     row.insertCell(1).innerText = unit.health;
@@ -236,7 +250,7 @@ function updateUI() {
   }
 
   // Update the biter units table
-  for (const unit of battle.biterUnits) {
+  for (const unit of biterUnits) {
     const row = biterUnitsTable.insertRow(-1);
     row.insertCell(0).innerText = unit.name;
     row.insertCell(1).innerText = unit.health;
@@ -245,10 +259,10 @@ function updateUI() {
   }
 
   // Update the ammunition element
-  ammunitionElement.innerText = battle.ammunition;
+  ammunitionElement.innerText = ammunition;
 
   // Update the battle log
-  battle.logs.forEach((log) => {
+  this.logs.forEach((log) => {
     const logDiv = document.createElement("div");
     logDiv.innerText = log;
     battleLog.appendChild(logDiv);
