@@ -16,7 +16,7 @@ const ui = (() => {
         this.createHeader();
       }
 
-      // Update the Pracel Name Display
+      // Update the Parcel Name Display
       const parcelTitle = document.getElementById("parcelNameDisplay");
       if (parcels.parcelList[selectedParcelIndex].name) {
         parcelTitle.textContent = parcels.parcelList[selectedParcelIndex].name;
@@ -27,23 +27,26 @@ const ui = (() => {
       // Update the header row
       this.updateHeader();
 
-      // Clear the table content except for the header row
-      while (this.tableElement.rows.length > 1) {
-        this.tableElement.deleteRow(-1);
-      }
-
       // Iterate over each resource in the parcel
       for (const category of window.resourceCategories) {
         for (const resource of category.resources) {
           const resourceName = resource.name;
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
-            // Create a new row for the resource and append it to the table element
-            this.tableElement.appendChild(this.createRow(resourceName));
+            const rowId = `resourceRow-${this.parcel.id}-${resourceName}`;
+            let row = document.getElementById(rowId);
+            if (!row) {
+              // If the row doesn't exist, create it
+              row = this.createRow(resourceName);
+              this.tableElement.appendChild(row);
+            } else {
+              // Update the existing row
+              this.updateRow(resourceName, row);
+            }
           }
         }
       }
 
-      //Add event listeners to buttons after appending all rows
+      // Add event listeners to buttons after updating all rows
       this.addEventListenerToButtons(".buy-building-resource", buyBuilding);
       this.addEventListenerToButtons(".sell-building-resource", sellBuilding);
 
@@ -52,6 +55,50 @@ const ui = (() => {
 
       // Add tooltips to the resource names
       this.addResourceTooltips(this.parcel);
+    }
+
+    updateRow(resourceName, row) {
+      const building = buildingManager.getBuildingByResourceName(resourceName);
+
+      // Update the resource amount cell
+      const color = getResourceRateColor(this.parcel, resourceName);
+      const resourceCell = row.cells[1];
+      resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
+      resourceCell.style.backgroundColor = color;
+      if (color === "green") {
+        resourceCell.style.color = "white";
+      } else {
+        resourceCell.style.color = "black";
+      }
+
+      // Update the building count cell
+      const countCell = row.cells[3];
+      if (building && progressionManager.isUnlocked("ironMiner") &&
+        progressionManager.isUnlocked("stoneMiner") &&
+        progressionManager.isUnlocked("coalMiner")) {
+        countCell.textContent = this.parcel.buildings[building.id] || 0;
+      } else {
+        countCell.textContent = "";
+      }
+
+      // Update the production cell
+      const productionCell = row.cells[4];
+      if (building) {
+        const buildingCount = this.parcel.buildings[building.id] || 0;
+        if (buildingCount > 0 &&
+          progressionManager.isUnlocked("ironMiner") &&
+          progressionManager.isUnlocked("stoneMiner") &&
+          progressionManager.isUnlocked("coalMiner")) {
+          if (!productionCell.querySelector(".buy-building-resource")) {
+            productionCell.innerHTML = `
+              <button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
+              <button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
+            `;
+          }
+        } else {
+          productionCell.textContent = "";
+        }
+      }
     }
 
     addEventListenerToButtons(buttonClass, actionFunction) {
@@ -237,10 +284,14 @@ const ui = (() => {
         backwardBeltLabel.id = `backwardBeltHeader-${this.parcel.id}`;
 
         // Update forward and backward belt labels
-        const forwardBeltCount = this.parcel.buildings['forwardBelt'] ?? 0;
-        const backwardBeltCount = this.parcel.buildings['backwardBelt'] ?? 0;
-        forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${forwardBeltCount}`;
-        backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${backwardBeltCount}`;
+        const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
+        const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
+        const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["forwardBelt"] || 0), 0);
+        const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["backwardBelt"] || 0), 0);
+        forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
+        backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
+        console.log(backwardBeltCount);
+        console.log(backwardBeltLabel.textContent);
         }
     }
 
@@ -561,10 +612,25 @@ const ui = (() => {
       });
   }
 
-    function updateResourceDisplay(parcel) {
-      const resourceTable = new ResourceTable(parcel);
-      resourceTable.update();
+  let previousParcel = null;
+
+  function updateResourceDisplay(parcel) {
+    const resourceTable = new ResourceTable(parcel);
+
+    // Check if the parcel has changed
+    if (previousParcel !== parcel) {
+      // Clear the existing rows
+      while (resourceTable.tableElement.rows.length > 1) {
+        resourceTable.tableElement.deleteRow(-1);
+      }
+
+      // Update the previousParcel variable with the new parcel
+      previousParcel = parcel;
     }
+
+    // Update the resource table with the given parcel
+    resourceTable.update();
+  }
 
     function getTotalBeltUsage(parcel, beltId) {
       let totalBeltUsage = 0;
