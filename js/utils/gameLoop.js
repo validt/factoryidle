@@ -15,6 +15,8 @@ const gameLoop = (() => {
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
             window.ui.updateResourceDisplay(selectedParcel);
             updateAllParcels();
+            updateAmmunitionDisplay(battleOngoing);
+            updateStartBattleButtonState();
             ui.updateEnergyDisplay();
             window.progressionManager.update(gameState);
             tickCounter++;

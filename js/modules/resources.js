@@ -1,25 +1,27 @@
 const resourceCategories = {
-  stone: { category: "Raw", order: 1 },
-  coal: { category: "Raw", order: 2 },
-  ironOre: { category: "Raw", order: 3 },
-  copperOre: { category: "Raw", order: 4 },
-  oilBarrel: { category: "Raw", order: 5 },
-  bricks: { category: "Basic", order: 1 },
-  ironPlates: { category: "Basic", order: 2 },
-  copperPlates: { category: "Basic", order: 3 },
-  gears: { category: "Basic", order: 4 },
-  copperCables: { category: "Basic", order: 5 },
-  steel: { category: "Basic", order: 6 },
-  petroleumBarrel: { category: "Basic", order: 7 },
-  plastics: { category: "Basic", order: 8 },
-  sulfur: { category: "Basic", order: 9 },
-  greenChips: { category: "Advanced", order: 1 },
-  redChips: { category: "Advanced", order: 2 },
-  redScience: { category: "Advanced", order: 3 },
-  researchPoints: { category: "Points", order: 1 },
-  expansionPoints: { category: "Points", order: 2 },
-  blueprintPoints: { category: "Points", order: 3 },
-
+  stone: { category: "1Raw", order: 1 },
+  coal: { category: "1Raw", order: 2 },
+  ironOre: { category: "1Raw", order: 3 },
+  copperOre: { category: "1Raw", order: 4 },
+  oilBarrel: { category: "1Raw", order: 5 },
+  bricks: { category: "2Basic", order: 1 },
+  ironPlates: { category: "2Basic", order: 2 },
+  copperPlates: { category: "2Basic", order: 3 },
+  gears: { category: "2Basic", order: 4 },
+  copperCables: { category: "2Basic", order: 5 },
+  steel: { category: "2Basic", order: 6 },
+  petroleumBarrel: { category: "2Basic", order: 7 },
+  plastics: { category: "2Basic", order: 8 },
+  sulfur: { category: "2Basic", order: 9 },
+  greenChips: { category: "3Advanced", order: 1 },
+  redChips: { category: "3Advanced", order: 2 },
+  redScience: { category: "3Advanced", order: 3 },
+  researchPoints: { category: "4Points", order: 1 },
+  expansionPoints: { category: "4Points", order: 2 },
+  blueprintPoints: { category: "4Points", order: 3 },
+  standardAmmunition:  { category: "5Military", order: 1},
+  armorPenetratingAmmunition:  { category: "5Military", order: 2},
+  piercingAmmunition:  { category: "5Military", order: 3},
 };
 
 window.resourceCategories = Object.keys(resourceCategories)
@@ -40,6 +42,6 @@ window.resourceCategories = Object.keys(resourceCategories)
   .sort((a, b) => a.name.localeCompare(b.name))
   .map(category => ({
     ...category,
-    resources: category.resources.sort((a, b) => a.order - b.order),
+    resources: category.resources.sort((a, b) => b.order - a.order),
   }))
   .reverse();

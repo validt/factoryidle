@@ -404,7 +404,68 @@
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.blueprintTech,
     },
+    {
+      id: "militaryHQ",
+      name: "Military HQ",
+      cost: { ironPlates: 1000, copperCables: 500},
+      inputs: {},
+      outputs: {},
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.militaryTech,
+    },
+    {
+      id: "standardAmmunitionFactory",
+      name: "Ammunition Factory (Standard)",
+      cost: { ironPlates: 1000, gears: 500},
+      inputs: { ironPlates: 1, copperPlates: 3 },
+      outputs: { standardAmmunition: 1},
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.militaryTech,
+    },
+    {
+      id: "armorPenetratingAmmunitionFactory",
+      name: "Ammunition Factory (Armor Pen)",
+      cost: { steel: 1000, gears: 500, greenChips: 500},
+      inputs: { standardAmmunition: 5, steel: 1, copperPlates: 2 },
+      outputs: { armorPenetratingAmmunition: 1},
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.militaryTech,
+    },
+    {
+      id: "piercingAmmunitionFactory",
+      name: "Ammunition Factory (Piercing)",
+      cost: { steel: 5000, gears: 5000, redChips: 500},
+      inputs: { armorPenetratingAmmunition: 5, steel: 2, copperPlates: 1 },
+      outputs: { piercingAmmunition: 1},
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.militaryTech,
+    },
   ];
+
 
   function getBuilding(id) {
     return buildings.find((building) => building.id === id);
@@ -483,6 +544,56 @@
       }
   }
 
+  /* Military Building Logic */
+    const AmmunitionTypeCatalogue = [
+      { ammunitionType: "Standard", resourceId: "standardAmmunition" },
+      { ammunitionType: "Armor Penetrating", resourceId: "armorPenetratingAmmunition" },
+      { ammunitionType: "Piercing", resourceId: "piercingAmmunition" },
+    ];
+
+    // Count the available ammunition from parcels with militaryHQ
+    function getAmmunitionFromMilitaryHQ(parcels, ammunitionType) {
+      let totalAmmunition = 0;
+
+      parcels.forEach((parcel) => {
+        if (parcel.buildings["militaryHQ"]) {
+          const resourceId = AmmunitionTypeCatalogue.find((ammo) => ammo.ammunitionType === ammunitionType)?.resourceId;
+          totalAmmunition += parcel.resources[resourceId] || 0;
+        }
+      });
+
+      return totalAmmunition;
+    }
+
+    // Deduct consumed ammunition from parcels with militaryHQ
+    function deductAmmunitionFromMilitaryHQ(parcels, ammunitionType, amount) {
+      const resourceId = AmmunitionTypeCatalogue.find((ammo) => ammo.ammunitionType === ammunitionType)?.resourceId;
+
+      parcels.forEach((parcel) => {
+        if (parcel.buildings["militaryHQ"] && parcel.resources[resourceId]) {
+          const deduction = Math.min(parcel.resources[resourceId], amount);
+          parcel.resources[resourceId] -= deduction;
+          amount -= deduction;
+        }
+
+        if (amount <= 0) {
+          return;
+        }
+      });
+    }
+
+
+    // Add consumed ammunition to parcels with militaryHQ
+    function addAmmunitionToMilitaryHQ(parcels, ammunitionType, amount) {
+      const resourceId = AmmunitionTypeCatalogue.find((ammo) => ammo.ammunitionType === ammunitionType)?.resourceId;
+
+      parcels.forEach((parcel) => {
+        if (parcel.buildings["militaryHQ"]) {
+          parcel.resources[resourceId] = (parcel.resources[resourceId] || 0) + amount;
+        }
+      });
+    }
+
   window.buildingManager = {
     getBuilding,
     getBuildingList,
@@ -492,4 +603,7 @@
     initializeResourceOutput,
     getResourcesFromRemoteConstructionFacilities,
     deductResourcesFromRemoteConstructionFacilities,
+    getAmmunitionFromMilitaryHQ,
+    deductAmmunitionFromMilitaryHQ,
+    addAmmunitionToMilitaryHQ,
   };

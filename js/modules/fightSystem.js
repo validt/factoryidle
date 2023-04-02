@@ -3,9 +3,14 @@
 const factoryUnitsTable = document.getElementById("factory-units-table");
 const biterUnitsTable = document.getElementById("biter-units-table");
 const ammunitionElement = document.getElementById("ammunition");
-const battleLog = document.getElementById("battle-log");
+//const battleLog = document.getElementById("battle-log");
 const startBattleButton = document.getElementById("start-battle");
 const inputValues = {};
+let battle = {};
+let battleOngoing = false;
+const factoryUnits = [];
+
+const startingAmmunition = {};
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -18,16 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add more units...
   ];
 
-  const factoryUnits = [];
 
-  const startingAmmunition = {
-    "Standard": 120000,
-    "Armor Penetrating": 120000,
-    "Piercing": 120000,
-  };
 
-  const battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
 
+
+
+  battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
 
 
   // Update the ammunition element
@@ -35,15 +36,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, []);
 
-  // Update the battle log
-  battle.logs.forEach((log) => {
-    const logDiv = document.createElement("div");
-    logDiv.innerText = log;
-    battleLog.appendChild(logDiv);
-  });
+  // // Update the battle log
+  // battle.logs.forEach((log) => {
+  //   const logDiv = document.createElement("div");
+  //   logDiv.innerText = log;
+  //   battleLog.appendChild(logDiv);
+  // });
 
   // Add event listener for the start battle button
   startBattleButton.addEventListener("click", async () => {
+    // Deduct the army cost from resources
+    const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+    const armyCost = calculateTotalArmyCost(factoryUnits);
+    deductArmyCost(selectedParcel, armyCost);
+    // Prepare ammunition and deduct it from the parcels
+    prepareAmmunition();
+
     // Sort factoryUnits so that Walls are first
     factoryUnits.sort((a, b) => {
       if (a.name === "Wall") {
@@ -56,11 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     startBattleButton.disabled = true;
-
+    battleOngoing = true;
     await battle.run();
+    battleOngoing = false;
+    // Return the remaining ammunition to the parcels
+    returnRemainingAmmunition(battle);
 
     // Re-enable the start battle button after the battle is finished
     startBattleButton.disabled = false;
+
+    // Update the UI to reflect the changes
+    updateAmmunitionDisplay();
   });
 });
 
@@ -89,8 +103,9 @@ class FactoryUnit extends Unit {
 
 // Initialize your factoryUnits and biterUnits here
 const factoryUnitsCatalogue = [
-  new FactoryUnit("Wall", 1500, 0, 0, 0, { ironPlates: 25, bricks: 20 }),
-  new FactoryUnit("Turret", 100, 20, 3, 1, { ironPlates: 50, bricks: 40 }),
+  new FactoryUnit("Wall", 150, 0, 0, 0, { ironPlates: 5, bricks: 50 }),
+  new FactoryUnit("Reinforced Wall", 500, 0, 5, 0, { steel: 25, bricks: 50 }),
+  new FactoryUnit("Turret", 100, 20, 3, 1, { ironPlates: 50, gears: 25, copperCables: 25, bricks: 20 }),
   // ... additional factory unit types ...
 ];
 
@@ -110,8 +125,8 @@ class Ammunition {
 const ammunitionTypes = [
   new Ammunition("Melee", 0,0,false),
   new Ammunition("Standard", 10, 0, false),
-  new Ammunition("Armor Penetrating", 5, 0.5, false),
-  new Ammunition("Piercing", 10, 0, true),
+  new Ammunition("Armor Penetrating", 10, 0.25, false),
+  new Ammunition("Piercing", 10, 0.25, true),
 ];
 
 class Battle {
@@ -150,21 +165,17 @@ class Battle {
   async run() {
     let battleStatus = null;
     for (let i = 0; i < this.ticks; i++) {
-      console.log("Run factoryUnits", this.factoryUnits);
-      console.log("Run factoryUnits.length", this.factoryUnits.length);
       if (this.factoryUnits.length === 0 || this.biterUnits.length === 0) {
         break;
       }
 
       this.fight();
       await this.sleep(200);
-      console.log("Run factoryUnits after fight", this.factoryUnits);
 
       // Deep copy the factoryUnits and biterUnits arrays
       const factoryUnitsCopy = JSON.parse(JSON.stringify(this.factoryUnits));
       const biterUnitsCopy = JSON.parse(JSON.stringify(this.biterUnits));
 
-      console.log("factoryUnitsCopy", factoryUnitsCopy);
 
       // Update the UI
       this.updateUI(factoryUnitsCopy, factoryUnitsCatalogue, biterUnitsCopy, this.ammunition, this.logs, true);
@@ -172,11 +183,11 @@ class Battle {
 
 
 
-      // Log the current step
-      for (const log of this.logs) {
-        console.log(log);
-      }
-      this.logs = []; // Clear the logs for the next step
+      // // Log the current step
+      // for (const log of this.logs) {
+      //   console.log(log);
+      // }
+      // this.logs = []; // Clear the logs for the next step
 
       battleStatus = this.checkBattleStatus();
       if (battleStatus) {
@@ -300,6 +311,23 @@ function createUnits(unitType, unitClass, count, ...unitArgs) {
   return units;
 }
 
+function prepareAmmunition() {
+  ammunitionTypes.forEach((ammoType) => {
+    const ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name);
+    if (ammoQuantity > 0) {
+      startingAmmunition[ammoType.name] = ammoQuantity;
+      buildingManager.deductAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name, ammoQuantity);
+    }
+  });
+}
+
+function returnRemainingAmmunition(battleInstance) {
+  ammunitionTypes.forEach((ammoType) => {
+    if (battleInstance.ammunition[ammoType.name] > 0) {
+      buildingManager.addAmmunitionToMilitaryHQ(window.parcels.parcelList, ammoType.name, battleInstance.ammunition[ammoType.name]);
+    }
+  });
+}
 
 /* UI */
 function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, logs, battleStarted = false) {
@@ -332,8 +360,8 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
 
   // Group the factory units
   const displayFactoryUnits = battleStarted ? Object.values(groupUnits(factoryUnits)) : factoryUnitsCatalogue;
-  console.log("factoryUnits:", factoryUnits);
-  console.log("displayFactoryUnits:", displayFactoryUnits);
+  // console.log("factoryUnits:", factoryUnits);
+  // console.log("displayFactoryUnits:", displayFactoryUnits);
   // Update the factory units table
   for (const unitData of displayFactoryUnits) {
     const row = document.createElement("tr");
@@ -406,19 +434,15 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
   }
 
   // Update the ammunition element
-  ammunitionElement.innerHTML = ""; // Clear the innerHTML
-  for (const [ammoName, ammoQuantity] of Object.entries(ammunition)) {
-    const ammoInfo = document.createElement("p");
-    ammoInfo.innerText = `${ammoName}: ${ammoQuantity}`;
-    ammunitionElement.appendChild(ammoInfo);
-  }
+  updateAmmunitionDisplay(battleStarted);
 
-  // Update the battle log
-  logs.forEach((log) => {
-    const logElement = document.createElement("li");
-    logElement.innerText = log;
-    battleLog.appendChild(logElement);
-  });
+
+  // // Update the battle log
+  // logs.forEach((log) => {
+  //   const logElement = document.createElement("li");
+  //   logElement.innerText = log;
+  //   battleLog.appendChild(logElement);
+  // });
 
   // Pre Battle
   if (!battleStarted) {
@@ -496,7 +520,7 @@ function groupUnits(units) {
   const groupedUnits = {};
 
   for (const unit of units) {
-    const unitKey = unit.health === unit.maxHealth ? unit.name : `${unit.name}-${unit.health}`;
+    const unitKey = unit.health === unit.maxHealth ? unit.name : `${unit.name}`;
 
     if (!groupedUnits[unitKey]) {
       groupedUnits[unitKey] = {
@@ -516,14 +540,23 @@ function groupUnits(units) {
 function createHealthProgressBar(currentHealth, maxHealth) {
   const progressBarContainer = document.createElement("div");
   progressBarContainer.style.width = "100%";
-  progressBarContainer.style.backgroundColor = "#ccc";
+  progressBarContainer.style.backgroundColor = "#c00";
+  progressBarContainer.style.position = "relative";
 
   const progressBar = document.createElement("div");
   progressBar.style.width = `${(currentHealth / maxHealth) * 100}%`;
   progressBar.style.height = "20px";
-  progressBar.style.backgroundColor = "#4caf50";
+  progressBar.style.backgroundColor = "#4cb43c";
+
+  const healthText = document.createElement("span");
+  healthText.innerText = Math.round(currentHealth);
+  healthText.style.position = "absolute";
+  healthText.style.left = "50%";
+  healthText.style.top = "50%";
+  healthText.style.transform = "translate(-50%, -50%)";
 
   progressBarContainer.appendChild(progressBar);
+  progressBarContainer.appendChild(healthText);
   return progressBarContainer;
 }
 
@@ -542,7 +575,7 @@ function buyFactoryUnit(unitName, factoryUnits, factoryUnitsCatalogue, quantity)
       );
       factoryUnits.push(newUnit);
     }
-    console.log(factoryUnits);
+    // console.log(factoryUnits);
   }
 }
 
@@ -562,6 +595,12 @@ function displayArmyCost(factoryUnits) {
   resourceCostTable.innerHTML = "";
 
   const costs = calculateTotalArmyCost(factoryUnits);
+  const header = document.createElement("th");
+  header.innerText = "Army Cost";
+  header.colSpan = 2;
+  if (Object.entries(costs).length > 0) {
+    resourceCostTable.appendChild(header);
+  }
 
   for (const [resource, cost] of Object.entries(costs)) {
     const row = document.createElement("tr");
@@ -582,12 +621,74 @@ function calculateTotalArmyCost(factoryUnits) {
   const costs = {};
 
   factoryUnits.forEach((unit) => {
-    console.log('Unit:', unit);
-    console.log('Unit cost:', unit.cost);
+    // console.log('Unit:', unit);
+    // console.log('Unit cost:', unit.cost);
     for (const [resource, cost] of Object.entries(unit.cost)) {
       costs[resource] = (costs[resource] || 0) + cost;
     }
   });
 
   return costs;
+}
+
+function updateAmmunitionDisplay(battleStarted = false) {
+  const ammunitionElement = document.getElementById("ammunition");
+
+  // Clear the innerHTML
+  ammunitionElement.innerHTML = "";
+
+  // Iterate over the ammunitionTypes array and create an ammoInfo element for each ammunition type
+  ammunitionTypes.forEach((ammoType) => {
+    let ammoQuantity;
+
+    if (battleStarted) {
+      ammoQuantity = battle.ammunition[ammoType.name];
+    } else {
+      ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name);
+    }
+
+    // Only display ammunition types with a quantity greater than 0
+    if (ammoQuantity > 0) {
+      const ammoInfo = document.createElement("p");
+      ammoInfo.innerText = `${ammoType.name}: ${ammoQuantity}`;
+      ammunitionElement.appendChild(ammoInfo);
+    }
+  });
+}
+
+function canAffordArmy(selectedParcel, armyCost) {
+  for (const resource in armyCost) {
+    const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+
+    if (totalResource < armyCost[resource]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function updateStartBattleButtonState() {
+  const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+  const armyCost = calculateTotalArmyCost(factoryUnits);
+
+  if (canAffordArmy(selectedParcel, armyCost)) {
+    startBattleButton.disabled = false;
+  } else {
+    startBattleButton.disabled = true;
+  }
+}
+
+function deductArmyCost(selectedParcel, armyCost) {
+  for (const resource in armyCost) {
+    const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+
+    if (selectedParcel.resources[resource] >= armyCost[resource]) {
+      selectedParcel.resources[resource] -= armyCost[resource];
+    } else {
+      const parcelResource = selectedParcel.resources[resource] || 0;
+      const remainingResource = armyCost[resource] - parcelResource;
+      selectedParcel.resources[resource] = 0;
+      buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
+    }
+  }
 }

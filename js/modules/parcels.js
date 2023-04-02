@@ -214,6 +214,14 @@ const parcels = {
           },
           maxBuildingLimit: 96, // Add the max building limit value for this level
         },
+        {
+          level: 13,
+          cost: {
+            steel: 12800,
+            expansionPoints: 1024,
+          },
+          maxBuildingLimit: 104, // Add the max building limit value for this level
+        },
       ],
     },
     globalProductionRateModifiers: {

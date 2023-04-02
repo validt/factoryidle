@@ -141,9 +141,15 @@ const body = document.querySelector('body');
 
 // Check the user's preference when the page is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('darkMode') === 'true') {
+  const darkMode = localStorage.getItem('darkMode');
+
+  // Enable dark mode if the user has not set a preference or has set it to 'true'
+  if (darkMode === null || darkMode === 'true') {
     body.classList.add('dark-mode');
   }
+
+  // Save the user's preference to localStorage
+  localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
 });
 
 // Toggle dark mode and save the user's preference

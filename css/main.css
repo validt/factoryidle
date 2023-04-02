@@ -37,6 +37,10 @@
     background-color: initial;
 }
 
+.dark-mode button:disabled {
+    background: #888;
+}
+
 .dark-mode .input-btn:hover{
   background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
   background-color: initial;
@@ -505,4 +509,10 @@ h1 {
   padding: 10px;
   font-size: 14px;
   white-space: pre-wrap;
+}
+
+.tables-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
