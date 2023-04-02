@@ -66,7 +66,6 @@ const ui = (() => {
       const resourceCell = row.cells[1];
       resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
       resourceCell.style.backgroundColor = color;
-      console.log(resourceName, color);
       if (color === "green") {
         resourceCell.style.color = "white";
       } else {
@@ -953,8 +952,6 @@ const ui = (() => {
       const currentResourceCount = parcel.resources[resourceName] || 0;
       const previousResourceCount = parcel.previousResources[resourceName] || 0;
       const productionRate = currentResourceCount - previousResourceCount;
-      console.log("getResourceRate current, prev", currentResourceCount, previousResourceCount);
-      console.log("getResourceRate: ", resourceName, productionRate);
       if (productionRate > 0) {
         return "green";
       } else if (productionRate < 0) {

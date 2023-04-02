@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const factoryUnits = [
     new FactoryUnit("Wall", 150, 0, 0, 0),
     new FactoryUnit("Wall", 150, 0, 0, 0),
+    new FactoryUnit("Wall", 150, 0, 0, 0),
+    new FactoryUnit("Wall", 150, 0, 0, 0),
+    new FactoryUnit("Turret", 100, 30, 3, 1),
     new FactoryUnit("Turret", 100, 30, 3, 1),
     new FactoryUnit("Turret", 100, 30, 3, 1),
     new FactoryUnit("Turret", 100, 30, 3, 1),
@@ -18,20 +21,18 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const biterUnits = [
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
-    new BiterUnit("Biter", 80, 5, 5),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Biter", 80, 5, 0),
+    new BiterUnit("Medium Biter", 160, 10, 5),
+    new BiterUnit("Medium Biter", 160, 10, 5),
+    new BiterUnit("Medium Biter", 160, 10, 5),
+    new BiterUnit("Medium Biter", 160, 10, 5),
+    new BiterUnit("Medium Biter", 160, 10, 5),
+    new BiterUnit("Big Biter", 320, 25, 25),
     // Add more units...
   ];
 
@@ -83,6 +84,7 @@ class Unit {
   constructor(name, health, attack, armor) {
     this.name = name;
     this.health = health;
+    this.maxHealth = health;
     this.attack = attack;
     this.armor = armor;
   }
@@ -147,8 +149,12 @@ class Battle {
       this.fight();
       await this.sleep(1000);
 
+      // Deep copy the factoryUnits and biterUnits arrays
+      const factoryUnitsCopy = JSON.parse(JSON.stringify(this.factoryUnits));
+      const biterUnitsCopy = JSON.parse(JSON.stringify(this.biterUnits));
+
       // Update the UI
-      this.updateUI(this.factoryUnits, this.biterUnits, this.ammunition);
+      this.updateUI(factoryUnitsCopy, biterUnitsCopy, this.ammunition, this.logs);
 
       // Log the current step
       for (const log of this.logs) {
@@ -213,58 +219,147 @@ class Battle {
   attackUnits(attackingUnits, defendingUnits, totalDamage) {
     let remainingDamage = totalDamage;
 
-    for (let i = 0; i < defendingUnits.length; i++) {
+    for (let i = 0; i < defendingUnits.length && remainingDamage > 0; i++) {
       const unit = defendingUnits[i];
-      const damageDealt = unit.dealDamage(remainingDamage);
+      console.log("----------", remainingDamage,"---------------",unit);
+      const damageToDeal = Math.max(remainingDamage - unit.armor, 0);
+      if (unit.health >= damageToDeal) {
+        unit.dealDamage(remainingDamage);
+        remainingDamage -= damageToDeal + unit.armor;
+        console.log(remainingDamage)
+      } else {
+        const health = unit.health;
 
-      remainingDamage -= damageDealt;
+        unit.dealDamage(remainingDamage);
+        remainingDamage -= health + unit.armor;
+        console.log(remainingDamage)
+      }
+
 
       if (unit.health <= 0) {
-        this.logs.push(
-          `${attackingUnits[0].name} Units kill 1 ${unit.name}.`
-        );
+        if (attackingUnits.length > 0) {
+          this.logs.push(
+            `${attackingUnits[0].name} Units kill 1 ${unit.name}.`
+          );
+        } else {
+          this.logs.push(
+            `Unknown Units kill 1 ${unit.name}.`
+          );
+        }
         defendingUnits.splice(i, 1);
         i--;
-
-        if (remainingDamage <= 0) {
-          break;
-        }
       }
     }
   }
 }
 
-function updateUI(factoryUnits, biterUnits, ammunition) {
+function updateUI(factoryUnits, biterUnits, ammunition, logs) {
   // Clear the tables
   factoryUnitsTable.innerHTML = "";
   biterUnitsTable.innerHTML = "";
 
+  // Add headers to the tables
+  const factoryHeader = document.createElement("tr");
+  const biterHeader = document.createElement("tr");
+  ["Type", "Health", "Count"].forEach((headerText) => {
+    const factoryTh = document.createElement("th");
+    const biterTh = document.createElement("th");
+    factoryTh.innerText = headerText;
+    biterTh.innerText = headerText;
+    factoryHeader.appendChild(factoryTh);
+    biterHeader.appendChild(biterTh);
+  });
+  factoryUnitsTable.appendChild(factoryHeader);
+  biterUnitsTable.appendChild(biterHeader);
+
+  // Group the factory units
+  const groupedFactoryUnits = groupUnits(factoryUnits);
+
   // Update the factory units table
-  for (const unit of factoryUnits) {
-    const row = factoryUnitsTable.insertRow(-1);
-    row.insertCell(0).innerText = unit.name;
-    row.insertCell(1).innerText = unit.health;
-    row.insertCell(2).innerText = unit.attack;
-    row.insertCell(3).innerText = unit.armor;
-    row.insertCell(4).innerText = unit.consumesAmmo;
+  for (const [unitName, unitData] of Object.entries(groupedFactoryUnits)) {
+    const row = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    nameCell.innerText = unitName;
+    row.appendChild(nameCell);
+
+    const healthCell = document.createElement("td");
+    const progressBar = createHealthProgressBar(unitData.health, unitData.maxHealth);
+    healthCell.appendChild(progressBar);
+    row.appendChild(healthCell);
+
+    const countCell = document.createElement("td");
+    countCell.innerText = unitData.count;
+    row.appendChild(countCell);
+
+    factoryUnitsTable.appendChild(row);
   }
 
+  // Group the biter units
+  const groupedBiterUnits = groupUnits(biterUnits);
+
   // Update the biter units table
-  for (const unit of biterUnits) {
-    const row = biterUnitsTable.insertRow(-1);
-    row.insertCell(0).innerText = unit.name;
-    row.insertCell(1).innerText = unit.health;
-    row.insertCell(2).innerText = unit.attack;
-    row.insertCell(3).innerText = unit.armor;
+  for (const [unitName, unitData] of Object.entries(groupedBiterUnits)) {
+    const row = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    nameCell.innerText = unitName;
+    row.appendChild(nameCell);
+
+    const healthCell = document.createElement("td");
+    const progressBar = createHealthProgressBar(unitData.health, unitData.maxHealth);
+    healthCell.appendChild(progressBar);
+    row.appendChild(healthCell);
+
+    const countCell = document.createElement("td");
+    countCell.innerText = unitData.count;
+    row.appendChild(countCell);
+
+    biterUnitsTable.appendChild(row);
   }
 
   // Update the ammunition element
   ammunitionElement.innerText = ammunition;
 
   // Update the battle log
-  this.logs.forEach((log) => {
-    const logDiv = document.createElement("div");
-    logDiv.innerText = log;
-    battleLog.appendChild(logDiv);
+  logs.forEach((log) => {
+    const logElement = document.createElement("li");
+    logElement.innerText = log;
+    battleLog.appendChild(logElement);
   });
+}
+
+function groupUnits(units) {
+  const groupedUnits = {};
+
+  for (const unit of units) {
+    const unitKey = unit.health === unit.maxHealth ? unit.name : `${unit.name}-${unit.health}`;
+
+    if (!groupedUnits[unitKey]) {
+      groupedUnits[unitKey] = {
+        name: unit.name,
+        health: unit.health,
+        maxHealth: unit.maxHealth,
+        count: 0,
+      };
+    }
+
+    groupedUnits[unitKey].count++;
+  }
+
+  return groupedUnits;
+}
+
+function createHealthProgressBar(currentHealth, maxHealth) {
+  const progressBarContainer = document.createElement("div");
+  progressBarContainer.style.width = "100%";
+  progressBarContainer.style.backgroundColor = "#ccc";
+
+  const progressBar = document.createElement("div");
+  progressBar.style.width = `${(currentHealth / maxHealth) * 100}%`;
+  progressBar.style.height = "20px";
+  progressBar.style.backgroundColor = "#4caf50";
+
+  progressBarContainer.appendChild(progressBar);
+  return progressBarContainer;
 }
