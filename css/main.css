@@ -37,7 +37,7 @@
     background-color: initial;
 }
 
-.dark-mode .belt-btn:hover{
+.dark-mode .input-btn:hover{
   background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
   background-color: initial;
   cursor:pointer;
@@ -66,15 +66,15 @@
   background-color: #222426;
 }
 
-.dark-mode .belt-btn {
+.dark-mode .input-btn {
     background-color: #35393B;
 }
 
-.dark-mode .belt-controller {
+.dark-mode .input-controller {
     border-color: rgb(140, 130, 115);
 }
 
-.dark-mode .belt-display {
+.dark-mode .input-display {
     border-left-color: rgb(140, 130, 115);
     border-top-color: initial;
     border-right-color: rgb(140, 130, 115);
@@ -397,35 +397,47 @@ button:disabled {
   margin-bottom: 1rem;
 }
 
-/* Belt Controller */
-.belt-controller{
+/* Input Controller */
+.input-controller{
   display:flex;
   width:120px;
   border:1px solid black;
 }
 
-.belt-btn{
+.input-btn{
   width:30px;
   text-align:center;
   background-color:#AAAAAA;
   padding:5px 3px;
   user-select: none;
 }
-.belt-btn:hover{
+.input-btn:hover{
   background-color:#CCCCCC;
   cursor:pointer;
 }
-.belt-btn:active{
+.input-btn:active{
   background-color:#666666;
 }
 
-.belt-display{
+.input-display{
   width:80%;
   text-align:center;
   border-left: 1px solid black;
   border-top: 0px;
   border-right: 1px solid black;
   border-bottom: 0px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Title and Version Number */

@@ -1,3 +1,162 @@
+createDirectionInput(beltId, resourceName) {
+  // Create elements
+  const beltController = document.createElement("div");
+  const minusBtn = document.createElement("div");
+  const directionInput = document.createElement("input");
+  const plusBtn = document.createElement("div");
+
+  // Set properties and attributes
+  beltController.className = "input-controller";
+
+  minusBtn.className = "input-btn";
+  minusBtn.innerText = "-";
+
+  directionInput.type = "text";
+  directionInput.className = "input-display";
+  const inputValue = this.parcel.inputValues && this.parcel.inputValues[resourceName] && this.parcel.inputValues[resourceName][beltId] ? this.parcel.inputValues[resourceName][beltId] : 0;
+  directionInput.value = inputValue;
+  directionInput.dataset.belt = beltId;
+  directionInput.dataset.resource = resourceName;
+  directionInput.dataset.currentval = directionInput.value;
+
+  plusBtn.className = "input-btn";
+  plusBtn.innerText = "+";
+
+  // Append elements
+  beltController.append(minusBtn, directionInput, plusBtn);
+
+
+I found the issue, when buying a new unit, we use this function:
+function buyFactoryUnit(unitName, factoryUnits) {
+  const unit = factoryUnits.find((u) => u.name === unitName);
+  console.log("-unit-", unit);
+  factoryUnits.push(new FactoryUnit(unit));
+}
+
+So we push the entire existing factory unit object into the first argument to create a new FactoryUnit, which is the name. So the unit construction here is invalid.
+
+There is a deeper reason for this issue, so lets resolve this step by step.
+
+The major issue is that to have factory units available to buy, we need to already add one of those factory units to the array like this:
+const factoryUnits = [
+  new FactoryUnit("Wall", 1500, 0, 0, 0, { ironPlates: 25, bricks: 20 }),
+  new FactoryUnit("Turret", 100, 20, 3, 1, { ironPlates: 50, bricks: 40 }),
+  // ... additional factory unit types ...
+];
+
+So I think we should have two arrays initialized. the factoryUnitsCatalogue which holds all possible units that can be bough.
+This is the object that is used to create the rows of the table & is referenced for the buy button.
+And then we have an empty factoryUnits array to begin with, as the total units bought will be 0.
+This is also the array that we use to determine the "count" column in the factory-units table as this is the function we use for the active battle.
+
+
+
+
+
+Right now we are initializing factory units with a set amount and we don't have costs attribute on them.
+
+Lets set this up so that we initialize the factory units with cost & amount = 0 so that the buying & selling can set the amount. Costs should be like this:
+cost: { ironPlates: 25, bricks: 20 },
+
+I setup the structure as follows:
+class Unit {
+  constructor(name, health, attack, armor) {
+    this.name = name;
+    this.health = health;
+    this.maxHealth = health;
+    this.attack = attack;
+    this.armor = armor;
+  }
+
+  dealDamage(damage) {
+    this.health -= damage;
+    return damage;
+  }
+}
+
+class FactoryUnit extends Unit {
+  constructor(name, health, attack, armor, consumesAmmo, cost) {
+    super(name, health, attack, armor);
+    this.consumesAmmo = consumesAmmo;
+    this.cost = cost;
+  }
+}
+
+  // Initialize your factoryUnits here
+  const factoryUnits = [
+    new FactoryUnit("Wall", FactoryUnit, 1500, 0, 0, 0, { ironPlates: 25, bricks: 20 }),
+    new FactoryUnit("Turret", FactoryUnit, 100, 20, 3, 1, { ironPlates: 50, bricks: 40 }),
+    // ... additional factory unit types ...
+  ];
+
+i am getting this error:
+fightSystem.js:479 Uncaught TypeError: Cannot convert undefined or null to object
+    at Function.entries (<anonymous>)
+    at fightSystem.js:479:43
+
+At this line:
+for (const [resource, cost] of Object.entries(unit.cost)) {
+
+
+
+Next up we need to update the UI so that the player can buy Units using existing resources.
+
+1. Before the battle has started, the table needs to havee "buy" & "sell" buttons next to each unit that can be bought (see buy building buttons for reference)
+
+<button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
+<button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
+
+2. Clicking "buy" adds one unit of that type to the factory army. Clicking sell works analogous.
+
+3. Every factory unit has a cost attribute, much like this:
+cost: { ironPlates: 25, bricks: 20 },
+
+4. We calcluate the total cost for the army and display it in a table, one row for each resource
+
+function startProject(project) {
+    const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+
+    if (hasEnoughResources(selectedParcel, project.cost)) {
+        for (const resource in project.cost) {
+            const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+
+            if (selectedParcel.resources[resource] >= project.cost[resource]) {
+                selectedParcel.resources[resource] -= project.cost[resource];
+            } else {
+                const parcelResource = selectedParcel.resources[resource] || 0;
+                const remainingResource = project.cost[resource] - parcelResource;
+                selectedParcel.resources[resource] = 0;
+                buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
+            }
+        }
+
+        for (const resource in project.reward) {
+            if (!selectedParcel.resources[resource]) {
+                selectedParcel.resources[resource] = 0;
+            }
+            selectedParcel.resources[resource] += project.reward[resource];
+        }
+
+        project.completed = true;
+        // Remove the completed project and add the next project in the category (if any)
+        projects[project.category].shift();
+
+        // Hide the tooltip
+        const tooltip = document.getElementById("tooltip");
+        tooltip.style.display = "none";
+
+        // Update the UI to reflect the changes
+        ui.updateResourceDisplay(selectedParcel);
+        //projectsContainer.innerHTML = ""; // Remove this line
+        renderProjects();
+    } else {
+        alert("You don't have enough resources to start this project.");
+    }
+}
+
+
+
+
 addTooltipToButtons(buttonClass, parcel) {
   const buttons = this.tableElement.querySelectorAll(buttonClass);
   buttons.forEach((button) => {

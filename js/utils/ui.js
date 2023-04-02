@@ -500,20 +500,20 @@ const ui = (() => {
       const plusBtn = document.createElement("div");
 
       // Set properties and attributes
-      beltController.className = "belt-controller";
+      beltController.className = "input-controller";
 
-      minusBtn.className = "belt-btn";
+      minusBtn.className = "input-btn";
       minusBtn.innerText = "-";
 
       directionInput.type = "text";
-      directionInput.className = "belt-display";
+      directionInput.className = "input-display";
       const inputValue = this.parcel.inputValues && this.parcel.inputValues[resourceName] && this.parcel.inputValues[resourceName][beltId] ? this.parcel.inputValues[resourceName][beltId] : 0;
       directionInput.value = inputValue;
       directionInput.dataset.belt = beltId;
       directionInput.dataset.resource = resourceName;
       directionInput.dataset.currentval = directionInput.value;
 
-      plusBtn.className = "belt-btn";
+      plusBtn.className = "input-btn";
       plusBtn.innerText = "+";
 
       // Append elements

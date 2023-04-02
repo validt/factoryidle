@@ -193,8 +193,16 @@
         </div>
     </div>
     <div>
+      <table id="resource-cost-table">
+        <tr>
+          <th>Resource</th>
+          <th>Cost</th>
+        </tr>
+      </table>
+      <button id="start-battle">Start Battle</button>
       <h2>Factory Units</h2>
-      <h3>Ammunition: <span id="ammunition">0</span></h3>
+      <h3>Ammunition:</h3>
+      <div id="ammunition"></div>
       <table id="factory-units-table">
         <thead>
           <tr>
@@ -232,7 +240,7 @@
         <!-- Battle log messages will be dynamically added here -->
       </div>
 
-      <button id="start-battle">Start Battle</button>
+
     </div>
 
     <script src="js/modules/parcels.js"></script>

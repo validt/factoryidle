@@ -67,6 +67,7 @@ window.researchManager = new ResearchManager();
 // Add research options here
 window.researchManager.addResearch(new Research('expansionTech', 'Expansion Tech', { researchPoints: 4 }));
 window.researchManager.addResearch(new Research('remoteConstruction', 'Remote Construction', { researchPoints: 12 }));
+window.researchManager.addResearch(new Research('militaryTech', 'Military Tech', { researchPoints: 16 }));
 window.researchManager.addResearch(new Research('steelMaking', 'Steel Making', { researchPoints: 24 }));
 window.researchManager.addResearch(new Research('oilProcessing', 'Oil Processing', { researchPoints: 30 }));
 window.researchManager.addResearch(new Research('advancedElectronics', 'Advanced Electronics', { researchPoints: 36 }));
