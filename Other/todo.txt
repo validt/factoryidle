@@ -1,3 +1,5 @@
+- Tooltips hidden when 0%
+
 ## Playtrough Testing
 - Highlight Buildings that have not yet been built with a "new" property
 - If there is a "new" property in the dropdown, dispaly a little arrow emoji(can be done with hide unhide)
