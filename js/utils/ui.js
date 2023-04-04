@@ -58,68 +58,6 @@ const ui = (() => {
       this.addResourceTooltips(this.parcel);
     }
 
-    updateRow(resourceName, row) {
-      const building = buildingManager.getBuildingByResourceName(resourceName);
-
-      // Update the resource amount cell
-      const color = getResourceRateColor(this.parcel, resourceName);
-      const resourceCell = row.cells[1];
-      resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
-      resourceCell.style.backgroundColor = color;
-      if (color === "green") {
-        resourceCell.style.color = "white";
-      } else {
-        if (localStorage.getItem('darkMode') === 'true') {
-          resourceCell.style.color = "#E8E6E3";
-          return "#E8E6E3";
-        } else {
-          resourceCell.style.color = "black";
-          return "black";
-        }
-      }
-
-      // Update the building count cell
-      const countCell = row.cells[3];
-      if (building && progressionManager.isUnlocked("ironMiner") &&
-        progressionManager.isUnlocked("stoneMiner") &&
-        progressionManager.isUnlocked("coalMiner")) {
-        countCell.textContent = this.parcel.buildings[building.id] || 0;
-      } else {
-        countCell.textContent = "";
-      }
-
-      // Update the production cell
-      const productionCell = row.cells[4];
-      if (building) {
-        const buildingCount = this.parcel.buildings[building.id] || 0;
-        if (buildingCount > 0 &&
-          progressionManager.isUnlocked("ironMiner") &&
-          progressionManager.isUnlocked("stoneMiner") &&
-          progressionManager.isUnlocked("coalMiner")) {
-          if (!productionCell.querySelector(".buy-building-resource")) {
-            productionCell.innerHTML = `
-              <button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
-              <button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
-            `;
-          }
-        } else {
-          productionCell.textContent = "";
-        }
-      }
-
-      // Update the buy and sell buttons
-      const buyButton = row.querySelector('.buy-building-resource');
-      const sellButton = row.querySelector('.sell-building-resource');
-
-      if (buyButton && buyButton.dataset.listenerAttached !== 'true') {
-        this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
-      }
-
-      if (sellButton && sellButton.dataset.listenerAttached !== 'true') {
-        this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
-      }
-    }
-
     addEventListenerToButtons(buttonClass, actionFunction, buttonElement = null) {
       const buttons = buttonElement ? [buttonElement] : this.tableElement.querySelectorAll(buttonClass);
       buttons.forEach((button) => {
@@ -216,16 +154,15 @@ const ui = (() => {
               const totalModifiedOutputText = Object.entries(resource.outputs || {})
               .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
               .join("<br>");
-
+              console.log(consumptionRateModifier);
+              console.log(productionRateModifier);
               const tooltipText = `
               <table>
               <tbody>
 
               <thead>
                 <tr>
-                  <th colspan="2" style="text-align: left;"><b>Total (Modified)</b></th>
-                  <th></th>
-                  <th></th>
+                  <th colspan="3" style="text-align: left;"><b>Total (Modified)</b></th>
                 </tr>
               </thead>
               <tr>
@@ -236,35 +173,33 @@ const ui = (() => {
 
                 <thead>
                   <tr>
-                    <th colspan="2" style="text-align: left;"><b>Modified</b></th>
-                    <th></th>
-                    <th></th>
+                    <th colspan="3" style="text-align: left;"><b>Modified</b></th>
                   </tr>
                 </thead>
-                <tr>
-                  <td>${
-                    consumptionRateModifier !== undefined
-                      ? (consumptionRateModifier > 0 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
-                      : ""
-                  }</td>
-                  <td></td>
-                  <td>${
-                    productionRateModifier !== undefined
-                      ? (productionRateModifier > 0 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
-                      : ""
-                  }</td>
-                </tr>
+
                   <tr>
                     <td>${modifiedInputText || "-"}</td>
                     <td> &#x2192; </td>
                     <td>${modifiedOutputText || "-"}</td>
                   </tr>
 
+                  <tr>
+                    <td>${
+                      consumptionRateModifier !== undefined
+                        ? (consumptionRateModifier > 1 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
+                        : ""
+                    }</td>
+                    <td></td>
+                    <td>${
+                      productionRateModifier !== undefined
+                        ? (productionRateModifier > 1 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
+                        : ""
+                    }</td>
+                  </tr>
+
                   <thead>
                     <tr>
-                      <th colspan="2" style="text-align: left;"><b>Total (Default)</b></th>
-                      <th></th>
-                      <th></th>
+                      <th colspan="3" style="text-align: left;"><b>Total (Default)</b></th>
                     </tr>
                   </thead>
                   <tr>
@@ -275,9 +210,7 @@ const ui = (() => {
 
                   <thead>
                     <tr>
-                      <th colspan="2" style="text-align: left;"><b>Default</b></th>
-                      <th></th>
-                      <th></th>
+                      <th colspan="3" style="text-align: left;"><b>Default</b></th>
                     </tr>
                   </thead>
                     <tr>
@@ -321,8 +254,8 @@ const ui = (() => {
         // Update forward and backward belt labels
         const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
         const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
-        const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["forwardBelt"] || 0), 0);
-        const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["backwardBelt"] || 0), 0);
+        const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+        const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
         forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
         backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
         }
@@ -336,7 +269,7 @@ const ui = (() => {
         //"Utilization",
         "Action",
         "Count",
-        "Production",
+        "Building",
         "Forward 0/0",
         "Backward 0/0",
       ];
@@ -359,8 +292,6 @@ const ui = (() => {
       // Hide the Production header initially
       const productionHeader = headerRow.children[4];
       const countHeader = headerRow.children[3];
-      productionHeader.style.display = "none";
-      countHeader.style.display = "none";
 
       this.tableElement.appendChild(headerRow);
     }
@@ -469,7 +400,7 @@ const ui = (() => {
       beltTypes.forEach((beltId, index) => {
         const beltController = this.createDirectionInput(beltId, resourceName);
         const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
-        const beltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings[beltId] || 0), 0);
+        const beltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
         //const beltCount = this.parcel.buildings[beltId] * 2 || 0;
 
         const cell = this.createCell(beltController);
@@ -483,13 +414,96 @@ const ui = (() => {
 
           const labelId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltHeader-${this.parcel.id}`;
           const labelElement = document.getElementById(labelId);
-          labelElement.textContent = `${beltId === "forwardBelt" ? "Forwards" : "Backwards"} ${beltUsage}/${beltCount}`;
+          labelElement.textContent = `${beltId === "forwardBelt" ? "Forward" : "Backward"} ${beltUsage}/${beltCount}`;
 
           cell.style.display = ""; // Unhide the cell if the belt has been built
         }
       });
 
       return row;
+    }
+
+    updateRow(resourceName, row) {
+      const building = buildingManager.getBuildingByResourceName(resourceName);
+      // Update the resource amount cell
+      const color = getResourceRateColor(this.parcel, resourceName);
+      const resourceCell = row.cells[1];
+      resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
+      resourceCell.style.backgroundColor = color;
+      if (color === "green") {
+        resourceCell.style.color = "white";
+      } else {
+        if (localStorage.getItem('darkMode') === 'true') {
+          resourceCell.style.color = "#E8E6E3";
+        } else {
+          resourceCell.style.color = "black";
+        }
+      }
+
+      // Update the building count cell
+      const countCell = row.cells[3];
+      if (building && progressionManager.isUnlocked("ironMiner") &&
+        progressionManager.isUnlocked("stoneMiner") &&
+        progressionManager.isUnlocked("coalMiner")) {
+        countCell.textContent = this.parcel.buildings[building.id] || 0;
+        countCell.style.visibility = "visible"; // Make the cell visible
+      } else {
+        countCell.textContent = ""; // Hide the content if the required buildings are not unlocked
+        countCell.style.visibility = "collapse"; // Make the cell invisible
+      }
+
+      // Update the production cell
+      const productionCell = row.cells[4];
+      if (building) {
+        const buildingCount = this.parcel.buildings[building.id] || 0;
+        if (buildingCount > 0 &&
+          progressionManager.isUnlocked("ironMiner") &&
+          progressionManager.isUnlocked("stoneMiner") &&
+          progressionManager.isUnlocked("coalMiner")) {
+          if (!productionCell.querySelector(".buy-building-resource")) {
+            productionCell.innerHTML = `
+              <button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
+              <button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
+            `;
+          }
+        } else {
+          productionCell.textContent = "";
+        }
+      }
+
+      // Update the buy and sell buttons
+      const buyButton = row.querySelector('.buy-building-resource');
+      const sellButton = row.querySelector('.sell-building-resource');
+
+      if (buyButton && buyButton.dataset.listenerAttached !== 'true') {
+        this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
+      }
+
+      if (sellButton && sellButton.dataset.listenerAttached !== 'true') {
+        this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
+      }
+
+      // Unhide the belt cells if the belt count is greater than 0
+      const beltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+      if (beltCount > 0) {
+        for (let i = 5; i <= 6; i++) {
+          row.cells[i].style.display = ""; // Unhide the Forward and Backward cells
+          // console.log("unhide", resourceName, row.cells[i])
+        }
+
+        const forwardBeltUsage = this.parcel.beltUsage ? this.parcel.beltUsage["forwardBelt"] || 0 : 0;
+        const backwardBeltUsage = this.parcel.beltUsage ? this.parcel.beltUsage["backwardBelt"] || 0 : 0;
+
+        const forwardLabelId = `forwardBeltHeader-${this.parcel.id}`;
+        const forwardLabelElement = document.getElementById(forwardLabelId);
+        forwardLabelElement.textContent = `Forward ${forwardBeltUsage}/${beltCount}`;
+        forwardLabelElement.style.display = "";
+
+        const backwardLabelId = `backwardBeltHeader-${this.parcel.id}`;
+        const backwardLabelElement = document.getElementById(backwardLabelId);
+        backwardLabelElement.textContent = `Backward ${backwardBeltUsage}/${beltCount}`;
+        backwardLabelElement.style.display = "";
+      }
     }
 
     createDirectionInput(beltId, resourceName) {
@@ -534,7 +548,7 @@ const ui = (() => {
 
       directionInput.addEventListener("input", (event) => {
         const inputVal = parseInt(event.target.value, 10) || 0;
-        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings[beltId] || 0), 0);
+        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
         const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
         const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
         const maxCellVal = maxVal - (beltUsage - currentVal);
@@ -618,6 +632,18 @@ const ui = (() => {
       }
     }
 
+    refreshTable() {
+      const resourceTable = document.getElementById("resourceTable");
+      console.log(resourceTable);
+      for (let i = 1; i < resourceTable.rows.length; i++) {
+        const row = resourceTable.rows[i];
+        const resourceName = row.cells[0].textContent;
+        console.log("row", row);
+        console.log("resourceName", resourceName);
+        this.updateRow(resourceName, row);
+      }
+    }
+
   }
 
   function addParcelToUI(parcel) {
@@ -635,7 +661,6 @@ const ui = (() => {
     const parcelIndex = window.parcels.parcelList.findIndex(p => p.id === parcel.id);
     parcelManipulation.updateParcelTab(parcelIndex);
   }
-
 
   function addParcelClickListener(parcelTab) {
       parcelTab.addEventListener("click", () => {
@@ -668,6 +693,7 @@ const ui = (() => {
 
     // Update the resource table with the given parcel
     resourceTable.update();
+    return resourceTable;
   }
 
     function getTotalBeltUsage(parcel, beltId) {
@@ -845,6 +871,7 @@ const ui = (() => {
                 const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
                 if (totalResource < cost) {
                     canAfford = false;
+                    console.log(resourceName, totalResource - cost);
                     break;
                 }
             }
@@ -877,8 +904,49 @@ const ui = (() => {
                 }
 
                 updateBuildingDisplay(parcel);
-            }
+              } else {
+                const missingResources = resourceCost
+                  .filter(([resourceName, cost]) => {
+                    const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+                    return totalResource < cost;
+                  })
+                  .map(([resourceName, cost]) => {
+                    const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+                    return { resourceName, amount: cost - totalResource };
+                  });
+
+                showMissingResourceOverlay(missingResources);
+              }
         }
+    }
+
+    function showMissingResourceOverlay(missingResources) {
+      const overlay = document.createElement("div");
+      const darkMode = localStorage.getItem('darkMode');
+
+      overlay.id = "missing-resource-overlay";
+
+
+      const title = document.createElement("h3");
+      title.textContent = "Missing Resources";
+      overlay.appendChild(title);
+
+      const resourceList = document.createElement("ul");
+      missingResources.forEach((resource) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${resource.resourceName}: ${resource.amount}`;
+        resourceList.appendChild(listItem);
+      });
+      overlay.appendChild(resourceList);
+
+      const closeButton = document.createElement("button");
+      closeButton.textContent = "Close";
+      closeButton.addEventListener("click", () => {
+        document.body.removeChild(overlay);
+      });
+      overlay.appendChild(closeButton);
+
+      document.body.appendChild(overlay);
     }
 
     function sellBuilding(parcel, buildingId) {
@@ -896,7 +964,6 @@ const ui = (() => {
             if (parcel.buildings[buildingId] === 0) {
                 delete parcel.buildings[buildingId];
             }
-
             // Update building display
             updateBuildingDisplay(parcel);
         }
@@ -937,7 +1004,7 @@ const ui = (() => {
 
                 // Include the building description if it exists
                 const buildingDescription = building.description ? ` - ${building.description}` : "";
-                optionElement.textContent = `${building.name} - ${JSON.stringify(building.cost)}${buildingDescription}`;
+                optionElement.textContent = `${building.name} - ${formatResourceCost(building.cost)}${buildingDescription}`;
 
                 //buildNewBuildingSelect.appendChild(optionElement);
                 buildNewBuildingSelect.insertBefore(optionElement, firstChild);
@@ -946,6 +1013,12 @@ const ui = (() => {
                 addedToDropdown.add(buildingId);
             }
         }
+    }
+
+    function formatResourceCost(cost) {
+      return Object.entries(cost)
+        .map(([resource, amount]) => `${resource}: ${amount}`)
+        .join(", ");
     }
 
     function getResourceRateColor(parcel, resourceName) {
@@ -976,6 +1049,8 @@ const ui = (() => {
       updateSectionVisibility("parcels-section", expansionTechCenterBuilt);
       updateSectionVisibility("global-header", expansionTechCenterBuilt);
       updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
+      updateSectionVisibility("pollution-section", gameState.sectionVisibility.pollutionSection);
+      updateSectionVisibility("fight-container", gameState.sectionVisibility.fightSection);
       updateSectionVisibility("project-section", gameState.sectionVisibility.projectSection);
       updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
       updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
@@ -997,14 +1072,14 @@ const ui = (() => {
 
 
       if (fulfillment >= 200) {
-        emoji = '🟢🟢🟢';
-        modifier = 50;
+        emoji = '🟢';
+        modifier = 0;
       } else if (fulfillment > 120) {
-        emoji = '🟢🟢';
-        modifier = (fulfillment - 100) / fulfillment * 100;
+        emoji = '🟢';
+        modifier = 0;
       } else if (fulfillment >= 100) {
         emoji = '🟢';
-        modifier = (fulfillment - 100) / fulfillment * 100;
+        modifier = 0;
       } else {
         emoji = fulfillment < 40 ? '🔴' : '🟠';
         modifier = fulfillment - 100;
@@ -1024,7 +1099,7 @@ const ui = (() => {
 
       const energyDemand = energyManager.calculateGlobalEnergyUsage();
       const energyProduction = energyManager.calculateGlobalEnergyProduction();
-
+      let modifier = 0;
       energyDemandElement.textContent = energyDemand;
       energyProductionElement.textContent = energyProduction;
 
@@ -1033,9 +1108,9 @@ const ui = (() => {
       fulfillmentModifierElement.textContent = fulfillmentModifier;
 
       if (fulfillment >= 100) {
-        let modifier = (fulfillment - 100) / fulfillment;
+        modifier = 0;
         if (fulfillment >= 200) {
-            modifier = 0.5
+            modifier = 0
         }
         parcels.globalProductionRateModifiers.energyModifier = modifier;
         parcels.globalConsumptionRateModifiers.energyModifier = modifier;
@@ -1083,6 +1158,33 @@ const ui = (() => {
       }
     }
 
+    function addTooltipToBuyParcelButton(buyParcelButton) {
+      const tooltip = document.getElementById("tooltip");
+
+      buyParcelButton.addEventListener("mouseover", (event) => {
+        const costText = Object.entries(gameState.buyParcelCost)
+          .map(([resource, cost]) => `${cost} ${resource}`)
+          .join("<br>");
+        const parcelText = `Cost:<br>${costText}`;
+
+        tooltip.innerHTML = parcelText;
+        tooltip.style.display = "block";
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+
+      // Hide tooltip on mouseout
+      buyParcelButton.addEventListener("mouseout", () => {
+        tooltip.style.display = "none";
+      });
+
+      // Update tooltip position on mousemove
+      buyParcelButton.addEventListener("mousemove", (event) => {
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+    }
+
     return {
         addParcelToUI,
         updateResourceDisplay,
@@ -1097,6 +1199,8 @@ const ui = (() => {
         buyBuilding,
         sellBuilding,
         addParcelClickListener,
+        addTooltipToBuyParcelButton,
+        formatResourceCost,
     };
     })();
 

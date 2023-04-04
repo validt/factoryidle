@@ -18,7 +18,7 @@ const resourceCategories = {
   redScience: { category: "3Advanced", order: 3 },
   researchPoints: { category: "4Points", order: 1 },
   expansionPoints: { category: "4Points", order: 2 },
-  blueprintPoints: { category: "4Points", order: 3 },
+  alienArtefacts: { category: "4Points", order: 3 },
   standardAmmunition:  { category: "5Military", order: 1},
   armorPenetratingAmmunition:  { category: "5Military", order: 2},
   piercingAmmunition:  { category: "5Military", order: 3},

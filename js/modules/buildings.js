@@ -206,24 +206,39 @@
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.researchCenter > 0),
     },
+    // {
+    //   id: "forwardBelt",
+    //   name: "Forward Conveyor Belt",
+    //   cost: { expansionPoints: 1 },
+    //   inputs: {},
+    //   outputs: {},
+    //   energyInput: 2,
+    //   rate: 1,
+    //   minable: false,
+    //   productionRateModifier: 0,
+    //   consumptionRateModifier: 0,
+    //   productionModifierSources: {},
+    //   consumptionModifierSources: {},
+    //   unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0),
+    // },
+    // {
+    //   id: "backwardBelt",
+    //   name: "Backward Conveyor Belt",
+    //   cost: { expansionPoints: 1 },
+    //   inputs: {},
+    //   outputs: {},
+    //   energyInput: 2,
+    //   rate: 1,
+    //   minable: false,
+    //   productionRateModifier: 0,
+    //   consumptionRateModifier: 0,
+    //   productionModifierSources: {},
+    //   consumptionModifierSources: {},
+    //   unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0),
+    // },
     {
-      id: "forwardBelt",
-      name: "Forward Conveyor Belt",
-      cost: { expansionPoints: 1 },
-      inputs: {},
-      outputs: {},
-      energyInput: 2,
-      rate: 1,
-      minable: false,
-      productionRateModifier: 0,
-      consumptionRateModifier: 0,
-      productionModifierSources: {},
-      consumptionModifierSources: {},
-      unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0),
-    },
-    {
-      id: "backwardBelt",
-      name: "Backward Conveyor Belt",
+      id: "beltBus",
+      name: "Belt Bus",
       cost: { expansionPoints: 1 },
       inputs: {},
       outputs: {},
@@ -240,7 +255,7 @@
       id: "expansionCenter",
       name: "Expansion Center",
       cost: { ironPlates: 100, expansionPoints: 4 },
-      inputs: { redScience: 75 },
+      inputs: { redScience: 60 },
       outputs: { expansionPoints: 1 },
       energyInput: 3,
       rate: 1,
@@ -440,7 +455,7 @@
       cost: { steel: 1000, gears: 500, greenChips: 500},
       inputs: { standardAmmunition: 5, steel: 1, copperPlates: 2 },
       outputs: { armorPenetratingAmmunition: 1},
-      energyInput: 6,
+      energyInput: 12,
       rate: 1,
       minable: false,
       productionRateModifier: 0,
@@ -452,10 +467,10 @@
     {
       id: "piercingAmmunitionFactory",
       name: "Ammunition Factory (Piercing)",
-      cost: { steel: 5000, gears: 5000, redChips: 500},
-      inputs: { armorPenetratingAmmunition: 5, steel: 2, copperPlates: 1 },
+      cost: { steel: 10000, gears: 10000, redChips: 5000},
+      inputs: { armorPenetratingAmmunition: 4, steel: 1, copperPlates: 1 },
       outputs: { piercingAmmunition: 1},
-      energyInput: 6,
+      energyInput: 18,
       rate: 1,
       minable: false,
       productionRateModifier: 0,
@@ -463,6 +478,66 @@
       productionModifierSources: {},
       consumptionModifierSources: {},
       unlockConditions: () => window.gameState.research.militaryTech,
+    },
+    {
+      id: "solarBatteryArray",
+      name: "Solar & Battery Array",
+      cost: { steel: 100, copperCables: 100, greenChips: 50, sulfur: 50},
+      inputs: {},
+      outputs: {},
+      energyOutput: 4,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => window.gameState.research.solarTech,
+    },
+    {
+      id: "electricStoneFurnace",
+      name: "Stone Furnace (Electric)",
+      cost: { steel: 500, bricks: 500, redChips: 250 },
+      inputs: { stone: 4 },
+      outputs: { bricks: 2 },
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => true,
+    },
+    {
+      id: "electricIronFurnace",
+      name: "Iron Furnace (Electric)",
+      cost: { steel: 500, bricks: 500, redChips: 250 },
+      inputs: { ironOre: 4 },
+      outputs: { ironPlates: 2 },
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => true,
+    },
+    {
+      id: "electricCopperFurnace",
+      name: "Copper Furnace (Electric)",
+      cost: { steel: 500, bricks: 500, redChips: 250 },
+      inputs: { copperOre: 4},
+      outputs: { copperPlates: 2 },
+      energyInput: 6,
+      rate: 1,
+      minable: false,
+      productionRateModifier: 0,
+      consumptionRateModifier: 0,
+      productionModifierSources: {},
+      consumptionModifierSources: {},
+      unlockConditions: () => true,
     },
   ];
 
@@ -528,20 +603,25 @@
   }
 
   function deductResourcesFromRemoteConstructionFacilities(parcels, resourceName, requiredResource) {
-      for (const parcel of parcels) {
-          if (parcel.buildings.remoteConstructionFacility) {
-              const availableResource = parcel.resources[resourceName] || 0;
-              console.log("availableResource", availableResource);
-              console.log("requiredResource", requiredResource);
-              const resourceToDeduct = Math.min(availableResource, requiredResource);
-              parcel.resources[resourceName] -= resourceToDeduct;
-              requiredResource -= resourceToDeduct;
+    console.log(requiredResource);
+    for (const parcel of parcels) {
+      if (parcel.buildings.remoteConstructionFacility) {
+        if (isNaN(parcel.resources[resourceName]) || parcel.resources[resourceName] === undefined) {
+          parcel.resources[resourceName] = 0;
+        }
 
-              if (requiredResource <= 0) {
-                  break;
-              }
-          }
+        const availableResource = parcel.resources[resourceName];
+        console.log("availableResource", availableResource);
+        console.log("requiredResource", requiredResource);
+        const resourceToDeduct = Math.min(availableResource, requiredResource);
+        parcel.resources[resourceName] -= resourceToDeduct;
+        requiredResource -= resourceToDeduct;
+
+        if (requiredResource <= 0) {
+          break;
+        }
       }
+    }
   }
 
   /* Military Building Logic */

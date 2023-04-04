@@ -2,15 +2,30 @@ const gameState = {
   get parcels() {
     return window.parcels.parcelList;
   },
+  buyParcelCost: {
+      expansionPoints: 2,
+      alienArtefacts: 1,
+  },
   research: {}, // Fill with your research data
   progression: {
     unlockedBuildings: new Set(), // Store the unlocked buildings here
   },
   sectionVisibility: {
     energySection: false,
+    pollutionSection: false,
+    fight: false,
     projectSection: false,
     researchSection: false,
     blueprints: false,
+
+  },
+  battle: null,
+  pollution: {
+    pollutionFactor: 0,
+    pollutionBiterFactor: 0,
+    pollutionValue: 0,
+    pollutionEnergyValue: 0,
+    pollutionBuildingValue: 0,
   },
   // Add other relevant game state data as needed
 };
@@ -18,6 +33,11 @@ const gameState = {
 window.gameState = gameState;
 
 window.saveGame = function() {
+  // Save the battle object
+  if (window.battle) {
+    window.gameState.battle = window.battle.exportData();
+  }
+
   localStorage.setItem('gameState', JSON.stringify(window.gameState));
   const projectsJSON = JSON.stringify(projectsModule.projects);
   localStorage.setItem("savedProjects", projectsJSON);
@@ -64,6 +84,11 @@ window.loadGame = function() {
       return parcel;
     });
 
+    // Assign the Parcel Costs
+    if (parsedState.buyParcelCost) {
+      window.gameState.buyParcelCost = parsedState.buyParcelCost;
+    }
+
     // Assign the research data
     if (parsedState.research) {
       window.gameState.research = parsedState.research;
@@ -72,6 +97,11 @@ window.loadGame = function() {
     // Assign section visibility
     if (parsedState.sectionVisibility) {
       window.gameState.sectionVisibility = parsedState.sectionVisibility;
+    }
+
+    // Assign section visibility
+    if (parsedState.pollution) {
+      window.gameState.pollution = parsedState.pollution;
     }
 
     const researchData = localStorage.getItem("researchData");
@@ -108,8 +138,26 @@ window.loadGame = function() {
       projectsModule.setProjects(parsedProjects);
     }
 
+    // Load the battle data if it exists
+    if (parsedState.battle) {
+      const battleData = parsedState.battle;
+      battle = new Battle(
+        battleData.factoryUnits,
+        battleData.biterUnits,
+        startingAmmunition,
+        updateUI
+      );
+      factoryUnits = battle.factoryUnits;
+      biterUnits = battle.biterUnits;
+      window.battle = battle;
+      updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, []);
+    }
+
     // Add other relevant game state data assignments as needed
   }
+  setTimeout(() => {
+  ui.updateResourceDisplay(window.parcels.getParcel(1));
+}, 2000);
 };
 
 // Save the game state every minute

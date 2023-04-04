@@ -23,25 +23,24 @@ function createNumberGuard(target) {
   });
 }
 
+function createBuildingsHandler(target) {
+  return new Proxy(target, {
+    set(obj, prop, value) {
+      obj[prop] = value;
+      calculatePollutionBuildingValue();
+      updatePollutionValues();
+      updatePollutionDisplay();
+      return true;
+    },
+  });
+}
+
 class Parcel {
     constructor(id, maxBuildings) {
         this.id = id;
         this.maxBuildings = maxBuildings;
-        this.buildings = createNumberGuard({
-            // kiln: id === 'parcel-1' ? 6 : 0,
-            // ironSmelter: id === 'parcel-1' ? 10 : 0,
-            // coalMiner: id === 'parcel-1' ? 24 : 0,
-            // stoneMiner: id === 'parcel-1' ? 12 : 0,
-            // ironMiner: id === 'parcel-1' ? 20 : 0,
-            // copperSmelter: id === 'parcel-1' ? 6 : 0,
-            // copperMiner: id === 'parcel-1' ? 12 : 0,
-            // gearPress: id === 'parcel-1' ? 2 : 0,
-            // cableExtruder: id === 'parcel-1' ? 4 : 0,
-            // greenChipFactory: id === 'parcel-1' ? 2 : 0,
-            // redScienceLab: id === 'parcel-1' ? 2 : 0,
-            // researchCenter: id === 'parcel-1' ? 1 : 0,
-            // coalPowerPlant: id === 'parcel-1' ? 0 : 0,
-        });
+        this.buildings = createBuildingsHandler(createNumberGuard({
+        }));
         this.resources = createNumberGuard({
             stone: 0,
         });
@@ -73,20 +72,47 @@ class Parcel {
       if (!this.previousResourceHistory) {
         this.previousResourceHistory = {};
       }
+      if (!this.previousResourceChangeSum) {
+        this.previousResourceChangeSum = {};
+      }
 
       for (const [resourceKey, resourceValue] of Object.entries(this.resources)) {
         if (!this.previousResourceHistory[resourceKey]) {
           this.previousResourceHistory[resourceKey] = [];
         }
+        if (!this.previousResourceChangeSum[resourceKey]) {
+          this.previousResourceChangeSum[resourceKey] = 0;
+        }
 
-        this.previousResourceHistory[resourceKey].push(resourceValue);
+        const history = this.previousResourceHistory[resourceKey];
+        const changeSum = this.previousResourceChangeSum;
 
-        // Limit the history array to 16 values
-        if (this.previousResourceHistory[resourceKey].length > 16) {
-          this.previousResourceHistory[resourceKey].shift();
+        if (history.length > 0) {
+          const change = resourceValue - history[history.length - 1];
+          changeSum[resourceKey] += change;
+        }
+
+        history.push(resourceValue);
+
+        // Limit the history array to 120 values and update the change sum
+        if (history.length > 120) {
+          const removedValue = history.shift();
+          const removedChange = removedValue - history[0];
+          changeSum[resourceKey] -= removedChange;
         }
       }
     }
+
+    calculateAverageRateOfChange() {
+      const averageRateOfChange = {};
+
+      for (const [resourceKey, resourceHistory] of Object.entries(this.previousResourceHistory)) {
+        averageRateOfChange[resourceKey] = this.previousResourceChangeSum[resourceKey] / (resourceHistory.length - 1);
+      }
+
+      return averageRateOfChange;
+    }
+  
 
     addBuilding(buildingType) {
         const totalBuildings = Object.values(this.buildings).reduce((a, b) => a + b, 0);
@@ -121,7 +147,6 @@ class Parcel {
 const parcels = {
     parcelList: [],
     maxBuildingsPerParcel: 8,
-    buyParcelCost: 2,
     upgradeCosts: {
       maxBuildingLimit: [
         {
@@ -246,8 +271,10 @@ const parcels = {
         return parcel;
     },
 
-    canBuyParcel(resourceCount) {
-        return resourceCount >= this.buyParcelCost;
+    canBuyParcel(resources) {
+      return Object.entries(gameState.buyParcelCost).every(([resource, cost]) => {
+        return resources[resource] >= cost;
+      });
     },
 
     addBuildingToParcel(parcelIndex, buildingType) {

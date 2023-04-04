@@ -33,7 +33,7 @@ class ResearchManager {
       if (!window.researchManager.isResearchCompleted(research.id)) {
         const optionElement = document.createElement("option");
         optionElement.value = research.id;
-        optionElement.textContent = `${research.name} - ${JSON.stringify(research.cost)}`;
+        optionElement.textContent = `${research.name} - ${ui.formatResourceCost(research.cost)}`;
         researchSelect.appendChild(optionElement);
       }
     });
@@ -70,6 +70,7 @@ window.researchManager.addResearch(new Research('remoteConstruction', 'Remote Co
 window.researchManager.addResearch(new Research('militaryTech', 'Military Tech', { researchPoints: 16 }));
 window.researchManager.addResearch(new Research('steelMaking', 'Steel Making', { researchPoints: 24 }));
 window.researchManager.addResearch(new Research('oilProcessing', 'Oil Processing', { researchPoints: 30 }));
+window.researchManager.addResearch(new Research('solarTech', 'Solar Tech', { researchPoints: 32 }));
 window.researchManager.addResearch(new Research('advancedElectronics', 'Advanced Electronics', { researchPoints: 36 }));
 window.researchManager.addResearch(new Research('blueprintTech', 'Blueprint Tech', { researchPoints: 40 }));
 window.researchManager.addResearch(new Research('beaconTech', 'Beacon Tech', { researchPoints: 100 }));

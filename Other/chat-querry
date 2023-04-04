@@ -1,3 +1,519 @@
+"Reinforced Wall"
+
+I want to add tooltips to both unit types (Factory Units, Biter Units) & the ammunition, displaying all their stats.
+Those should show up when hovering over the Unit Type in the Table or the Ammunition Type in the ammunition display.
+
+The current updateUI Function:
+function updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted = false) {
+  // Clear the tables
+  factoryUnitsTable.innerHTML = "";
+  biterUnitsTable.innerHTML = "";
+
+  // Add headers to the tables
+  const factoryHeader = document.createElement("tr");
+  const biterHeader = document.createElement("tr");
+
+  ["Type", "Health", "Count"].forEach((headerText) => {
+    const factoryTh = document.createElement("th");
+    const biterTh = document.createElement("th");
+    factoryTh.innerText = headerText;
+    biterTh.innerText = headerText;
+    factoryHeader.appendChild(factoryTh);
+    biterHeader.appendChild(biterTh);
+  });
+
+  if (!battleStarted) {
+    const setupTh = document.createElement("th");
+    setupTh.innerText = "Setup";
+    setupTh.colSpan = 3;
+    factoryHeader.appendChild(setupTh);
+  }
+
+  factoryUnitsTable.appendChild(factoryHeader);
+  biterUnitsTable.appendChild(biterHeader);
+
+  // Group the factory units
+  const displayFactoryUnits = battleStarted ? Object.values(groupUnits(factoryUnits)) : factorUnitCatalogue;
+  // console.log("factoryUnits:", factoryUnits);
+  // console.log("displayFactoryUnits:", displayFactoryUnits);
+  // Update the factory units table
+  for (const unitData of displayFactoryUnits) {
+    const row = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    const unitName = unitData.name;
+    nameCell.innerText = unitName;
+    row.appendChild(nameCell);
+
+    const healthCell = document.createElement("td");
+    const progressBar = createHealthProgressBar(unitData.health, unitData.maxHealth);
+    healthCell.appendChild(progressBar);
+    row.appendChild(healthCell);
+
+    const countCell = document.createElement("td");
+    const unitCount = factoryUnits.filter((u) => u.name === unitName).length;
+    countCell.innerText = unitCount;
+    row.appendChild(countCell);
+    startBattleButton.style.display = "none";
+    //Pre Battle Setup
+    if (!battleStarted) {
+      startBattleButton.style.display = "";
+
+      const buyArmyController = createQuantityInput(unitName, inputValues);
+
+      const buyArmyControllerCell = document.createElement("td");
+      buyArmyControllerCell.appendChild(buyArmyController);
+      row.appendChild(buyArmyControllerCell);
+
+      const buyCell = document.createElement("td");
+      const buyButton = document.createElement("button");
+      buyButton.innerText = "Add";
+      buyButton.classList.add("buy-unit");
+      buyButton.dataset.unitName = unitName;
+      buyCell.appendChild(buyButton);
+      row.appendChild(buyCell);
+
+      const sellCell = document.createElement("td");
+      const sellButton = document.createElement("button");
+      sellButton.innerText = "Remove";
+      sellButton.classList.add("sell-unit");
+      sellButton.dataset.unitName = unitName;
+      sellCell.appendChild(sellButton);
+      row.appendChild(sellCell);
+    }
+
+
+    factoryUnitsTable.appendChild(row);
+  }
+
+  // Group the biter units
+  const groupedBiterUnits = groupUnits(biterUnits);
+
+  // Update the biter units table
+  for (const [unitName, unitData] of Object.entries(groupedBiterUnits)) {
+    const row = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    nameCell.innerText = unitName;
+    row.appendChild(nameCell);
+
+    const healthCell = document.createElement("td");
+    const progressBar = createHealthProgressBar(unitData.health, unitData.maxHealth);
+    healthCell.appendChild(progressBar);
+    row.appendChild(healthCell);
+
+    const countCell = document.createElement("td");
+    countCell.innerText = unitData.count;
+    row.appendChild(countCell);
+
+    biterUnitsTable.appendChild(row);
+  }
+
+  // Update the ammunition element
+  updateAmmunitionDisplay(battleStarted);
+
+
+  // // Update the battle log
+  // logs.forEach((log) => {
+  //   const logElement = document.createElement("li");
+  //   logElement.innerText = log;
+  //   battleLog.appendChild(logElement);
+  // });
+
+  // Pre Battle
+  if (!battleStarted) {
+    // Add event listeners to buy and sell buttons
+    document.querySelectorAll(".buy-unit").forEach((button, index) => {
+      button.addEventListener("click", (event) => {
+        const unitName = event.target.dataset.unitName;
+        const quantityInput = document.querySelectorAll(".unit-quantity")[index];
+        const quantity = parseInt(quantityInput.value);
+        inputValues[unitName] = quantity;
+        buyFactoryUnit(unitName, factoryUnits, factorUnitCatalogue, quantity);
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
+      });
+    });
+
+    document.querySelectorAll(".sell-unit").forEach((button, index) => {
+      button.addEventListener("click", (event) => {
+        const unitName = event.target.dataset.unitName;
+        const quantityInput = document.querySelectorAll(".unit-quantity")[index];
+        const quantity = parseInt(quantityInput.value);
+        inputValues[unitName] = quantity;
+        sellFactoryUnit(unitName, factoryUnits, quantity);
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
+      });
+    });
+
+    // Calculate and display the total cost for the army
+    displayArmyCost(factoryUnits);
+  }
+}
+
+Some Context regarding Factory Units, Biter Units & Ammunition:
+class FactoryUnit extends Unit {
+  constructor(name, health, attack, armor, consumesAmmo, cost) {
+    super(name, health, attack, armor);
+    this.consumesAmmo = consumesAmmo;
+    this.cost = cost;
+    this.payedFor = false;
+  }
+}
+
+// Initialize your factoryUnits and biterUnits here
+const factorUnitCatalogue = [
+  new FactoryUnit("Wall", 120, 0, 5, 0, { ironPlates: 5, bricks: 50 }),
+  new FactoryUnit("Turret", 100, 30, 5, 1, { ironPlates: 150, gears: 50, copperCables: 50, bricks: 25 }),
+  // ... additional factory unit types ...
+];
+
+
+class BiterUnit extends Unit {
+  constructor(name, health, attack, armor, reward) {
+    super(name, health, attack, armor);
+    this.reward = reward;
+  }
+}
+
+class Ammunition {
+  constructor(name, damage, armorPenetration, piercing) {
+    this.name = name;
+    this.damage = damage;
+    this.armorPenetration = armorPenetration;
+    this.piercing = piercing;
+  }
+}
+
+const ammunitionTypes = [
+  new Ammunition("Melee", 0,0,false),
+  new Ammunition("Standard", 10, 0, false),
+  new Ammunition("Armor Penetrating", 25, 0.25, false),
+  new Ammunition("Piercing", 50, 0.5, true),
+];
+
+Reference of how we do tooltips:
+addTooltipToButtons(buttonClass, parcel) {
+  const buttons = this.tableElement.querySelectorAll(buttonClass);
+  buttons.forEach((button) => {
+    // Show tooltip on mouseover for Buy buttons only
+    if (buttonClass.includes("buy-building")) {
+      button.addEventListener("mouseover", (event) => {
+        const buildingId = event.target.dataset.buildingId;
+        const building = buildingManager.getBuilding(buildingId);
+        const costText = Object.entries(building.cost)
+          .map(([resource, cost]) => `${cost} ${resource}`)
+          .join("<br>");
+        const buyText = `Cost:<br>${costText}`;
+
+        tooltip.innerHTML = buyText;
+        tooltip.style.display = "block";
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+
+      // Hide tooltip on mouseout
+      button.addEventListener("mouseout", () => {
+        tooltip.style.display = "none";
+      });
+
+      // Update tooltip position on mousemove
+      button.addEventListener("mousemove", (event) => {
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+    }
+  });
+}
+
+
+
+...createUnits("Small Biter", BiterUnit, smallBiterAmount, 80, 15, 5, {alienArtefacts: 0.005}),
+...createUnits("Medium Biter", BiterUnit, mediumBiterAmount, 160, 25, 22, {alienArtefacts: 0.01}),
+...createUnits("Big Biter", BiterUnit, bigBiterAmount, 320, 50, 38, {alienArtefacts: 0.032}),
+
+
+
+
+
+
+I want to integrate rewards for winning a fight.
+The rewards get calculated based on all defeated biters.
+For this I want to add a new property to the BiterUnit class named "reward". This is an example reward:
+rewards: {
+    biterBody: 1,
+    alienArtefacts: 0.1,
+},
+
+class BiterUnit extends Unit {}
+
+The rewards should get added to the first parcel with a militaryHQ.
+
+
+
+I want the Move PopUps Input field to look like the other input fields that we have in the game.
+
+This is the Move PopUp. its in our HTML (& can stay there):
+<!-- Move Popup -->
+<div id="moveParcelOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 20px; border-radius: 5px;">
+        <label for="parcelMoveInput">Move parcel:</label>
+        <input type="number" id="parcelMoveInput" placeholder="Enter move amount">
+        <button id="moveParcelButton">Move</button>
+        <button id="closeMoveParcelOverlay">Cancel</button>
+    </div>
+
+These are the event listeners in parcelManipulation.js
+// Move
+document.getElementById('moveDropdownItem').addEventListener('click', () => {
+    document.getElementById('moveParcelOverlay').style.display = 'flex';
+});
+
+document.getElementById('moveParcelButton').addEventListener('click', () => {
+    parcelManipulation.moveParcel();
+});
+
+document.getElementById('closeMoveParcelOverlay').addEventListener('click', () => {
+    document.getElementById('moveParcelOverlay').style.display = 'none';
+});
+
+
+This is an existing Input Field from another part of the code as context:
+//Pre Battle Setup
+if (!battleStarted) {
+  const buyArmyController = createQuantityInput(unitName, inputValues);
+
+  const buyArmyControllerCell = document.createElement("td");
+  buyArmyControllerCell.appendChild(buyArmyController);
+  row.appendChild(buyArmyControllerCell);
+
+  const buyCell = document.createElement("td");
+  const buyButton = document.createElement("button");
+  buyButton.innerText = "Add";
+  buyButton.classList.add("buy-unit");
+  buyButton.dataset.unitName = unitName;
+  buyCell.appendChild(buyButton);
+  row.appendChild(buyCell);
+
+  const sellCell = document.createElement("td");
+  const sellButton = document.createElement("button");
+  sellButton.innerText = "Remove";
+  sellButton.classList.add("sell-unit");
+  sellButton.dataset.unitName = unitName;
+  sellCell.appendChild(sellButton);
+  row.appendChild(sellCell);
+}
+
+Specific Function to create this input element:
+function createQuantityInput(unitName, inputValues) {
+  const buyArmyController = document.createElement("div");
+  const minusBtn = document.createElement("div");
+  const plusBtn = document.createElement("div");
+  const quantityInput = document.createElement("input");
+
+  // Set properties and attributes
+  buyArmyController.className = "input-controller";
+
+  minusBtn.className = "input-btn";
+  minusBtn.innerText = "-";
+
+  plusBtn.className = "input-btn";
+  plusBtn.innerText = "+";
+
+  quantityInput.type = "number";
+  quantityInput.className = "input-display";
+
+  quantityInput.value = inputValues[unitName] || 1;
+  quantityInput.min = 1;
+  quantityInput.classList.add("unit-quantity");
+
+  // Append elements
+  buyArmyController.append(minusBtn, quantityInput, plusBtn);
+
+  // Function to handle button clicks
+  const handleButtonClick = (increment) => {
+    const currentVal = parseInt(quantityInput.value, 10) || 0;
+    const newVal = currentVal + increment;
+
+    if (newVal >= 1) {
+      quantityInput.value = newVal;
+    }
+  };
+
+  // Attach event listeners
+  minusBtn.addEventListener("click", () => handleButtonClick(-1));
+  plusBtn.addEventListener("click", () => handleButtonClick(1));
+
+  return buyArmyController;
+}
+
+
+
+// Create input fields for forward and backward belts, also from other part of the code:
+const beltTypes = ["forwardBelt", "backwardBelt"];
+beltTypes.forEach((beltId, index) => {
+  const beltController = this.createDirectionInput(beltId, resourceName);
+  const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
+  const beltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings[beltId] || 0), 0);
+  //const beltCount = this.parcel.buildings[beltId] * 2 || 0;
+
+  const cell = this.createCell(beltController);
+  cell.style.display = "none"; // Initially hide the Forward and Backward cells
+  row.appendChild(cell);
+
+  if (beltCount > 0) {
+    const headerId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltHeader-${this.parcel.id}`;
+    const headerElement = document.getElementById(headerId);
+    headerElement.style.display = ""; // Unhide the header if the belt has been built
+
+    const labelId = `${beltId === "forwardBelt" ? "forward" : "backward"}BeltHeader-${this.parcel.id}`;
+    const labelElement = document.getElementById(labelId);
+    labelElement.textContent = `${beltId === "forwardBelt" ? "Forwards" : "Backwards"} ${beltUsage}/${beltCount}`;
+
+    cell.style.display = ""; // Unhide the cell if the belt has been built
+  }
+});
+
+
+
+// Create overlay Snippet
+const overlay = document.createElement("div");
+const darkMode = localStorage.getItem('darkMode');
+
+overlay.style.position = "absolute";
+overlay.style.top = "0";
+overlay.style.left = "0";
+overlay.style.width = "100%";
+overlay.style.height = "100%";
+
+overlay.id = "battle-result-overlay";
+
+if (darkMode === null || darkMode === 'true') {
+  overlay.style.backgroundColor = "rgba(0, 2, 4, 0.8)";
+  overlay.style.outline = "1px solid rgb(131, 122, 108)";
+} else {
+  overlay.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  overlay.style.outline = "1px solid";
+}
+
+//buyBuilding Function
+function buyBuilding(parcel, buildingId) {
+    const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+    console.log("buyBuilding")
+    if (totalBuildings < parcel.maxBuildings) {
+        const building = buildingManager.getBuilding(buildingId);
+
+        const resourceCost = Object.entries(building.cost);
+
+        let canAfford = true;
+        for (const [resourceName, cost] of resourceCost) {
+            const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+            if (totalResource < cost) {
+                canAfford = false;
+                console.log(resourceName, totalResource - cost);
+                break;
+            }
+        }
+
+        if (canAfford) {
+            if (parcel.buildings[buildingId] === undefined) {
+                parcel.buildings[buildingId] = 0;
+            }
+            parcel.buildings[buildingId]++;
+
+            for (const [resourceName, cost] of resourceCost) {
+                if (parcel.resources[resourceName] >= cost) {
+                    parcel.resources[resourceName] -= cost;
+                } else {
+                    const parcelResource = parcel.resources[resourceName] || 0;
+                    const remainingResource = cost - parcelResource;
+                    parcel.resources[resourceName] = 0;
+                    buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
+                }
+            }
+
+            buildingManager.initializeResourceOutput(parcel, building);
+
+            if (buildingId === "kiln" && !parcel.resources.coal) {
+                parcel.resources = { coal: 0, ...parcel.resources };
+            }
+
+            if (buildingId === "ironSmelter" && !parcel.resources.ironOre) {
+                parcel.resources = { ironOre: 0, ...parcel.resources };
+            }
+
+            updateBuildingDisplay(parcel);
+        }
+    }
+}
+
+
+
+
+
+const parcels = {
+    parcelList: [],
+    maxBuildingsPerParcel: 8,
+    buyParcelCost: 2,
+
+canBuyParcel(resourceCount) {
+    return resourceCount >= this.buyParcelCost;
+},
+
+// Buy Parcel button event listener
+buyParcelButton.addEventListener("click", () => {
+    const highestParcelIndex = parcels.getParcelCount() - 1;
+    const highestParcel = parcels.getParcel(highestParcelIndex);
+    const highestParcelResource = highestParcel.resources.expansionPoints || 0;
+    const resourceCount = highestParcelResource + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints');
+
+    if (parcels.canBuyParcel(resourceCount)) {
+        const cost = parcels.buyParcelCost;
+
+        if (highestParcel.resources.expansionPoints >= cost) {
+            highestParcel.resources.expansionPoints -= cost;
+        } else {
+            const remainingCost = cost - highestParcelResource;
+            highestParcel.resources.expansionPoints = 0;
+            buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints', remainingCost);
+        }
+
+        const newParcel = parcels.createNewParcel();
+        ui.addParcelToUI(newParcel);
+        ui.updateResourceDisplay(newParcel);
+
+        // Select the newly bought parcel
+        const newIndex = parcels.getParcelCount() - 1;
+        ui.selectParcel(newIndex);
+    }
+});
+
+
+
+I want to add a wave system that prepares the next biterUnits array.
+The wave system generates the biter army based on a EvolutionFactor variable. This will be stored in the gameState object & for now is constant.
+
+The evolution factor can be a number between 0 and 1.
+There are three units that can be generated for now:
+let biterUnits = [
+  ...createUnits("Small Biter", BiterUnit, smallBiterAmount, 80, 5, 0),
+  ...createUnits("Medium Biter", BiterUnit, mediumBiterAmount, 160, 10, 5),
+  ...createUnits("Big Biter", BiterUnit, bigBiterAmount, 320, 25, 25),
+];
+
+
+
+
+
+
+Next I want to save & retrieve the relevant states for the fight system.
+Here is what I am thinking. If you have better approaches, pleae let me know.
+- We save the battle object in gameState.battle - this will be our anchor for saving as this should hold all relevant data
+- When loading the game, we set the battle object itself to be updated
+
+
+
+
+
 Next we will change how the Ammunition amount will be determined:
 - There is a building with the id militaryHQ
 - We will have a list of "AmmunitionTypeCatalogue" in which we define what ammunition types match to what resource id. Right now we only have "standardAmmunition" matching to the ammunition type "Standard".

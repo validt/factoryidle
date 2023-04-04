@@ -56,11 +56,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById('moveParcelButton').addEventListener('click', () => {
       parcelManipulation.moveParcel();
-      document.getElementById('moveParcelOverlay').style.display = 'none';
   });
 
   document.getElementById('closeMoveParcelOverlay').addEventListener('click', () => {
       document.getElementById('moveParcelOverlay').style.display = 'none';
+  });
+
+  // Handle increase and decrease move amount button clicks
+  document.getElementById('decreaseMoveAmount').addEventListener('click', () => {
+      const moveInput = document.getElementById('parcelMoveInput');
+      const currentValue = parseInt(moveInput.value, 10);
+      moveInput.value = currentValue - 1;
+  });
+
+  document.getElementById('increaseMoveAmount').addEventListener('click', () => {
+      const moveInput = document.getElementById('parcelMoveInput');
+      const currentValue = parseInt(moveInput.value, 10);
+      moveInput.value = currentValue + 1;
   });
 
   // Copy & paste
@@ -405,7 +417,10 @@ function moveParcel() {
             } else {
                 parcelContainer.insertBefore(parcelTab, targetTab);
             }
-
+            const resourceTable = document.getElementById("resourceTable");
+            while (resourceTable.rows.length > 1) {
+                resourceTable.deleteRow(-1);
+            }
         } else {
             alert('Invalid move amount. Please enter a valid number.');
         }

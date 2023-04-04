@@ -1,6 +1,8 @@
+let currentTable;
+
 const gameLoop = (() => {
     let gameInterval;
-    const tickRate = 1000;
+    const tickRate = 250;
     let tickCounter = 0;
 
     function start() {
@@ -13,10 +15,14 @@ const gameLoop = (() => {
             ui.updateBuildingDropdown();
             ui.updateParcelsSectionVisibility();
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
-            window.ui.updateResourceDisplay(selectedParcel);
+            currentTable = window.ui.updateResourceDisplay(selectedParcel);
             updateAllParcels();
             updateAmmunitionDisplay(battleOngoing);
+            displayArmyCost(factoryUnits);
             updateStartBattleButtonState();
+            updatePollutionValues()
+            updatePollutionDisplay();
+            reduceBiterFactor();
             ui.updateEnergyDisplay();
             window.progressionManager.update(gameState);
             tickCounter++;

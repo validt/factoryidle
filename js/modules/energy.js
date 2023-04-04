@@ -12,7 +12,7 @@ window.energyManager = {
         }
       }
     }
-
+    gameState.pollution.pollutionEnergyValue = totalEnergyUsage;
     return totalEnergyUsage;
   },
 

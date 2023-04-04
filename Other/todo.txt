@@ -1,18 +1,27 @@
+## Playtrough Testing
+- Highlight Buildings that have not yet been built with a "new" property
+- If there is a "new" property in the dropdown, dispaly a little arrow emoji(can be done with hide unhide)
+- Accept Enter for PupUps
+
 ### Bug & Small Fixes
-- Perforamnce Issues --> Cleaning DOM & Event listeners. --> Resource Table?
 - Belt Inputs linked after Copy Pasting? ID thing?
-- "For example, parcel name change window should accept when you hit enter, and dismiss if you press escape, or click away. I also keep instinctively right clicking the parcel buttons when I try to rename or change color of a parcel lol."
-- Autosave apparently doesnt save parcel name & color
+
+- Autosave is bugged af!!!!
 
 ### Balance
-- Buy New Parcel increases cost by +1
+- Add in Electric Furnace
+    --> Needs Tooltip Reworking
+
+construction: 250 red chips, 500 steel, and 500 bricks
 
 ### QoL
+- QoL: - "For example, parcel name change window should accept when you hit enter, and dismiss if you press escape, or click away. I also keep instinctively right clicking the parcel buttons when I try to rename or change color of a parcel lol." wezu
 - QoL: it'd be nice to see power consumption stats for buildings in the build menu eventually
 - QoL: RCF --> Selling adds resources back into RCF
-- QoL: Energy System Explainer: Question Mark Icon?
+- QoL: Energy System Explainer: Question Mark Icon? --> Remove bonus
 - QoL: Display Gain (Average over last 10 Ticks)
 - QoL: On-Off Button for Buildings
+- QoL: Sell Pop-up?
 - QoL: Make Intro Skippable with Click
 - Sneaky: Follow Twitter Checker
 

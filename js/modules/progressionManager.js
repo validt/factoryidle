@@ -54,6 +54,11 @@ class ProgressionManager {
     for (const parcel of parcels) {
       if (parcel.buildings.coalPowerPlant > 0) {
         gameState.sectionVisibility.energySection = true;
+        gameState.sectionVisibility.pollutionSection = true;
+      }
+
+      if (parcel.buildings.militaryHQ > 0) {
+        gameState.sectionVisibility.fightSection = true;
       }
 
       if (

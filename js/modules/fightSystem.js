@@ -8,33 +8,16 @@ const startBattleButton = document.getElementById("start-battle");
 const inputValues = {};
 let battle = {};
 let battleOngoing = false;
-const factoryUnits = [];
+let factoryUnits = [];
+let defeatedBiterUnits = [];
 
 const startingAmmunition = {};
 
 document.addEventListener("DOMContentLoaded", () => {
-
-
-
-  const biterUnits = [
-    ...createUnits("Biter", BiterUnit, 1000, 80, 5, 0),
-    ...createUnits("Medium Biter", BiterUnit, 1000, 160, 10, 5),
-    ...createUnits("Big Biter", BiterUnit, 1000, 320, 25, 25),
-    // Add more units...
-  ];
-
-
-
-
-
-
-  battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
-
-
   // Update the ammunition element
   ammunitionElement.innerText = battle.ammunition;
 
-  updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, []);
+  updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, []);
 
   // // Update the battle log
   // battle.logs.forEach((log) => {
@@ -48,21 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // Deduct the army cost from resources
     const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
     const armyCost = calculateTotalArmyCost(factoryUnits);
-    deductArmyCost(selectedParcel, armyCost);
+    deductArmyCost(selectedParcel, armyCost, factoryUnits);
     // Prepare ammunition and deduct it from the parcels
     prepareAmmunition();
 
-    // Sort factoryUnits so that Walls are first
+    // Sort factoryUnits so that Walls are first, followed by Reinforced Walls
     factoryUnits.sort((a, b) => {
-      if (a.name === "Wall") {
-        return -1;
-      } else if (b.name === "Wall") {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+      const getPriority = (name) => {
+        if (name === "Wall") {
+          return 1;
+        } else if (name === "Reinforced Wall") {
+          return 2;
+        } else {
+          return 3;
+        }
+      };
 
+      const aPriority = getPriority(a.name);
+      const bPriority = getPriority(b.name);
+      return aPriority - bPriority;
+    });
+    console.log("sorted Factory Units", factoryUnits);
     startBattleButton.disabled = true;
     battleOngoing = true;
     await battle.run();
@@ -86,11 +75,6 @@ class Unit {
     this.attack = attack;
     this.armor = armor;
   }
-
-  dealDamage(damage) {
-    this.health -= damage;
-    return damage;
-  }
 }
 
 class FactoryUnit extends Unit {
@@ -98,20 +82,25 @@ class FactoryUnit extends Unit {
     super(name, health, attack, armor);
     this.consumesAmmo = consumesAmmo;
     this.cost = cost;
+    this.payedFor = false;
   }
 }
 
 // Initialize your factoryUnits and biterUnits here
-const factoryUnitsCatalogue = [
-  new FactoryUnit("Wall", 150, 0, 0, 0, { ironPlates: 5, bricks: 50 }),
-  new FactoryUnit("Reinforced Wall", 500, 0, 5, 0, { steel: 25, bricks: 50 }),
-  new FactoryUnit("Turret", 100, 20, 3, 1, { ironPlates: 50, gears: 25, copperCables: 25, bricks: 20 }),
+const factorUnitCatalogue = [
+  new FactoryUnit("Wall", 120, 0, 0, 0, { ironPlates: 5, bricks: 50 }),
+  new FactoryUnit("Reinforced Wall", 150, 0, 10, 0, { steel: 5, bricks: 50 }),
+  new FactoryUnit("Turret", 100, 30, 5, 1, { ironPlates: 150, gears: 50, copperCables: 50, bricks: 25 }),
   // ... additional factory unit types ...
 ];
 
 
-class BiterUnit extends Unit {}
-
+class BiterUnit extends Unit {
+  constructor(name, health, attack, armor, reward) {
+    super(name, health, attack, armor);
+    this.reward = reward;
+  }
+}
 
 class Ammunition {
   constructor(name, damage, armorPenetration, piercing) {
@@ -125,8 +114,8 @@ class Ammunition {
 const ammunitionTypes = [
   new Ammunition("Melee", 0,0,false),
   new Ammunition("Standard", 10, 0, false),
-  new Ammunition("Armor Penetrating", 10, 0.25, false),
-  new Ammunition("Piercing", 10, 0.25, true),
+  new Ammunition("Armor Penetrating", 25, 0.25, false),
+  new Ammunition("Piercing", 50, 0.5, true),
 ];
 
 class Battle {
@@ -135,6 +124,7 @@ class Battle {
     this.biterUnits = biterUnits;
     this.ammunition = ammunition;
     this.ticks = 120;
+    this.currentTick = 0;
     this.logs = [];
     this.updateUI = updateUI;
   }
@@ -148,10 +138,12 @@ class Battle {
     }
 
     if (!biterUnitsAlive) {
+      console.log("----------------------------");
       return "win";
     }
 
-    if (this.tick >= this.ticks) {
+    if (this.currentTick >= this.ticks) {
+      console.log("draw");
       return "draw";
     }
 
@@ -164,49 +156,104 @@ class Battle {
 
   async run() {
     let battleStatus = null;
+    defeatedBiterUnits = [];
     for (let i = 0; i < this.ticks; i++) {
       if (this.factoryUnits.length === 0 || this.biterUnits.length === 0) {
         break;
       }
 
       this.fight();
-      await this.sleep(200);
+      await this.sleep(1000);
 
       // Deep copy the factoryUnits and biterUnits arrays
       const factoryUnitsCopy = JSON.parse(JSON.stringify(this.factoryUnits));
       const biterUnitsCopy = JSON.parse(JSON.stringify(this.biterUnits));
 
-
       // Update the UI
-      this.updateUI(factoryUnitsCopy, factoryUnitsCatalogue, biterUnitsCopy, this.ammunition, this.logs, true);
-
-
-
+      this.updateUI(factoryUnitsCopy, factorUnitCatalogue, biterUnitsCopy, this.ammunition, this.logs, true);
 
       // // Log the current step
       // for (const log of this.logs) {
       //   console.log(log);
       // }
       // this.logs = []; // Clear the logs for the next step
-
+      this.currentTick++;
       battleStatus = this.checkBattleStatus();
       if (battleStatus) {
         break;
       }
+
+
     }
 
+    await this.afterBattle(battleStatus);
+  }
+
+  async afterBattle(battleStatus) {
     switch (battleStatus) {
       case "win":
         console.log("Factory units win!");
+        this.result = "Victory 🎖";
+
+        // Assuming `defeatedBiters` is an array of defeated biter instances
+        const rewards = calculateRewards(defeatedBiterUnits);
+        addRewardsToMilitaryHQParcel(window.parcels.parcelList, rewards);
+
+        console.log(rewards.alienArtefacts);
+
+        // Call displayBattleResult directly from afterBattle
+        displayBattleResult(this.result, rewards);
+
+        // Increment pollution factor, for example
+        gameState.pollution.pollutionBiterFactor += 0.005;
+        gameState.pollution.pollutionBiterFactor = Math.min(gameState.pollution.pollutionBiterFactor, 1);
+        updatePollutionValues();
+
+        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
+        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
+        window.battle = battle;
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
+        // Set the next biter army
+
         break;
       case "lose":
         console.log("Biter units win!");
+        this.result = "Defeat 💀";
+
+        // Call displayBattleResult directly from afterBattle
+        displayBattleResult(this.result);
+
+        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
+        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
+        window.battle = battle;
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
+
         break;
       case "draw":
         console.log("It's a draw!");
+        this.result = "Draw 🤷";
+
+        // Call displayBattleResult directly from afterBattle
+        displayBattleResult(this.result);
+
+        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
+        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
+        window.battle = battle;
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
+
         break;
       default:
         console.log("Battle status could not be determined.");
+        this.result = "Inconclusive (This should not happen)";
+
+        // Call displayBattleResult directly from afterBattle
+        displayBattleResult(this.result);
+
+        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
+        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
+        window.battle = battle;
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
+
         break;
     }
   }
@@ -217,10 +264,10 @@ class Battle {
 
     for (const factoryUnit of this.factoryUnits) {
       if (factoryUnit.attack > 0) {
-        // Choose ammunition type based on your logic or randomly
-        const selectedAmmo = ammunitionTypes[Math.floor(Math.random() * ammunitionTypes.length)];
+        // Choose the first ammunition type with at least 1 ammunition left
+        const selectedAmmo = ammunitionTypes.find(ammoType => this.ammunition[ammoType.name] && this.ammunition[ammoType.name] >= factoryUnit.consumesAmmo);
 
-        if (this.ammunition[selectedAmmo.name] >= factoryUnit.consumesAmmo) {
+        if (selectedAmmo && this.ammunition[selectedAmmo.name] >= factoryUnit.consumesAmmo) {
           // console.log('Factory Unit Damage:', factoryUnit.attack);
           // console.log('Selected Ammo Damage:', selectedAmmo.damage);
           const totalDamage = factoryUnit.attack + selectedAmmo.damage;
@@ -244,8 +291,12 @@ class Battle {
     //   `Factory Units Consume ${ammoConsumed} amount of Ammunition. Remaining Ammunition: ${this.ammunition}`
     // );
 
-    this.attackUnits("Factory",this.factoryUnits, this.biterUnits, factoryDamages);
+
+    // console.log(this.factoryUnits);
+    // console.log(this.biterUnits);
     this.attackUnits("Biters",this.biterUnits, this.factoryUnits, biterDamages);
+    this.attackUnits("Factory",this.factoryUnits, this.biterUnits, factoryDamages);
+
     // console.log("Biter Damages --------:", biterDamages);
     // console.log("Factory Damages --------:", factoryDamages);
     // this.logs.push(
@@ -258,21 +309,24 @@ class Battle {
 
     for (const damageObj of damages) {
       let remainingDamage = damageObj.damage;
-
+      console.log(defendingUnits);
+      console.log(remainingDamage);
       for (let i = 0; i < defendingUnits.length && remainingDamage > 0; i++) {
         const unit = defendingUnits[i];
-
+        //console.log(unit);
+        console.log(remainingDamage);
         if (unit) {
           const armorPenetration = unit.armor * (1 - damageObj.ammo.armorPenetration);
           const damageToDeal = Math.max(remainingDamage - armorPenetration, 0);
 
-          const actualDamageDealt = unit.dealDamage(damageToDeal);
-          // console.log("actualDamageDealt", faction, actualDamageDealt);
+          unit.health -= damageToDeal;
+          //console.log(unit, "receives", damageToDeal);
+          // console.log("damageToDeal", faction, damageToDeal);
 
           if (damageObj.ammo.piercing && unit.health <= 0) {
-            remainingDamage -= (actualDamageDealt + unit.health);
+            remainingDamage -= (damageToDeal + armorPenetration + unit.health);
           } else {
-            remainingDamage -= actualDamageDealt;
+            remainingDamage -= (damageToDeal + armorPenetration);
           }
 
           // console.log("remainingDamage", faction, remainingDamage);
@@ -281,6 +335,10 @@ class Battle {
             // Increment the kill count for this unit type
             killCounts[unit.name] = (killCounts[unit.name] || 0) + 1;
 
+            // Add defeated unit to defeatedBiterUnits array
+            defeatedBiterUnits.push(unit);
+
+            // Remove defeated unit from defendingUnits array
             defendingUnits.splice(i, 1);
             i--;
 
@@ -298,7 +356,19 @@ class Battle {
       this.logs.push(`${faction} Units kill ${killCount} ${unitName}.`);
     }
   }
+
+  exportData() {
+    return {
+      factoryUnits: this.factoryUnits,
+      biterUnits: this.biterUnits,
+      ammunition: this.ammunition,
+    };
+  }
 }
+biterUnits = generateBiterArmy(0);
+battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
+window.battle = battle
+
 
 /* Fight Setup */
 function createUnits(unitType, unitClass, count, ...unitArgs) {
@@ -312,11 +382,15 @@ function createUnits(unitType, unitClass, count, ...unitArgs) {
 }
 
 function prepareAmmunition() {
+  console.log("prepareAmmunition");
   ammunitionTypes.forEach((ammoType) => {
+    console.log("forEach");
     const ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name);
+    console.log("ammoQuantity", ammoQuantity);
     if (ammoQuantity > 0) {
       startingAmmunition[ammoType.name] = ammoQuantity;
       buildingManager.deductAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name, ammoQuantity);
+      console.log("ammoQuantity > 0", ammoQuantity);
     }
   });
 }
@@ -329,8 +403,53 @@ function returnRemainingAmmunition(battleInstance) {
   });
 }
 
+function generateBiterArmy(pollutionFactor) {
+  const biterWave = waveData.find((wave) => wave.pollutionFactor >= pollutionFactor) || waveData[waveData.length - 1];
+
+  const smallBiterAmount = biterWave.smallBiterAmount;
+  const mediumBiterAmount = biterWave.mediumBiterAmount;
+  const bigBiterAmount = biterWave.bigBiterAmount;
+
+  const biterUnits = [
+    ...createUnits("Small Biter", BiterUnit, smallBiterAmount, 80, 15, 5, {alienArtefacts: 0.005}),
+    ...createUnits("Medium Biter", BiterUnit, mediumBiterAmount, 160, 35, 22, {alienArtefacts: 0.01}),
+    ...createUnits("Big Biter", BiterUnit, bigBiterAmount, 320, 100, 38, {alienArtefacts: 0.032}),
+  ];
+
+  return biterUnits;
+}
+
+function calculateRewards(defeatedBiters) {
+  const rewards = {};
+
+  defeatedBiters.forEach((biter) => {
+    if (biter.reward) {
+      for (const [resource, amount] of Object.entries(biter.reward)) {
+        rewards[resource] = (rewards[resource] || 0) + amount;
+      }
+    }
+  });
+
+  // Add a flat +0.5 to each reward
+  for (const resource in rewards) {
+    rewards[resource] += 0.5;
+  }
+
+  return rewards;
+}
+
+function addRewardsToMilitaryHQParcel(parcels, rewards) {
+  const militaryHQParcel = parcels.find((parcel) => parcel.buildings.militaryHQ > 0);
+
+  if (militaryHQParcel) {
+    for (const [resource, amount] of Object.entries(rewards)) {
+      militaryHQParcel.resources[resource] = (militaryHQParcel.resources[resource] || 0) + amount;
+    }
+  }
+}
+
 /* UI */
-function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, logs, battleStarted = false) {
+function updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted = false) {
   // Clear the tables
   factoryUnitsTable.innerHTML = "";
   biterUnitsTable.innerHTML = "";
@@ -359,7 +478,7 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
   biterUnitsTable.appendChild(biterHeader);
 
   // Group the factory units
-  const displayFactoryUnits = battleStarted ? Object.values(groupUnits(factoryUnits)) : factoryUnitsCatalogue;
+  const displayFactoryUnits = battleStarted ? Object.values(groupUnits(factoryUnits)) : factorUnitCatalogue;
   // console.log("factoryUnits:", factoryUnits);
   // console.log("displayFactoryUnits:", displayFactoryUnits);
   // Update the factory units table
@@ -369,6 +488,8 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
     const nameCell = document.createElement("td");
     const unitName = unitData.name;
     nameCell.innerText = unitName;
+    nameCell.dataset.unitName = unitName;
+    nameCell.classList.add("unit-tooltip");
     row.appendChild(nameCell);
 
     const healthCell = document.createElement("td");
@@ -380,9 +501,11 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
     const unitCount = factoryUnits.filter((u) => u.name === unitName).length;
     countCell.innerText = unitCount;
     row.appendChild(countCell);
-
+    startBattleButton.style.display = "none";
     //Pre Battle Setup
     if (!battleStarted) {
+      startBattleButton.style.display = "";
+
       const buyArmyController = createQuantityInput(unitName, inputValues);
 
       const buyArmyControllerCell = document.createElement("td");
@@ -391,7 +514,7 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
 
       const buyCell = document.createElement("td");
       const buyButton = document.createElement("button");
-      buyButton.innerText = "Buy";
+      buyButton.innerText = "Add";
       buyButton.classList.add("buy-unit");
       buyButton.dataset.unitName = unitName;
       buyCell.appendChild(buyButton);
@@ -399,7 +522,7 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
 
       const sellCell = document.createElement("td");
       const sellButton = document.createElement("button");
-      sellButton.innerText = "Sell";
+      sellButton.innerText = "Remove";
       sellButton.classList.add("sell-unit");
       sellButton.dataset.unitName = unitName;
       sellCell.appendChild(sellButton);
@@ -419,6 +542,8 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
 
     const nameCell = document.createElement("td");
     nameCell.innerText = unitName;
+    nameCell.dataset.unitName = unitName;
+    nameCell.classList.add("unit-tooltip");
     row.appendChild(nameCell);
 
     const healthCell = document.createElement("td");
@@ -453,8 +578,8 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
         const quantityInput = document.querySelectorAll(".unit-quantity")[index];
         const quantity = parseInt(quantityInput.value);
         inputValues[unitName] = quantity;
-        buyFactoryUnit(unitName, factoryUnits, factoryUnitsCatalogue, quantity);
-        updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
+        buyFactoryUnit(unitName, factoryUnits, factorUnitCatalogue, quantity);
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
       });
     });
 
@@ -465,12 +590,13 @@ function updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, l
         const quantity = parseInt(quantityInput.value);
         inputValues[unitName] = quantity;
         sellFactoryUnit(unitName, factoryUnits, quantity);
-        updateUI(factoryUnits, factoryUnitsCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
+        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, logs, battleStarted, inputValues);
       });
     });
 
     // Calculate and display the total cost for the army
     displayArmyCost(factoryUnits);
+    addTooltipToUnits(".unit-tooltip", [...factorUnitCatalogue, ...biterUnits]);
   }
 }
 
@@ -560,8 +686,54 @@ function createHealthProgressBar(currentHealth, maxHealth) {
   return progressBarContainer;
 }
 
-function buyFactoryUnit(unitName, factoryUnits, factoryUnitsCatalogue, quantity) {
-  const unitTemplate = factoryUnitsCatalogue.find((u) => u.name === unitName);
+function addTooltipToUnits(selector, unitsData) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((element) => {
+    element.addEventListener("mouseover", (event) => {
+      const unitName = event.target.dataset.unitName;
+      const unitData = unitsData.find((unit) => unit.name === unitName);
+      let tooltipText = `
+        Name: ${unitData.name}<br>
+        Health: ${unitData.health}<br>
+        Attack: ${unitData.attack}<br>
+        Armor: ${unitData.armor}<br>
+      `;
+
+      if (unitData instanceof FactoryUnit) {
+        tooltipText += `Consumes Ammo: ${unitData.consumesAmmo}<br><br>`;
+        const costText = Object.entries(unitData.cost)
+          .map(([resource, cost]) => `${cost} ${resource}`)
+          .join("<br>");
+        tooltipText += `Cost:<br>${costText}`;
+      } else if (unitData instanceof BiterUnit) {
+        const rewardText = Object.entries(unitData.reward)
+          .map(([resource, reward]) => `${reward} ${resource}`)
+          .join("<br>");
+        tooltipText += `Reward:<br>${rewardText}`;
+      }
+
+      tooltip.innerHTML = tooltipText;
+      tooltip.style.display = "block";
+      tooltip.style.left = event.pageX + 10 + "px";
+      tooltip.style.top = event.pageY + 10 + "px";
+    });
+
+    // Hide tooltip on mouseout
+    element.addEventListener("mouseout", () => {
+      tooltip.style.display = "none";
+    });
+
+    // Update tooltip position on mousemove
+    element.addEventListener("mousemove", (event) => {
+      tooltip.style.left = event.pageX + 10 + "px";
+      tooltip.style.top = event.pageY + 10 + "px";
+    });
+  });
+}
+
+/* Unit Cost */
+function buyFactoryUnit(unitName, factoryUnits, factorUnitCatalogue, quantity) {
+  const unitTemplate = factorUnitCatalogue.find((u) => u.name === unitName);
 
   if (unitTemplate) {
     for (let i = 0; i < quantity; i++) {
@@ -581,11 +753,18 @@ function buyFactoryUnit(unitName, factoryUnits, factoryUnitsCatalogue, quantity)
 
 function sellFactoryUnit(unitName, factoryUnits, quantity) {
   for (let i = 0; i < quantity; i++) {
-    const index = factoryUnits.findIndex((u) => u.name === unitName);
+    const index = factoryUnits.findIndex((u) => u.name === unitName && !u.payedFor);
+
     if (index !== -1) {
       factoryUnits.splice(index, 1);
     } else {
-      break;
+      // If no unpaid unit is found, sell any available unit
+      const anyUnitIndex = factoryUnits.findIndex((u) => u.name === unitName);
+      if (anyUnitIndex !== -1) {
+        factoryUnits.splice(anyUnitIndex, 1);
+      } else {
+        break;
+      }
     }
   }
 }
@@ -595,11 +774,26 @@ function displayArmyCost(factoryUnits) {
   resourceCostTable.innerHTML = "";
 
   const costs = calculateTotalArmyCost(factoryUnits);
-  const header = document.createElement("th");
-  header.innerText = "Army Cost";
-  header.colSpan = 2;
+
   if (Object.entries(costs).length > 0) {
-    resourceCostTable.appendChild(header);
+    const headerRow = document.createElement("tr");
+
+    const resourceHeader = document.createElement("th");
+    resourceHeader.innerText = "Resource";
+    resourceHeader.colSpan = 1;
+    headerRow.appendChild(resourceHeader);
+
+    const costHeader = document.createElement("th");
+    costHeader.innerText = "Cost";
+    costHeader.colSpan = 1;
+    headerRow.appendChild(costHeader);
+
+    const missingHeader = document.createElement("th");
+    missingHeader.innerText = "Missing";
+    missingHeader.colSpan = 1;
+    headerRow.appendChild(missingHeader);
+
+    resourceCostTable.appendChild(headerRow);
   }
 
   for (const [resource, cost] of Object.entries(costs)) {
@@ -613,6 +807,15 @@ function displayArmyCost(factoryUnits) {
     costCell.innerText = cost;
     row.appendChild(costCell);
 
+    // Calculate missing resources
+    const selectedParcel = parcels.parcelList[ui.getSelectedParcelIndex()];
+    const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+    const missing = Math.max(cost - totalResource, 0).toFixed(0);
+
+    const missingCell = document.createElement("td");
+    missingCell.innerText = missing;
+    row.appendChild(missingCell);
+
     resourceCostTable.appendChild(row);
   }
 }
@@ -621,39 +824,14 @@ function calculateTotalArmyCost(factoryUnits) {
   const costs = {};
 
   factoryUnits.forEach((unit) => {
-    // console.log('Unit:', unit);
-    // console.log('Unit cost:', unit.cost);
-    for (const [resource, cost] of Object.entries(unit.cost)) {
-      costs[resource] = (costs[resource] || 0) + cost;
+    if (!unit.payedFor) {
+      for (const [resource, cost] of Object.entries(unit.cost)) {
+        costs[resource] = (costs[resource] || 0) + cost;
+      }
     }
   });
 
   return costs;
-}
-
-function updateAmmunitionDisplay(battleStarted = false) {
-  const ammunitionElement = document.getElementById("ammunition");
-
-  // Clear the innerHTML
-  ammunitionElement.innerHTML = "";
-
-  // Iterate over the ammunitionTypes array and create an ammoInfo element for each ammunition type
-  ammunitionTypes.forEach((ammoType) => {
-    let ammoQuantity;
-
-    if (battleStarted) {
-      ammoQuantity = battle.ammunition[ammoType.name];
-    } else {
-      ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name);
-    }
-
-    // Only display ammunition types with a quantity greater than 0
-    if (ammoQuantity > 0) {
-      const ammoInfo = document.createElement("p");
-      ammoInfo.innerText = `${ammoType.name}: ${ammoQuantity}`;
-      ammunitionElement.appendChild(ammoInfo);
-    }
-  });
 }
 
 function canAffordArmy(selectedParcel, armyCost) {
@@ -667,18 +845,69 @@ function canAffordArmy(selectedParcel, armyCost) {
   return true;
 }
 
+function updateAmmunitionDisplay(battleStarted = false) {
+  const ammunitionElement = document.getElementById("ammunition");
+
+  // Clear the innerHTML
+  ammunitionElement.innerHTML = "";
+
+  // Iterate over the ammunitionTypes array and create an ammoInfo element for each ammunition type
+  ammunitionTypes.forEach((ammoType) => {
+    let ammoQuantity;
+
+    if (battleStarted) {
+      ammoQuantity = battle.ammunition[ammoType.name] ? battle.ammunition[ammoType.name].toFixed(0) : 0;
+    } else {
+      ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name) ? buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name).toFixed(0) : 0;
+    }
+
+    // Only display ammunition types with a quantity greater than 0
+    if (ammoQuantity > 0) {
+      const ammoInfo = document.createElement("p");
+      ammoInfo.innerText = `${ammoType.name}: ${ammoQuantity}`;
+      ammunitionElement.appendChild(ammoInfo);
+
+      // Add tooltip to the ammoInfo element
+      ammoInfo.addEventListener("mouseover", (event) => {
+        const tooltipText = `
+          Damage: ${ammoType.damage}<br>
+          Armor Penetration: ${(ammoType.armorPenetration * 100).toFixed(0)}%<br>
+          Piercing: ${ammoType.piercing ? "Yes" : "No"}`;
+        tooltip.innerHTML = tooltipText;
+        tooltip.style.display = "block";
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+
+      // Hide tooltip on mouseout
+      ammoInfo.addEventListener("mouseout", () => {
+        tooltip.style.display = "none";
+      });
+
+      // Update tooltip position on mousemove
+      ammoInfo.addEventListener("mousemove", (event) => {
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+      });
+    }
+  });
+}
+
+
 function updateStartBattleButtonState() {
   const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
   const armyCost = calculateTotalArmyCost(factoryUnits);
 
-  if (canAffordArmy(selectedParcel, armyCost)) {
+  if (factoryUnits.length === 0) {
+    startBattleButton.disabled = true;
+  } else if (canAffordArmy(selectedParcel, armyCost)) {
     startBattleButton.disabled = false;
   } else {
     startBattleButton.disabled = true;
   }
 }
 
-function deductArmyCost(selectedParcel, armyCost) {
+function deductArmyCost(selectedParcel, armyCost, factoryUnits) {
   for (const resource in armyCost) {
     const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
 
@@ -690,5 +919,70 @@ function deductArmyCost(selectedParcel, armyCost) {
       selectedParcel.resources[resource] = 0;
       buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
     }
+  }
+
+  // Set payedFor to true for each unit
+  factoryUnits.forEach((unit) => {
+    if (!unit.payedFor) {
+      unit.payedFor = true;
+    }
+  });
+}
+
+function displayBattleResult(result, reward = {alienArtefacts: 0}) {
+  const fightContainer = document.getElementById("fight-container");
+
+  // Create overlay
+  const overlay = document.createElement("div");
+  const darkMode = localStorage.getItem('darkMode');
+
+  overlay.style.position = "absolute";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+
+  overlay.id = "battle-result-overlay";
+
+  if (darkMode === null || darkMode === 'true') {
+    overlay.style.backgroundColor = "rgba(0, 2, 4, 0.8)";
+    overlay.style.outline = "1px solid rgb(131, 122, 108)";
+  } else {
+    overlay.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+    overlay.style.outline = "1px solid";
+  }
+
+
+  // Create result text
+  const resultText = document.createElement("h1");
+  resultText.innerText = result;
+  resultText.style.textAlign = "center";
+  resultText.style.marginTop = "100px";
+
+  // Create reward text
+  const rewardText = document.createElement("h3");
+  rewardText.innerText = "Alien Artefacts Gained: " + reward.alienArtefacts.toFixed(2);
+  rewardText.style.textAlign = "center";
+  rewardText.style.marginTop = "100px";
+
+  // Create continue button
+  const continueButton = document.createElement("button");
+  continueButton.innerText = "Continue";
+  continueButton.style.display = "block";
+  continueButton.style.margin = "50px auto";
+  continueButton.addEventListener("click", hideBattleResult);
+
+  // Append elements to the overlay and then to the fight container
+  overlay.appendChild(resultText);
+  overlay.appendChild(rewardText);
+  overlay.appendChild(continueButton);
+  fightContainer.appendChild(overlay);
+}
+
+function hideBattleResult() {
+  updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false)
+  const overlay = document.getElementById("battle-result-overlay");
+  if (overlay) {
+    overlay.remove();
   }
 }

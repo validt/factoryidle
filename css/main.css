@@ -48,9 +48,9 @@
 }
 
 .dark-mode .parcel-tab.selected {
-    background-image: -webkit-linear-gradient(top, rgb(53, 57, 59), rgb(24, 26, 27));
+    background-image: -webkit-linear-gradient(top, rgb(0, 2, 4), rgb(48, 50, 53));
     background-color: initial;
-    border-color: rgb(82, 88, 92);
+    border-color: rgb(140, 130, 115);
 }
 
 .dark-mode :root {
@@ -60,7 +60,7 @@
     --darkreader-selection-text: #e8e6e3;
 }
 
-/* Projects */
+/* Dark Mode Projects */
 .dark-mode .project-box {
   border-color: rgb(140, 130, 115);
   background-color: rgb(24, 26, 27);
@@ -85,6 +85,41 @@
     border-bottom-color: initial;
 }
 
+/* Dark Mode Move Parcel Pop Up */
+.dark-mode .parcel-manipulation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode .parcel-manipulation-container {
+    background: #35393B;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.dark-mode .menu {
+  background-color: #35393B;
+  border: 1px solid rgb(140, 130, 115);
+}
+
+.dark-mode .menu-item {
+  border: 1px solid rgb(140, 130, 115);
+}
+
+/* Dark Mode Tooltips */
+.dark-mode .tooltip {
+  background-color: #35393B;
+  color: rgb(232, 230, 227);
+  border: 1px solid rgb(140, 130, 115);
+}
+
 /* General styles */
 body {
     font-family: Helvetica, Arial, sans-serif;
@@ -96,7 +131,6 @@ body {
 
 table {
   border-collapse: collapse;
-  margin-bottom: 20px;
 }
 
 @media (max-width: 800px){
@@ -403,7 +437,7 @@ button:disabled {
 
 /* Input Controller */
 .input-controller{
-  display:flex;
+  display: inline-flex;
   width:120px;
   border:1px solid black;
 }
@@ -413,6 +447,7 @@ button:disabled {
   text-align:center;
   background-color:#AAAAAA;
   padding:5px 3px;
+  cursor: pointer;
   user-select: none;
 }
 .input-btn:hover{
@@ -515,4 +550,49 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+#fight-container {
+  position: relative;
+}
+
+/* Move Parcel Pop Up */
+.parcel-manipulation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.parcel-manipulation-container {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Missing Resource Overlay */
+
+#missing-resource-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    background-color: rgba(255, 255, 255, 0.8);
+    outline: 1px solid;
+}
+
+.dark-mode #missing-resource-overlay {
+    background-color: rgba(0, 2, 4, 0.8);
+    outline: 1px solid rgb(131, 122, 108);
 }
