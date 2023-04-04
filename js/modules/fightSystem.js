@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const bPriority = getPriority(b.name);
       return aPriority - bPriority;
     });
-    console.log("sorted Factory Units", factoryUnits);
     startBattleButton.disabled = true;
     battleOngoing = true;
     await battle.run();

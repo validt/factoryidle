@@ -154,8 +154,6 @@ const ui = (() => {
               const totalModifiedOutputText = Object.entries(resource.outputs || {})
               .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
               .join("<br>");
-              console.log(consumptionRateModifier);
-              console.log(productionRateModifier);
               const tooltipText = `
               <table>
               <tbody>
@@ -488,7 +486,6 @@ const ui = (() => {
       if (beltCount > 0) {
         for (let i = 5; i <= 6; i++) {
           row.cells[i].style.display = ""; // Unhide the Forward and Backward cells
-          // console.log("unhide", resourceName, row.cells[i])
         }
 
         const forwardBeltUsage = this.parcel.beltUsage ? this.parcel.beltUsage["forwardBelt"] || 0 : 0;
@@ -634,12 +631,9 @@ const ui = (() => {
 
     refreshTable() {
       const resourceTable = document.getElementById("resourceTable");
-      console.log(resourceTable);
       for (let i = 1; i < resourceTable.rows.length; i++) {
         const row = resourceTable.rows[i];
         const resourceName = row.cells[0].textContent;
-        console.log("row", row);
-        console.log("resourceName", resourceName);
         this.updateRow(resourceName, row);
       }
     }
@@ -860,7 +854,6 @@ const ui = (() => {
 
     function buyBuilding(parcel, buildingId) {
         const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
-        console.log("buyBuilding")
         if (totalBuildings < parcel.maxBuildings) {
             const building = buildingManager.getBuilding(buildingId);
 
@@ -871,7 +864,6 @@ const ui = (() => {
                 const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
                 if (totalResource < cost) {
                     canAfford = false;
-                    console.log(resourceName, totalResource - cost);
                     break;
                 }
             }
