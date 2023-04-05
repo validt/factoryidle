@@ -155,9 +155,6 @@ window.loadGame = function() {
 
     // Add other relevant game state data assignments as needed
   }
-  setTimeout(() => {
-  ui.updateResourceDisplay(window.parcels.getParcel(1));
-}, 2000);
 };
 
 // Save the game state every minute

@@ -137,12 +137,10 @@ class Battle {
     }
 
     if (!biterUnitsAlive) {
-      console.log("----------------------------");
       return "win";
     }
 
     if (this.currentTick >= this.ticks) {
-      console.log("draw");
       return "draw";
     }
 
@@ -171,11 +169,6 @@ class Battle {
       // Update the UI
       this.updateUI(factoryUnitsCopy, factorUnitCatalogue, biterUnitsCopy, this.ammunition, this.logs, true);
 
-      // // Log the current step
-      // for (const log of this.logs) {
-      //   console.log(log);
-      // }
-      // this.logs = []; // Clear the logs for the next step
       this.currentTick++;
       battleStatus = this.checkBattleStatus();
       if (battleStatus) {
@@ -191,14 +184,11 @@ class Battle {
   async afterBattle(battleStatus) {
     switch (battleStatus) {
       case "win":
-        console.log("Factory units win!");
         this.result = "Victory 🎖";
 
         // Assuming `defeatedBiters` is an array of defeated biter instances
         const rewards = calculateRewards(defeatedBiterUnits);
         addRewardsToMilitaryHQParcel(window.parcels.parcelList, rewards);
-
-        console.log(rewards.alienArtefacts);
 
         // Call displayBattleResult directly from afterBattle
         displayBattleResult(this.result, rewards);
@@ -216,7 +206,6 @@ class Battle {
 
         break;
       case "lose":
-        console.log("Biter units win!");
         this.result = "Defeat 💀";
 
         // Call displayBattleResult directly from afterBattle
@@ -229,7 +218,6 @@ class Battle {
 
         break;
       case "draw":
-        console.log("It's a draw!");
         this.result = "Draw 🤷";
 
         // Call displayBattleResult directly from afterBattle
@@ -242,7 +230,6 @@ class Battle {
 
         break;
       default:
-        console.log("Battle status could not be determined.");
         this.result = "Inconclusive (This should not happen)";
 
         // Call displayBattleResult directly from afterBattle
@@ -267,8 +254,6 @@ class Battle {
         const selectedAmmo = ammunitionTypes.find(ammoType => this.ammunition[ammoType.name] && this.ammunition[ammoType.name] >= factoryUnit.consumesAmmo);
 
         if (selectedAmmo && this.ammunition[selectedAmmo.name] >= factoryUnit.consumesAmmo) {
-          // console.log('Factory Unit Damage:', factoryUnit.attack);
-          // console.log('Selected Ammo Damage:', selectedAmmo.damage);
           const totalDamage = factoryUnit.attack + selectedAmmo.damage;
           factoryDamages.push({ damage: totalDamage, ammo: selectedAmmo });
           this.ammunition[selectedAmmo.name] -= factoryUnit.consumesAmmo;
@@ -279,28 +264,12 @@ class Battle {
 
     let biterDamages = [];
     for (const biterUnit of this.biterUnits) {
-      // console.log("Biter Damage:", biterUnit.attack);
       biterDamages.push({ damage: biterUnit.attack, ammo: ammunitionTypes[0] });
     }
 
-    // this.logs.push(
-    //   `Factory Units Attack for total Damage: ${factoryDamages.reduce((a, b) => a + b, 0)}`
-    // );
-    // this.logs.push(
-    //   `Factory Units Consume ${ammoConsumed} amount of Ammunition. Remaining Ammunition: ${this.ammunition}`
-    // );
-
-
-    // console.log(this.factoryUnits);
-    // console.log(this.biterUnits);
     this.attackUnits("Biters",this.biterUnits, this.factoryUnits, biterDamages);
     this.attackUnits("Factory",this.factoryUnits, this.biterUnits, factoryDamages);
 
-    // console.log("Biter Damages --------:", biterDamages);
-    // console.log("Factory Damages --------:", factoryDamages);
-    // this.logs.push(
-    //   `Biter Units Attack for total Damage: ${biterDamages.reduce((a, b) => a + b, 0)}`
-    // );
   }
 
   attackUnits(faction, attackingUnits, defendingUnits, damages) {
@@ -308,19 +277,13 @@ class Battle {
 
     for (const damageObj of damages) {
       let remainingDamage = damageObj.damage;
-      console.log(defendingUnits);
-      console.log(remainingDamage);
       for (let i = 0; i < defendingUnits.length && remainingDamage > 0; i++) {
         const unit = defendingUnits[i];
-        //console.log(unit);
-        console.log(remainingDamage);
         if (unit) {
           const armorPenetration = unit.armor * (1 - damageObj.ammo.armorPenetration);
           const damageToDeal = Math.max(remainingDamage - armorPenetration, 0);
 
           unit.health -= damageToDeal;
-          //console.log(unit, "receives", damageToDeal);
-          // console.log("damageToDeal", faction, damageToDeal);
 
           if (damageObj.ammo.piercing && unit.health <= 0) {
             remainingDamage -= (damageToDeal + armorPenetration + unit.health);
@@ -328,7 +291,6 @@ class Battle {
             remainingDamage -= (damageToDeal + armorPenetration);
           }
 
-          // console.log("remainingDamage", faction, remainingDamage);
 
           if (unit.health <= 0) {
             // Increment the kill count for this unit type
@@ -381,15 +343,11 @@ function createUnits(unitType, unitClass, count, ...unitArgs) {
 }
 
 function prepareAmmunition() {
-  console.log("prepareAmmunition");
   ammunitionTypes.forEach((ammoType) => {
-    console.log("forEach");
     const ammoQuantity = buildingManager.getAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name);
-    console.log("ammoQuantity", ammoQuantity);
     if (ammoQuantity > 0) {
       startingAmmunition[ammoType.name] = ammoQuantity;
       buildingManager.deductAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name, ammoQuantity);
-      console.log("ammoQuantity > 0", ammoQuantity);
     }
   });
 }
@@ -478,8 +436,6 @@ function updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, log
 
   // Group the factory units
   const displayFactoryUnits = battleStarted ? Object.values(groupUnits(factoryUnits)) : factorUnitCatalogue;
-  // console.log("factoryUnits:", factoryUnits);
-  // console.log("displayFactoryUnits:", displayFactoryUnits);
   // Update the factory units table
   for (const unitData of displayFactoryUnits) {
     const row = document.createElement("tr");
@@ -746,7 +702,6 @@ function buyFactoryUnit(unitName, factoryUnits, factorUnitCatalogue, quantity) {
       );
       factoryUnits.push(newUnit);
     }
-    // console.log(factoryUnits);
   }
 }
 
