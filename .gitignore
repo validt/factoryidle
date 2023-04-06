@@ -1,1 +1,5 @@
-.vercel
+#Ignore Vercel Folder
+.vercel/
+
+#Ignore Other
+Other/
