@@ -1,3 +1,39 @@
+fight() {
+  let factoryDamages = [];
+  let ammoConsumed = {};
+
+  for (const factoryUnit of this.factoryUnits) {
+    if (factoryUnit.attack > 0) {
+      // Choose the first ammunition type with at least 1 ammunition left
+      const selectedAmmo = ammunitionTypes.find(ammoType => this.ammunition[ammoType.name] && this.ammunition[ammoType.name] >= factoryUnit.consumesAmmo);
+
+      if (selectedAmmo && this.ammunition[selectedAmmo.name] >= factoryUnit.consumesAmmo) {
+        const totalDamage = factoryUnit.attack + selectedAmmo.damage;
+        factoryDamages.push({ damage: totalDamage, ammo: selectedAmmo });
+        this.ammunition[selectedAmmo.name] -= factoryUnit.consumesAmmo;
+        ammoConsumed[selectedAmmo.name] = (ammoConsumed[selectedAmmo.name] || 0) + factoryUnit.consumesAmmo;
+      }
+    }
+  }
+
+  let biterDamages = [];
+  for (const biterUnit of this.biterUnits) {
+    biterDamages.push({ damage: biterUnit.attack, ammo: ammunitionTypes[0] });
+  }
+
+  this.attackUnits("Biters",this.biterUnits, this.factoryUnits, biterDamages);
+  this.attackUnits("Factory",this.factoryUnits, this.biterUnits, factoryDamages);
+
+}
+
+const ammunitionTypes = [
+  new Ammunition("Melee", 0,0,false),
+  new Ammunition("Standard", 10, 0, false),
+  new Ammunition("Armor Penetrating", 25, 0.25, false),
+  new Ammunition("Piercing", 50, 0.5, true),
+];
+
+
 "Reinforced Wall"
 
 I want to add tooltips to both unit types (Factory Units, Biter Units) & the ammunition, displaying all their stats.

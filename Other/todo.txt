@@ -1,3 +1,6 @@
+- Show Production Rate
+- Max limit of resources + Warehouse Buildings
+
 Unit Tests?
 Continuous Integration & Developing Unit tests on a class basis (?)
 

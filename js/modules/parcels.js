@@ -67,7 +67,7 @@ class Parcel {
     updatePreviousResources() {
       this.previousResources = { ...this.resources };
     }
-
+    // Clean Up #2
     updatePreviousResourceHistory() {
       if (!this.previousResourceHistory) {
         this.previousResourceHistory = {};
@@ -102,7 +102,7 @@ class Parcel {
         }
       }
     }
-
+    // Clean Up #1
     calculateAverageRateOfChange() {
       const averageRateOfChange = {};
 
@@ -112,7 +112,7 @@ class Parcel {
 
       return averageRateOfChange;
     }
-  
+
 
     addBuilding(buildingType) {
         const totalBuildings = Object.values(this.buildings).reduce((a, b) => a + b, 0);
