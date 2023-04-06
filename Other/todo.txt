@@ -1,3 +1,6 @@
+Unit Tests?
+Continuous Integration & Developing Unit tests on a class basis (?)
+
 - Tooltips hidden when 0%
 
 ## Playtrough Testing

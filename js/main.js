@@ -33,11 +33,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const highestParcelResourceEP = highestParcel.resources.expansionPoints || 0;
       const highestParcelResourceAA = highestParcel.resources.alienArtefacts || 0;
 
+      const selectedParcel = window.parcels.getParcel(ui.getSelectedParcelIndex());
+      const selectedParcelHasRCF = selectedParcel.buildings.remoteConstructionFacility;
+
       const resourceCounts = {
-        expansionPoints: highestParcelResourceEP + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
-        alienArtefacts: highestParcelResourceAA + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
+        expansionPoints: highestParcelResourceEP + (selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
+        alienArtefacts: highestParcelResourceAA + (selectedParcelHasRCF ? selectedParcel.resources.alienArtefacts : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
       };
 
+
+      console.log("resourceCounts", resourceCounts);
+      console.log("parcels.canBuyParcel(resourceCounts)", parcels.canBuyParcel(resourceCounts));
       if (parcels.canBuyParcel(resourceCounts)) {
         const cost = gameState.buyParcelCost;
 
@@ -67,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gameState.buyParcelCost.alienArtefacts += 1;
       }
     });
-    
+
     // Add tooltip to Buy Parcel button
     ui.addTooltipToBuyParcelButton(buyParcelButton);
 

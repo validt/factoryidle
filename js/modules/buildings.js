@@ -591,15 +591,24 @@
   }
 
 
-  //Remote Construction Facility Helper Functions
-  function getResourcesFromRemoteConstructionFacilities(parcels, resourceName) {
-      let totalResource = 0;
-      for (const parcel of parcels) {
-          if (parcel.buildings.remoteConstructionFacility) {
-              totalResource += parcel.resources[resourceName] || 0;
-          }
+  // Remote Construction Facility Helper Functions
+  function getResourcesFromRemoteConstructionFacilities(parcelss, resourceName) {
+    let totalResource = 0;
+    for (const parcel of parcelss) {
+      if (parcel.buildings.remoteConstructionFacility) {
+        totalResource += parcel.resources[resourceName] || 0;
       }
-      return totalResource;
+    }
+
+    // Get the selected parcel
+    const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+
+    // Subtract resources from the selected parcel if it has a remote construction facility
+    if (selectedParcel && selectedParcel.buildings.remoteConstructionFacility) {
+      totalResource -= selectedParcel.resources[resourceName] || 0;
+    }
+
+    return totalResource;
   }
 
   function deductResourcesFromRemoteConstructionFacilities(parcels, resourceName, requiredResource) {
@@ -664,15 +673,24 @@
 
 
     // Add consumed ammunition to parcels with militaryHQ
-    function addAmmunitionToMilitaryHQ(parcels, ammunitionType, amount) {
+    function addAmmunitionToMilitaryHQ(parcels, ammunitionType, totalAmount) {
       const resourceId = AmmunitionTypeCatalogue.find((ammo) => ammo.ammunitionType === ammunitionType)?.resourceId;
+
+      // Count the number of militaryHQ buildings
+      const militaryHQCount = parcels.reduce((count, parcel) => {
+        return count + (parcel.buildings["militaryHQ"] ? 1 : 0);
+      }, 0);
+
+      // Calculate the amount of ammunition to distribute to each militaryHQ
+      const amountPerHQ = totalAmount / militaryHQCount;
 
       parcels.forEach((parcel) => {
         if (parcel.buildings["militaryHQ"]) {
-          parcel.resources[resourceId] = (parcel.resources[resourceId] || 0) + amount;
+          parcel.resources[resourceId] = (parcel.resources[resourceId] || 0) + amountPerHQ;
         }
       });
     }
+
 
   window.buildingManager = {
     getBuilding,

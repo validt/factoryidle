@@ -33,6 +33,7 @@ const gameState = {
 window.gameState = gameState;
 
 window.saveGame = function() {
+  console.log('Saving game...');
   // Save the battle object
   if (window.battle) {
     window.gameState.battle = window.battle.exportData();
@@ -158,7 +159,7 @@ window.loadGame = function() {
 };
 
 // Save the game state every minute
-setInterval(window.saveGame, 60 * 1000);
+  setInterval(window.saveGame, 60 * 1000);
 
 function getSaveStateString() {
   const saveData = {
