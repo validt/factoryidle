@@ -134,18 +134,22 @@
           <h2>Military Operations</h2>
           <button id="start-battle">Start Battle</button>
           <br></br>
-          <div>
+          <div style="display: flex;">
+            <div>
             <table id="resource-cost-table">
               <tr>
                 <th>Resource</th>
                 <th>Cost</th>
               </tr>
             </table>
+            </div>
 
           </div>
 
 
+
           <div class="tables-container">
+
             <div>
               <h3>Factory Units</h3>
 
@@ -164,8 +168,7 @@
                 </tbody>
               </table>
 
-              <h4>Ammunition:</h4>
-              <div id="ammunition"></div>
+
             </div>
             <div>
               <h3>Biter Units</h3>
@@ -185,7 +188,10 @@
 
             </div>
           </div>
-
+          <div style="display: flex;">
+            <h3>Ammunition:</h3>
+            <div id="ammunition" style="margin: 1.33em;"></div>
+          </div>
           <!--
           <h2>Battle Log</h2>
           <div class="battle-log" id="battle-log">

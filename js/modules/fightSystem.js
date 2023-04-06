@@ -820,8 +820,8 @@ function updateAmmunitionDisplay(battleStarted = false) {
 
     // Only display ammunition types with a quantity greater than 0
     if (ammoQuantity > 0) {
-      const ammoInfo = document.createElement("p");
-      ammoInfo.innerText = `${ammoType.name}: ${ammoQuantity}`;
+      const ammoInfo = document.createElement("span");
+      ammoInfo.innerText = `${'\xa0'.repeat(10)} ${ammoType.name}: ${ammoQuantity}          `;
       ammunitionElement.appendChild(ammoInfo);
 
       // Add tooltip to the ammoInfo element
