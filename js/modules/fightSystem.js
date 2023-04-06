@@ -250,8 +250,11 @@ class Battle {
 
     for (const factoryUnit of this.factoryUnits) {
       if (factoryUnit.attack > 0) {
+        // Reverse the ammunitionTypes array to pick the strongest first
+        const reversedAmmunitionTypes = [...ammunitionTypes].reverse();
+
         // Choose the first ammunition type with at least 1 ammunition left
-        const selectedAmmo = ammunitionTypes.find(ammoType => this.ammunition[ammoType.name] && this.ammunition[ammoType.name] >= factoryUnit.consumesAmmo);
+        const selectedAmmo = reversedAmmunitionTypes.find(ammoType => this.ammunition[ammoType.name] && this.ammunition[ammoType.name] >= factoryUnit.consumesAmmo);
 
         if (selectedAmmo && this.ammunition[selectedAmmo.name] >= factoryUnit.consumesAmmo) {
           const totalDamage = factoryUnit.attack + selectedAmmo.damage;
