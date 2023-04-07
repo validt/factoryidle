@@ -321,16 +321,16 @@ const clipboard = (() => {
 
     }
 
-  function copyCustomizations(sourceParcel, targetParcel) {
-    targetParcel.name = sourceParcel.name;
-    targetParcel.color = sourceParcel.color;
-    targetParcel.beltUsage = sourceParcel.beltUsage;
+    function copyCustomizations(sourceParcel, targetParcel) {
+      targetParcel.name = sourceParcel.name;
+      targetParcel.color = sourceParcel.color;
+      targetParcel.beltUsage = JSON.parse(JSON.stringify(sourceParcel.beltUsage));
 
-    // Update UI
-    for (let i = 0; i < parcels.parcelList.length; i++) {
+      // Update UI
+      for (let i = 0; i < parcels.parcelList.length; i++) {
         parcelManipulation.updateParcelTab(i);
+      }
     }
-  }
 
   return {
     copyParcel,
