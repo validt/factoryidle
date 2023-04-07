@@ -1,3 +1,42 @@
+class CircularBuffer {
+  constructor(capacity) {
+    this.buffer = new Array(capacity);
+    this.capacity = capacity;
+    this.start = 0;
+    this.end = 0;
+    this.size = 0;
+    this.sum = 0;
+  }
+
+  insert(value) {
+    if (this.size === this.capacity) {
+      this.sum -= this.buffer[this.start];
+      this.start = (this.start + 1) % this.capacity;
+    } else {
+      this.size++;
+    }
+
+    this.buffer[this.end] = value;
+    this.sum += value;
+    this.end = (this.end + 1) % this.capacity;
+  }
+
+  getAverage(lastNValues) {
+    if (lastNValues >= this.size) {
+      return this.sum / this.size;
+    }
+
+    let sum = 0;
+    let index = (this.end - 1 + this.capacity) % this.capacity;
+    for (let i = 0; i < lastNValues; i++) {
+      sum += this.buffer[index];
+      index = (index - 1 + this.capacity) % this.capacity;
+    }
+
+    return sum / lastNValues;
+  }
+}
+
 let currentTable;
 
 const gameLoop = (() => {
@@ -127,6 +166,13 @@ const gameLoop = (() => {
                   parcel.resources[key] = Math.round(updatedValue * 10) / 10;
                 }
               }
+
+              // Insert the new production rate into the circular buffer for each output resource
+              for (const [key, value] of Object.entries(building.outputs)) {
+                const productionRate = maxProducingBuildings > 0 ? value * maxProducingBuildings * building.rate * (totalProductionRateModifier) : 0;
+                parcel.productionHistory[key].insert(productionRate);
+              }
+
             } else {
               for (const [key, value] of Object.entries(building.outputs)) {
                 if (!parcel.resources[key]) {
@@ -134,6 +180,9 @@ const gameLoop = (() => {
                 }
                 const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (totalProductionRateModifier);
                 parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+
+                // Insert the new production rate into the circular buffer
+                parcel.productionHistory[key].insert(value * buildingCount * building.rate * (totalProductionRateModifier));
               }
             }
           }

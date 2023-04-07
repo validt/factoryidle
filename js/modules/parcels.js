@@ -62,6 +62,11 @@ class Parcel {
         this.buildingProductionRateModifiers = {};
         this.buildingConsumptionRateModifiers = {};
         this.inputValues = {};
+        this.productionHistory = {};
+        const allResourceTypes = Object.keys(resourceCategories);
+        for (const resourceType of allResourceTypes) {
+          this.productionHistory[resourceType] = new CircularBuffer(300);
+        }
     }
 
     updatePreviousResources() {
@@ -263,6 +268,7 @@ const parcels = {
     getGlobalConsumptionRateModifier: function () {
       return Object.values(this.globalConsumptionRateModifiers).reduce((a, b) => a + b, 0);
     },
+
 
 
     createNewParcel() {
