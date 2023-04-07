@@ -13,7 +13,7 @@ const gameState = {
   sectionVisibility: {
     energySection: false,
     pollutionSection: false,
-    fight: false,
+    fightSection: false,
     projectSection: false,
     researchSection: false,
     blueprints: false,
@@ -39,7 +39,11 @@ window.saveGame = function() {
     window.gameState.battle = window.battle.exportData();
   }
 
-  localStorage.setItem('gameState', JSON.stringify(window.gameState));
+  // Convert unlockedBuildings Set to an Array before saving
+  const unlockedBuildingsArray = Array.from(window.progressionManager.unlockedBuildings);
+  const gameStateCopy = { ...window.gameState, progression: { ...window.gameState.progression, unlockedBuildings: unlockedBuildingsArray } };
+
+  localStorage.setItem('gameState', JSON.stringify(gameStateCopy));
   const projectsJSON = JSON.stringify(projectsModule.projects);
   localStorage.setItem("savedProjects", projectsJSON);
   localStorage.setItem("researchData", window.researchManager.saveResearchData());
@@ -116,9 +120,9 @@ window.loadGame = function() {
       parsedState.progression.unlockedBuildings &&
       Array.isArray(parsedState.progression.unlockedBuildings)
     ) {
-      window.gameState.progression.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
+      window.progressionManager.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
     } else {
-      window.gameState.progression.unlockedBuildings = new Set();
+      window.progressionManager.unlockedBuildings = new Set();
     }
 
     // Add parcels to the UI

@@ -551,7 +551,12 @@ const ui = (() => {
         const maxCellVal = maxVal - (beltUsage - currentVal);
 
         if (inputVal > maxCellVal) {
-          event.target.value = maxCellVal;
+          //Check for the edge case of selling belts where maxCellVal can get negative
+          if (maxCellVal < 0) {
+            event.target.value = 0;
+          } else {
+            event.target.value = maxCellVal;
+          }
         } else if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
           event.target.value = 0;
         }
@@ -1036,10 +1041,10 @@ const ui = (() => {
     }
 
     function updateParcelsSectionVisibility() {
-      const expansionTechCenterBuilt = gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0);
+      const expansionTech = window.gameState.research.expansionTech;
 
-      updateSectionVisibility("parcels-section", expansionTechCenterBuilt);
-      updateSectionVisibility("global-header", expansionTechCenterBuilt);
+      updateSectionVisibility("parcels-section", expansionTech);
+      updateSectionVisibility("global-header", expansionTech);
       updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
       updateSectionVisibility("pollution-section", gameState.sectionVisibility.pollutionSection);
       updateSectionVisibility("fight-container", gameState.sectionVisibility.fightSection);
@@ -1047,6 +1052,9 @@ const ui = (() => {
       updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
       updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
       updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
+
+      //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
+      updateSectionVisibility("project-section", !Object.values(window.projects.projects).every(array => array.length === 0));
     }
 
     function calculateFulfillmentAndModifier(energyDemand, energyProduction) {
