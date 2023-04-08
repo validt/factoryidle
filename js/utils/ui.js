@@ -454,28 +454,75 @@ const ui = (() => {
 
       // parcels.parcelList[i].productionHistory[resourceName].getAverage(n)
 
-      function getAdaptiveInterval(productionRate, minInterval, maxInterval) {
-        const scalingFactor = 1 / Math.max(productionRate, 0.01); // Avoid dividing by 0
-        const adaptiveInterval = Math.min(Math.max(minInterval * scalingFactor, minInterval), maxInterval);
-        return Math.round(adaptiveInterval);
-      }
+      // function getAdaptiveInterval(productionRate, minInterval, maxInterval) {
+      //   const scalingFactor = 1 / Math.max(productionRate, 0.01); // Avoid dividing by 0
+      //   const adaptiveInterval = Math.min(Math.max(minInterval * scalingFactor, minInterval), maxInterval);
+      //   return Math.round(adaptiveInterval);
+      // }
+      //
+
+      // let productionRateValue = this.parcel.productionHistory[resourceName].getAverage(10);
+      // let targetInterval = 1;
+      // //Determine a good scope for productionRateValue
+      //
+      // if (this.parcel.productionHistory[resourceName].getZeroCount(60) >= 45) {
+      //
+      // } else if (this.parcel.productionHistory[resourceName].getAverage(60) >= 30) {
+      //
+      // } else if (this.parcel.productionHistory[resourceName].getAverage(60) >= 15) {
+      //
+      // } else {
+      //
+      // }
+      //
+      // // this.parcel.productionHistory[resourceName].getAverage(30);
+      //
+      // const adaptiveInterval = getAdaptiveInterval(productionRateValue, 5, 300);
+      //
+      // //const averageValue = this.parcel.productionHistory[resourceName].getAverage(adaptiveInterval);
 
       // Update the productionRateCell
       const productionRateCell = row.cells[2];
-      const productionRateValue = this.parcel.productionHistory[resourceName].getAverage(60);
-      const adaptiveInterval = getAdaptiveInterval(productionRateValue, 15, 300);
-      const averageValue = this.parcel.productionHistory[resourceName].getAverage(adaptiveInterval);
+      let targetInterval = 7;
+      let buildingCount = 0;
+      let buildingCountChecked = 0;
+      let productionRateModifier = 0;
+      let amount = 0;
+
+
+      if (building) {
+        if (building.id === "expansionCenter" || building.id === "researchCenter") {
+          targetInterval = 300;
+        }
+
+        buildingCount = this.parcel.buildings[building.id];
+        buildingCountChecked = buildingCount || 0;
+        productionRateModifier = gameLoop.calculateProductionRateModifier(this.parcel, building, buildingCount);
+        amount = building.outputs[resourceName];
+      }
+
+
+      const averageValue = this.parcel.productionHistory[resourceName].getAverage(targetInterval);
+
+
+
+      const maxValue = amount * buildingCountChecked * productionRateModifier;
+      const progressPercentage = Math.min(averageValue / maxValue, 1) * 100;
+
+      // const averageValue = this.parcel.productionHistory[resourceName].getAverage(300);
 
       if (averageValue) {
         if (averageValue < 0.1) {
-          productionRateCell.textContent = averageValue.toFixed(3);
+          productionRateCell.textContent = "+" + averageValue.toFixed(3) + "/s";
         } else if (averageValue < 1) {
-          productionRateCell.textContent = averageValue.toFixed(2);
+          productionRateCell.textContent = "+" + averageValue.toFixed(2) + "/s";
         } else {
-          productionRateCell.textContent = averageValue.toFixed(1);
+          productionRateCell.textContent = "+" + averageValue.toFixed(1) + "/s";
         }
+        productionRateCell.style.background = `linear-gradient(90deg, rgba(0, 128, 0, 0.5) ${progressPercentage}%, transparent ${progressPercentage}%)`;
       } else {
         productionRateCell.textContent = "";
+        productionRateCell.style.background = "transparent";
       }
 
       // Update the building count cell
@@ -1001,6 +1048,10 @@ const ui = (() => {
             parcel.buildings[buildingId]--;
 
             if (parcel.buildings[buildingId] === 0) {
+                const firstKey = Object.keys(buildingManager.getBuilding(buildingId).outputs)[0];
+                if (firstKey) {
+                  parcel.productionHistory[firstKey] = new CircularBuffer(300)
+                }
                 delete parcel.buildings[buildingId];
             }
             // Update building display

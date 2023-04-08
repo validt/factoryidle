@@ -74,9 +74,13 @@ window.researchManager.addResearch(new Research('solarTech', 'Solar Tech', { res
 window.researchManager.addResearch(new Research('advancedElectronics', 'Advanced Electronics', { researchPoints: 36 }));
 window.researchManager.addResearch(new Research('blueprintTech', 'Blueprint Tech', { researchPoints: 40 }));
 window.researchManager.addResearch(new Research('beaconTech', 'Beacon Tech', { researchPoints: 100 }));
-window.researchManager.addResearch(new Research('gameWon', 'Win the Demo', { researchPoints: 400 }));
-window.researchManager.addResearch(new Research('gameWon2', 'Win Harder', { researchPoints: 4000 }));
-window.researchManager.addResearch(new Research('gameWon3', 'Win too Hard', { researchPoints: 40000 }));
+window.researchManager.addResearch(new Research('militaryTech2', 'Armor Penetrating Ammunition', { researchPoints: 150 }));
+window.researchManager.addResearch(new Research('beaconTech2', 'Beacon Tech 2', { researchPoints: 300 }));
+window.researchManager.addResearch(new Research('militaryTech3', 'Piercing Ammunition', { researchPoints: 600 }));
+window.researchManager.addResearch(new Research('beaconTech3', 'Beacon Tech 3', { researchPoints: 900 }));
+window.researchManager.addResearch(new Research('gameWon', 'Win the Demo', { researchPoints: 4000 }));
+window.researchManager.addResearch(new Research('gameWon2', 'Win Harder', { researchPoints: 40000 }));
+window.researchManager.addResearch(new Research('gameWon3', 'Win too Hard', { researchPoints: 400000 }));
 //window.researchManager.addResearch(new Research('militaryTech', 'Military (Not Implemented Yet)', { researchPoints: 200000 }));
 // Add more research options as needed
 

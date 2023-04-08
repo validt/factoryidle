@@ -35,6 +35,11 @@ class CircularBuffer {
 
     return sum / lastNValues;
   }
+
+  // Add the getSize method
+  getSize() {
+    return this.size;
+  }
 }
 
 let currentTable;
@@ -48,6 +53,7 @@ const gameLoop = (() => {
         window.loadGame();
         projects.renderProjects();
         ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
+        // initializeAnalytics();
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();
@@ -193,10 +199,6 @@ const gameLoop = (() => {
       ui.updateResourceDisplay(selectedParcel);
     }
 
-
-
-
-
     function calculateProductionRateModifier(parcel, building, buildingCount) {
         const energyBasedModifier = parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier || 0;
         const buildingProductionRateModifier = (parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier) || 0;
@@ -245,10 +247,33 @@ const gameLoop = (() => {
       }
     }
 
-
     function stop() {
         clearInterval(gameInterval);
     }
+
+    // function initializeAnalytics() {
+    //   // Cookie Consent
+    //   var cookieBotScript = document.createElement('script');
+    //   cookieBotScript.src = 'https://consent.cookiebot.com/uc.js';
+    //   cookieBotScript.setAttribute('data-cbid', 'cc57599e-a483-42fd-9b14-380f6c566317');
+    //   cookieBotScript.setAttribute('data-blockingmode', 'auto');
+    //   cookieBotScript.type = 'text/javascript';
+    //   document.head.appendChild(cookieBotScript);
+    //
+    //   // Google Analytics
+    //   var gaScript = document.createElement('script');
+    //   gaScript.async = true;
+    //   gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-7EH8S2NR6P';
+    //   document.head.appendChild(gaScript);
+    //
+    //   window.dataLayer = window.dataLayer || [];
+    //   function gtag(){dataLayer.push(arguments);}
+    //   gtag('consent', 'default', {ad_storage:'denied', analytics_storage:'denied'});
+    //   gtag('set', 'ads_data_redaction', true);
+    //   gtag('set', 'url_passthrough', true);
+    //   gtag('js', new Date());
+    //   gtag('config', 'G-7EH8S2NR6P', {'anonymize_ip': true});
+    // }
 
     return {
         start,
