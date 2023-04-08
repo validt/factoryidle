@@ -56,6 +56,7 @@
       </button>
       <button id="exportButton">Export</button>
       <button id="importButton">Import</button>
+      <button id="importLegacyButton">Import (Legacy)</button>
 
       <div id="exportContainer" style="display: none;">
         <textarea id="exportTextarea" rows="4" cols="50" readonly></textarea>
@@ -64,6 +65,10 @@
       <div id="importContainer" style="display: none;">
         <textarea id="importTextarea" rows="4" cols="50" placeholder="Paste your save state string here..."></textarea>
         <button id="loadSaveStateButton">Import</button>
+      </div>
+      <div id="importLegacyContainer" style="display: none;">
+        <textarea id="importLegacyTextarea" rows="4" cols="50" placeholder="Paste your legacy save state string here..."></textarea>
+        <button id="loadLegacySaveStateButton">Import (Legacy)</button>
       </div>
     </div>
     <div id="tooltip" class="tooltip" style="display: none;"></div>
@@ -303,6 +308,7 @@
     <script src="js/modules/parcelManipulation.js"></script>
     <script src="js/modules/waves.js"></script>
     <script src="js/modules/fightSystem.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
     <script src="js/utils/gameState.js"></script>
     <script src="js/modules/pollutionSystem.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
