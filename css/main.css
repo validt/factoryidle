@@ -251,6 +251,7 @@ h1 {
     display: block;
     flex-wrap: wrap;
     justify-content: space-evenly;
+    margin-bottom: 200px;
 }
 
 .building {
