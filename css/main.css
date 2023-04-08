@@ -142,7 +142,7 @@ table {
 th, td {
   border: 1px solid;
   padding: 5px;
-  text-align: center;
+  text-align: right;
 }
 th {
   background-color: #f2f2f2;
@@ -223,6 +223,10 @@ h1 {
 
 
 /* Resources styles */
+.header {
+  text-align: center;
+}
+
 #resources {
     display: block;
     flex-wrap: wrap;
@@ -244,6 +248,7 @@ h1 {
 
 .resource-name {
     margin-bottom: 5px;
+    text-align: left;
 }
 
 /* Buildings styles */
@@ -265,6 +270,10 @@ h1 {
     border: 1px solid #1a1a1a;
     padding: 5px;
     font-size: 14px;
+}
+
+.building-nameCell {
+  text-align: left;
 }
 
 .building-name {

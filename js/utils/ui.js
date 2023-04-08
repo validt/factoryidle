@@ -265,7 +265,7 @@ const ui = (() => {
         "Resource",
         "Amount",
         //"Utilization",
-        "Action",
+        "Ø Production",
         "Count",
         "Building",
         "Forward 0/0",
@@ -275,6 +275,7 @@ const ui = (() => {
       headerLabels.forEach((label) => {
         const headerCell = document.createElement("th");
         headerCell.textContent = label;
+        headerCell.classList.add("header");
         headerRow.appendChild(headerCell);
       });
 
@@ -301,8 +302,25 @@ const ui = (() => {
 
       // Create the resource name cell
       const nameCell = document.createElement("td");
-      nameCell.textContent = resourceName;
       nameCell.classList.add("resource-name");
+
+      const textWrapper = document.createElement("div");
+      textWrapper.textContent = resourceName;
+      textWrapper.style.display = "inline-block";
+      textWrapper.style.verticalAlign = "-webkit-baseline-middle";
+      nameCell.appendChild(textWrapper);
+
+
+      // Create button inside name cell
+      if (building && building.minable) {
+        const mineButton = this.createMineButton(resourceName);
+        mineButton.style.display = "inline-block";
+        mineButton.style.verticalAlign = "-webkit-baseline-middle";
+        mineButton.style.float = "right";
+        mineButton.style.marginLeft = "1em"
+        nameCell.appendChild(mineButton);
+      }
+
       row.appendChild(nameCell);
 
       //row.appendChild(this.createCell(resourceName));
@@ -352,13 +370,9 @@ const ui = (() => {
         tooltip.style.top = event.pageY + 10 + "px";
       });
 
-      //Create action cells
-      const actionCell = document.createElement("td");
-      if (building && building.minable) {
-          const mineButton = this.createMineButton(resourceName);
-          actionCell.appendChild(mineButton);
-      }
-      row.appendChild(actionCell);
+      //Create productionRate cells
+      const productionRateCell = document.createElement("td");
+      row.appendChild(productionRateCell);
 
       const countCell = document.createElement("td"); // Create a new cell for the building count
       if (building) {
@@ -438,6 +452,32 @@ const ui = (() => {
         }
       }
 
+      // parcels.parcelList[i].productionHistory[resourceName].getAverage(n)
+
+      function getAdaptiveInterval(productionRate, minInterval, maxInterval) {
+        const scalingFactor = 1 / Math.max(productionRate, 0.01); // Avoid dividing by 0
+        const adaptiveInterval = Math.min(Math.max(minInterval * scalingFactor, minInterval), maxInterval);
+        return Math.round(adaptiveInterval);
+      }
+
+      // Update the productionRateCell
+      const productionRateCell = row.cells[2];
+      const productionRateValue = this.parcel.productionHistory[resourceName].getAverage(60);
+      const adaptiveInterval = getAdaptiveInterval(productionRateValue, 15, 300);
+      const averageValue = this.parcel.productionHistory[resourceName].getAverage(adaptiveInterval);
+
+      if (averageValue) {
+        if (averageValue < 0.1) {
+          productionRateCell.textContent = averageValue.toFixed(3);
+        } else if (averageValue < 1) {
+          productionRateCell.textContent = averageValue.toFixed(2);
+        } else {
+          productionRateCell.textContent = averageValue.toFixed(1);
+        }
+      } else {
+        productionRateCell.textContent = "";
+      }
+
       // Update the building count cell
       const countCell = row.cells[3];
       if (building && progressionManager.isUnlocked("ironMiner") &&
@@ -502,6 +542,8 @@ const ui = (() => {
         backwardLabelElement.style.display = "";
       }
     }
+
+
 
     createDirectionInput(beltId, resourceName) {
       // Create elements
@@ -708,9 +750,9 @@ const ui = (() => {
     function updateBuildingDisplay(parcel) {
         buildingDisplay.innerHTML = `
             <tr>
-                <th>Building</th>
-                <th>Count</th>
-                <th>Action</th>
+                <th class = "header">Building</th>
+                <th class = "header">Count</th>
+                <th class = "header">Action</th>
             </tr>
         `;
 
@@ -718,7 +760,7 @@ const ui = (() => {
             const buildingElement = document.createElement("tr");
             const building = buildingManager.getBuilding(key);
             buildingElement.innerHTML = `
-                <td data-building-id="${key}">${building.name}</td>
+                <td data-building-id="${key}" class="building-nameCell">${building.name}</td>
                 <td>${value}</td>
                 <td>
                     <button data-building-id="${key}" class="buy-building">Buy</button>
