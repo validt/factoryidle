@@ -189,34 +189,34 @@ function loadSaveStateFromString(saveStateString) {
   }
 }
 
-function loadSaveStateFromStringLegacy(saveStateString) {
-  try {
-    const saveData = JSON.parse(saveStateString);
-    localStorage.setItem('gameState', JSON.stringify(saveData.gameState));
-    localStorage.setItem('savedProjects', JSON.stringify(saveData.savedProjects));
-    localStorage.setItem('researchData', saveData.researchData);
-
-    // Reload the page to apply the changes
-    location.reload();
-  } catch (error) {
-    console.error("Invalid save state string:", error);
-    alert("Invalid save state string. Please check the input and try again.");
-  }
-}
+// function loadSaveStateFromStringLegacy(saveStateString) {
+//   try {
+//     const saveData = JSON.parse(saveStateString);
+//     localStorage.setItem('gameState', LZString.compress(JSON.stringify(saveData.gameState)));
+//     localStorage.setItem('savedProjects', LZString.compress(JSON.stringify(saveData.savedProjects)));
+//     localStorage.setItem('researchData', LZString.compress(saveData.researchData));
+//
+//     // Reload the page to apply the changes
+//     location.reload();
+//   } catch (error) {
+//     console.error("Invalid save state string:", error);
+//     alert("Invalid save state string. Please check the input and try again.");
+//   }
+// }
 
 document.getElementById("exportButton").addEventListener("click", function () {
   const saveStateString = getSaveStateString();
   document.getElementById("exportTextarea").value = saveStateString;
   document.getElementById("exportContainer").style.display = "block";
   document.getElementById("importContainer").style.display = "none";
-  document.getElementById("importLegacyContainer").style.display = "none";
+  // document.getElementById("importLegacyContainer").style.display = "none";
 
 });
 
 document.getElementById("importButton").addEventListener("click", function () {
   document.getElementById("exportContainer").style.display = "none";
   document.getElementById("importContainer").style.display = "block";
-  document.getElementById("importLegacyContainer").style.display = "none";
+  // document.getElementById("importLegacyContainer").style.display = "none";
 });
 
 document.getElementById("loadSaveStateButton").addEventListener("click", function () {
@@ -224,16 +224,16 @@ document.getElementById("loadSaveStateButton").addEventListener("click", functio
   loadSaveStateFromString(saveStateString);
 });
 
-document.getElementById("importLegacyButton").addEventListener("click", function () {
-  document.getElementById("exportContainer").style.display = "none";
-  document.getElementById("importContainer").style.display = "none";
-  document.getElementById("importLegacyContainer").style.display = "block";
-});
-
-document.getElementById("loadLegacySaveStateButton").addEventListener("click", function () {
-  const saveStateStringLegacy = document.getElementById("importLegacyTextarea").value;
-  loadSaveStateFromStringLegacy(saveStateStringLegacy);
-});
+// document.getElementById("importLegacyButton").addEventListener("click", function () {
+//   document.getElementById("exportContainer").style.display = "none";
+//   document.getElementById("importContainer").style.display = "none";
+//   document.getElementById("importLegacyContainer").style.display = "block";
+// });
+//
+// document.getElementById("loadLegacySaveStateButton").addEventListener("click", function () {
+//   const saveStateStringLegacy = document.getElementById("importLegacyTextarea").value;
+//   loadSaveStateFromStringLegacy(saveStateStringLegacy);
+// });
 
 function showResetConfirmation() {
   const resetConfirmation = document.getElementById('resetConfirmation');

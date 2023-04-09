@@ -92,6 +92,26 @@ const gameLoop = (() => {
           parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT1 * 0.005;
         }
 
+        if (parcel.buildings.speedBeaconT2) {
+          parcel.productionRateModifier += parcel.buildings.speedBeaconT2 * 0.04;
+          parcel.consumptionRateModifier += parcel.buildings.speedBeaconT2 * 0.05;
+        }
+
+        if (parcel.buildings.productivityBeaconT2) {
+          parcel.productionRateModifier += parcel.buildings.productivityBeaconT2 * 0.02;
+          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT2 * 0.01;
+        }
+
+        if (parcel.buildings.speedBeaconT3) {
+          parcel.productionRateModifier += parcel.buildings.speedBeaconT3 * 0.08;
+          parcel.consumptionRateModifier += parcel.buildings.speedBeaconT3 * 0.010;
+        }
+
+        if (parcel.buildings.productivityBeaconT3) {
+          parcel.productionRateModifier += parcel.buildings.productivityBeaconT3 * 0.06;
+          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT3 * 0.03;
+        }
+
         // Call updatePreviousResources method for each parcel
         parcel.updatePreviousResources();
         parcel.updatePreviousResourceHistory();
