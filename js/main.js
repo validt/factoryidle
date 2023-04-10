@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ui.selectParcel(newIndex);
 
         // Increment the costs for the next purchase
-        gameState.buyParcelCost.expansionPoints += 0.5;
+        gameState.buyParcelCost.expansionPoints += 0.7;
         gameState.buyParcelCost.alienArtefacts += 0.5;
       }
     });
