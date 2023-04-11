@@ -9,6 +9,41 @@ const ui = (() => {
       this.parcel = parcel;
       this.tableElement = document.getElementById("resourceTable");
       this.eventListeners = new WeakMap();
+      this.columns = [
+        {
+          label: "Resource",
+          id: "resource",
+        },
+        {
+          label: "Amount",
+          id: "amount"
+        },
+        {
+          label: "Production Rate",
+          id: "productionRate",
+          display: "none"
+        },
+        {
+          label: "Active Buildings",
+          id: "activeBuildings",
+          display: "none"
+        },
+        {
+          label: "Total Building",
+          id: "totalBuildings",
+          display: "none"
+        },
+        {
+          label: "Forward 0/0",
+          id: "forwardBelt",
+          display: "none"
+        },
+        {
+          label: "Backward 0/0",
+          id: "backwardBelt",
+          display: "none"
+        }
+      ];
     }
 
     update() {
@@ -35,6 +70,8 @@ const ui = (() => {
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
             const rowId = `resourceRow-${this.parcel.id}-${resourceName}`;
             let row = document.getElementById(rowId);
+            this.updateRow(resourceName, row);
+            /*
             if (!row) {
               // If the row doesn't exist, create it
               row = this.createRow(resourceName);
@@ -43,6 +80,7 @@ const ui = (() => {
               // Update the existing row
               this.updateRow(resourceName, row);
             }
+            */
           }
         }
       }
@@ -117,185 +155,183 @@ const ui = (() => {
       const resourceNames = this.tableElement.querySelectorAll(".resource-name");
       resourceNames.forEach((resourceName) => {
         if (resourceName.dataset.tooltipListenerAttached !== 'true') {
-            resourceName.addEventListener("mouseover", (event) => {
-              const resource = buildingManager.getBuildingByResourceName(event.target.textContent);
-              const buildingCount = parcel.buildings[resource.id];
-              const buildingCountChecked = buildingCount || 0;
+          resourceName.addEventListener("mouseover", (event) => {
+            const name = resourceName.parentNode.id.split('-')[3];
+            const resource = buildingManager.getBuildingByResourceName(name);
+            const buildingCount = parcel.buildings[resource.id];
+            const buildingCountChecked = buildingCount || 0;
 
-              const inputText = Object.entries(resource.inputs || {})
-              .map(([inputResource, amount]) => `${amount} ${inputResource}`)
-              .join("<br>");
-              const outputText = Object.entries(resource.outputs || {})
-              .map(([outputResource, amount]) => `${amount} ${outputResource}`)
-              .join("<br>");
+            const inputText = Object.entries(resource.inputs || {})
+            .map(([inputResource, amount]) => `${amount} ${inputResource}`)
+            .join("<br>");
+            const outputText = Object.entries(resource.outputs || {})
+            .map(([outputResource, amount]) => `${amount} ${outputResource}`)
+            .join("<br>");
 
-              const totalInputText = Object.entries(resource.inputs || {})
-              .map(([inputResource, amount]) => `${amount * buildingCountChecked} ${inputResource}`)
-              .join("<br>");
-              const totalOutputText = Object.entries(resource.outputs || {})
-              .map(([outputResource, amount]) => `${amount * buildingCountChecked} ${outputResource}`)
-              .join("<br>");
+            const totalInputText = Object.entries(resource.inputs || {})
+            .map(([inputResource, amount]) => `${amount * buildingCountChecked} ${inputResource}`)
+            .join("<br>");
+            const totalOutputText = Object.entries(resource.outputs || {})
+            .map(([outputResource, amount]) => `${amount * buildingCountChecked} ${outputResource}`)
+            .join("<br>");
 
-              const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
-              const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
+            const productionRateModifier = gameLoop.calculateProductionRateModifier(parcel, resource, buildingCount);
+            const consumptionRateModifier = gameLoop.calculateConsumptionRateModifier(parcel, resource, buildingCount);
 
-              const modifiedInputText = Object.entries(resource.inputs || {})
-              .map(([inputResource, amount]) => `${(amount * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
-              .join("<br>");
-              const modifiedOutputText = Object.entries(resource.outputs || {})
-              .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
-              .join("<br>");
+            const modifiedInputText = Object.entries(resource.inputs || {})
+            .map(([inputResource, amount]) => `${(amount * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+            .join("<br>");
+            const modifiedOutputText = Object.entries(resource.outputs || {})
+            .map(([outputResource, amount]) => `${(amount * (productionRateModifier)).toFixed(2)} ${outputResource}`)
+            .join("<br>");
 
 
 
-              const totalModifiedInputText = Object.entries(resource.inputs || {})
-              .map(([inputResource, amount]) => `${(amount * buildingCountChecked * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
-              .join("<br>");
-              const totalModifiedOutputText = Object.entries(resource.outputs || {})
-              .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
-              .join("<br>");
-              const tooltipText = `
-              <table>
-              <tbody>
+            const totalModifiedInputText = Object.entries(resource.inputs || {})
+            .map(([inputResource, amount]) => `${(amount * buildingCountChecked * (consumptionRateModifier)).toFixed(2)} ${inputResource}`)
+            .join("<br>");
+            const totalModifiedOutputText = Object.entries(resource.outputs || {})
+            .map(([outputResource, amount]) => `${(amount * buildingCountChecked * (productionRateModifier)).toFixed(2)} ${outputResource}`)
+            .join("<br>");
+            const tooltipText = `
+            <table>
+            <tbody>
+
+            <thead>
+              <tr>
+                <th colspan="3" style="text-align: left;"><b>Total (Modified)</b></th>
+              </tr>
+            </thead>
+            <tr>
+              <td>${totalModifiedInputText || "-"}</td>
+              <td> &#x2192; </td>
+              <td>${totalModifiedOutputText || "-"}</td>
+            </tr>
 
               <thead>
                 <tr>
-                  <th colspan="3" style="text-align: left;"><b>Total (Modified)</b></th>
+                  <th colspan="3" style="text-align: left;"><b>Modified</b></th>
                 </tr>
               </thead>
-              <tr>
-                <td>${totalModifiedInputText || "-"}</td>
-                <td> &#x2192; </td>
-                <td>${totalModifiedOutputText || "-"}</td>
-              </tr>
+
+                <tr>
+                  <td>${modifiedInputText || "-"}</td>
+                  <td> &#x2192; </td>
+                  <td>${modifiedOutputText || "-"}</td>
+                </tr>
+
+                <tr>
+                  <td>${
+                    consumptionRateModifier !== undefined
+                      ? (consumptionRateModifier > 1 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
+                      : ""
+                  }</td>
+                  <td></td>
+                  <td>${
+                    productionRateModifier !== undefined
+                      ? (productionRateModifier > 1 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
+                      : ""
+                  }</td>
+                </tr>
 
                 <thead>
                   <tr>
-                    <th colspan="3" style="text-align: left;"><b>Modified</b></th>
+                    <th colspan="3" style="text-align: left;"><b>Total (Default)</b></th>
                   </tr>
                 </thead>
+                <tr>
+                  <td>${totalInputText || "-"}</td>
+                  <td> &#x2192; </td>
+                  <td>${totalOutputText || "-"}</td>
+                </tr>
 
+                <thead>
                   <tr>
-                    <td>${modifiedInputText || "-"}</td>
+                    <th colspan="3" style="text-align: left;"><b>Default</b></th>
+                  </tr>
+                </thead>
+                  <tr>
+                    <td>${inputText || "-"}</td>
                     <td> &#x2192; </td>
-                    <td>${modifiedOutputText || "-"}</td>
+                    <td>${outputText || "-"}</td>
                   </tr>
+              </tbody>
+            </table>`;
 
-                  <tr>
-                    <td>${
-                      consumptionRateModifier !== undefined
-                        ? (consumptionRateModifier > 1 ? "+" : "") + Math.round((consumptionRateModifier-1) * 100) + "%"
-                        : ""
-                    }</td>
-                    <td></td>
-                    <td>${
-                      productionRateModifier !== undefined
-                        ? (productionRateModifier > 1 ? "+" : "") + Math.round((productionRateModifier-1) * 100) + "%"
-                        : ""
-                    }</td>
-                  </tr>
+            tooltip.innerHTML = tooltipText;
+            tooltip.style.display = "block";
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+          });
 
-                  <thead>
-                    <tr>
-                      <th colspan="3" style="text-align: left;"><b>Total (Default)</b></th>
-                    </tr>
-                  </thead>
-                  <tr>
-                    <td>${totalInputText || "-"}</td>
-                    <td> &#x2192; </td>
-                    <td>${totalOutputText || "-"}</td>
-                  </tr>
+          resourceName.addEventListener("mouseout", () => {
+            tooltip.style.display = "none";
+          });
 
-                  <thead>
-                    <tr>
-                      <th colspan="3" style="text-align: left;"><b>Default</b></th>
-                    </tr>
-                  </thead>
-                    <tr>
-                      <td>${inputText || "-"}</td>
-                      <td> &#x2192; </td>
-                      <td>${outputText || "-"}</td>
-                    </tr>
-                </tbody>
-              </table>`;
-
-              tooltip.innerHTML = tooltipText;
-              tooltip.style.display = "block";
-              tooltip.style.left = event.pageX + 10 + "px";
-              tooltip.style.top = event.pageY + 10 + "px";
-            });
-
-            resourceName.addEventListener("mouseout", () => {
-              tooltip.style.display = "none";
-            });
-
-            resourceName.addEventListener("mousemove", (event) => {
-              tooltip.style.left = event.pageX + 10 + "px";
-              tooltip.style.top = event.pageY + 10 + "px";
-            });
-            // Mark the resourceName as having tooltip event listeners attached
-            resourceName.dataset.tooltipListenerAttached = 'true';
-          }
-      });
-    }
-
-    updateHeader() {
-        // Get the current header elements using a query selector
-        let forwardBeltLabel = document.querySelector("[id^='forwardBeltHeader-']");
-        let backwardBeltLabel = document.querySelector("[id^='backwardBeltHeader-']");
-
-        if (forwardBeltLabel && backwardBeltLabel) {
-        // Set new ids
-        forwardBeltLabel.id = `forwardBeltHeader-${this.parcel.id}`;
-        backwardBeltLabel.id = `backwardBeltHeader-${this.parcel.id}`;
-
-        // Update forward and backward belt labels
-        const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
-        const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
-        const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
-        const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
-        forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
-        backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
+          resourceName.addEventListener("mousemove", (event) => {
+            tooltip.style.left = event.pageX + 10 + "px";
+            tooltip.style.top = event.pageY + 10 + "px";
+          });
+          // Mark the resourceName as having tooltip event listeners attached
+          resourceName.dataset.tooltipListenerAttached = 'true';
         }
+      });
     }
 
     createHeader() {
       const headerRow = document.createElement("tr");
-      const headerLabels = [
-        "Resource",
-        "Amount",
-        //"Utilization",
-        "Action",
-        "Count",
-        "Building",
-        "Forward 0/0",
-        "Backward 0/0",
-      ];
-
-      headerLabels.forEach((label) => {
+      this.columns.forEach((column) => {
         const headerCell = document.createElement("th");
-        headerCell.textContent = label;
+        headerCell.textContent = column.label;
+        headerCell.id = `${column.id}-header-${this.parcel.id}`;
+        if(column.display === "none"){
+          headerCell.style.display = "none";
+        }
         headerRow.appendChild(headerCell);
       });
-
-      headerRow.children[3].id = `countHeader-${this.parcel.id}`; // Add an ID to the Production header
-
-      headerRow.children[4].id = `productionHeader-${this.parcel.id}`; // Add an ID to the Production header
-      headerRow.children[5].id = `forwardBeltHeader-${this.parcel.id}`; // Add an ID to the Forward header
-      headerRow.children[5].style.display = "none"; // Initially hide the Forward header
-
-      headerRow.children[6].id = `backwardBeltHeader-${this.parcel.id}`; // Add an ID to the Backward header
-      headerRow.children[6].style.display = "none"; // Initially hide the Backward header
-
-      // Hide the Production header initially
-      const productionHeader = headerRow.children[4];
-      const countHeader = headerRow.children[3];
-
       this.tableElement.appendChild(headerRow);
     }
 
+    updateHeader() {
+      const headerRow = document.createElement("tr");
+      this.columns.forEach((column) => {
+        if(column.id === "forwardBelt"){
+          let forwardBeltLabel = document.querySelector("[id^='forwardBelt-header-']");
+          if(forwardBeltLabel){
+            const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
+            const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
+            if(forwardBeltLabel.style.display === "none" && totalForwardBeltCount !== 0){
+              forwardBeltLabel.style.display = "";
+            }
+          }
+        }else if(column.id === "backwardBelt"){
+          let backwardBeltLabel = document.querySelector("[id^='backwardBelt-header-']");
+          if(backwardBeltLabel){
+            const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
+            const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
+            if(backwardBeltLabel.style.display === "none" && totalBackwardBeltCount !== 0){
+              backwardBeltLabel.style.display = "";
+            }
+          }
+        }else if(column.id === "productionRate" || column.id === "activeBuildings" || column.id === "totalBuildings"){
+          let selector = `[id^='${column.id}-header-']`;
+          const header = document.querySelector(selector);
+          if(
+            (progressionManager.isUnlocked("ironMiner") ||
+            progressionManager.isUnlocked("stoneMiner") ||
+            progressionManager.isUnlocked("coalMiner")) &&
+            header.style.display === "none"
+          ){
+            header.style.display = "";
+          }
+        }
+      });
+    }
+
     createRow(resourceName) {
-      const building = buildingManager.getBuildingByResourceName(resourceName);
+      /*const building = buildingManager.getBuildingByResourceName(resourceName);
       const row = document.createElement("tr");
       row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
 
@@ -419,88 +455,154 @@ const ui = (() => {
       });
 
       return row;
+      */
     }
 
     updateRow(resourceName, row) {
       const building = buildingManager.getBuildingByResourceName(resourceName);
-      // Update the resource amount cell
-      const color = getResourceRateColor(this.parcel, resourceName);
-      const resourceCell = row.cells[1];
-      resourceCell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
-      resourceCell.style.backgroundColor = color;
-      if (color === "green") {
-        resourceCell.style.color = "white";
-      } else {
-        if (localStorage.getItem('darkMode') === 'true') {
-          resourceCell.style.color = "#E8E6E3";
-        } else {
-          resourceCell.style.color = "black";
-        }
+      if (row === null) {
+        row = document.createElement("tr");
+        row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
+        this.tableElement.appendChild(row);
       }
-
-      // Update the building count cell
-      const countCell = row.cells[3];
-      if (building && progressionManager.isUnlocked("ironMiner") &&
-        progressionManager.isUnlocked("stoneMiner") &&
-        progressionManager.isUnlocked("coalMiner")) {
-        countCell.textContent = this.parcel.buildings[building.id] || 0;
-        countCell.style.visibility = "visible"; // Make the cell visible
-      } else {
-        countCell.textContent = ""; // Hide the content if the required buildings are not unlocked
-        countCell.style.visibility = "collapse"; // Make the cell invisible
-      }
-
-      // Update the production cell
-      const productionCell = row.cells[4];
-      if (building) {
-        const buildingCount = this.parcel.buildings[building.id] || 0;
-        if (buildingCount > 0 &&
-          progressionManager.isUnlocked("ironMiner") &&
-          progressionManager.isUnlocked("stoneMiner") &&
-          progressionManager.isUnlocked("coalMiner")) {
-          if (!productionCell.querySelector(".buy-building-resource")) {
-            productionCell.innerHTML = `
-              <button data-building-id="${building.id}" class="buy-building-resource">Buy</button>
-              <button data-building-id="${building.id}" class="sell-building-resource">Sell</button>
-            `;
+      this.columns.forEach((column) => {
+        let cell = document.getElementById(`${resourceName}-${column.id}-cell-${this.parcel.id}-resourceName`);
+        const header = document.getElementById(`${column.id}-header-${this.parcel.id}`);
+        let isInit = false;
+        if(cell === null && header){
+          isInit = true;
+          cell = document.createElement("td");
+          cell.id = `${resourceName}-${column.id}-cell-${this.parcel.id}-resourceName`;
+          if(header.style.display === "none"){
+            cell.style.display = "none";
           }
-        } else {
-          productionCell.textContent = "";
+          row.appendChild(cell);
         }
-      }
-
-      // Update the buy and sell buttons
-      const buyButton = row.querySelector('.buy-building-resource');
-      const sellButton = row.querySelector('.sell-building-resource');
-
-      if (buyButton && buyButton.dataset.listenerAttached !== 'true') {
-        this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
-      }
-
-      if (sellButton && sellButton.dataset.listenerAttached !== 'true') {
-        this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
-      }
-
-      // Unhide the belt cells if the belt count is greater than 0
-      const beltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
-      if (beltCount > 0) {
-        for (let i = 5; i <= 6; i++) {
-          row.cells[i].style.display = ""; // Unhide the Forward and Backward cells
+        if(header.style.display !== "none" && cell.style.display === "none"){
+          cell.style.display = "";
         }
+        if(header.style.display != "none"){
+          // update the cell only if the header is displayed
+          if(column.id === 'resource'){
+            if(isInit){
+              //init
+              cell.textContent = `${resourceName} `;
+              cell.classList.add("resource-name");
+              if (building && building.minable) {
+                const mineButton = this.createMineButton(resourceName);
+                cell.appendChild(mineButton);
+              }
+            }
+            //update
+          }else if(column.id === 'amount'){
+            if(isInit){
+              //init
+              const tooltip = document.getElementById("tooltip");
 
-        const forwardBeltUsage = this.parcel.beltUsage ? this.parcel.beltUsage["forwardBelt"] || 0 : 0;
-        const backwardBeltUsage = this.parcel.beltUsage ? this.parcel.beltUsage["backwardBelt"] || 0 : 0;
+              // Display bottleneck information on mouseover
+              cell.addEventListener("mouseover", (event) => {
+                if (this.parcel.utilization && this.parcel.utilization[building.id]) {
+                  const bottleneckInfo = this.parcel.utilization[building.id].bottlenecks;
+                  const bottleneckText = Object.entries(bottleneckInfo)
+                    .map(([resource, amount]) => `${resource}: ${amount.toFixed(2)}`)
+                    .join(", ");
 
-        const forwardLabelId = `forwardBeltHeader-${this.parcel.id}`;
-        const forwardLabelElement = document.getElementById(forwardLabelId);
-        forwardLabelElement.textContent = `Forward ${forwardBeltUsage}/${beltCount}`;
-        forwardLabelElement.style.display = "";
+                  if(bottleneckText === "") {
+                    tooltip.innerHTML = `✅`;
+                  } else {
+                    tooltip.innerHTML = `⏳: ${bottleneckText}`;
+                  }
 
-        const backwardLabelId = `backwardBeltHeader-${this.parcel.id}`;
-        const backwardLabelElement = document.getElementById(backwardLabelId);
-        backwardLabelElement.textContent = `Backward ${backwardBeltUsage}/${beltCount}`;
-        backwardLabelElement.style.display = "";
-      }
+                  tooltip.style.display = "block";
+                  tooltip.style.left = event.pageX + 10 + "px";
+                  tooltip.style.top = event.pageY + 10 + "px";
+                }
+              });
+
+              // Hide the tooltip on mouseout
+              cell.addEventListener("mouseout", () => {
+                tooltip.style.display = "none";
+              });
+
+              // Update the tooltip position on mousemove
+              cell.addEventListener("mousemove", (event) => {
+                tooltip.style.left = event.pageX + 10 + "px";
+                tooltip.style.top = event.pageY + 10 + "px";
+              });
+            }
+            //update
+            const bgColor = getResourceRateColor(this.parcel, resourceName);
+            cell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
+            if (bgColor === "green") {
+              cell.style.color = "white";
+              cell.style.backgroundColor = bgColor;
+            }else if(bgColor === "red"){
+              if (localStorage.getItem('darkMode') === 'true') {
+                cell.style.color = "white";
+              } else {
+                cell.style.color = "black";
+              }
+              cell.style.backgroundColor = bgColor;
+            }else{
+              cell.style.color = null;
+              cell.style.backgroundColor = null;
+            }
+          }else if(column.id === 'productionRate'){
+            if(isInit){
+              //init
+            }
+            //update
+            
+          }else if(column.id === 'activeBuildings'){
+            if(isInit){
+              //init
+            }
+            
+            //update
+          }else if(column.id === 'totalBuildings'){
+            if(
+              building && 
+              progressionManager.isUnlocked("ironMiner") &&
+              progressionManager.isUnlocked("stoneMiner") &&
+              progressionManager.isUnlocked("coalMiner")
+            ){
+              const buildingCount = this.parcel.buildings[building.id] || 0;
+              const buildingDisplay = document.getElementById(`building-amount-${resourceName}`);
+              if(buildingDisplay){
+                buildingDisplay.textContent = buildingCount;
+              }else{
+                cell.innerHTML = `<span id="building-amount-${resourceName}">${buildingCount}</span>`;
+              }
+              const buyButton = row.querySelector('.buy-building-resource');
+              const sellButton = row.querySelector('.sell-building-resource');
+              if(!buyButton && !sellButton && buildingCount > 0){
+                cell.innerHTML += `
+                  <button data-building-id="${building.id}" class="buy-building-resource">+</button>
+                  <button data-building-id="${building.id}" class="sell-building-resource">-</button>
+                `;
+              }
+              if(buyButton && sellButton){
+                if (buyButton.dataset.listenerAttached !== 'true') {
+                  this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
+                }
+                if (sellButton.dataset.listenerAttached !== 'true') {
+                  this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
+                }
+              }
+            }
+          }else if(column.id === 'forwardBelt'){
+            if(isInit){
+              const beltController = this.createDirectionInput(column.id, resourceName);
+              cell.appendChild(beltController);
+            }
+          }else if(column.id === 'backwardBelt'){
+            if(isInit){
+              const beltController = this.createDirectionInput(column.id, resourceName);
+              cell.appendChild(beltController);
+            }
+          }
+        }
+      });
     }
 
     createDirectionInput(beltId, resourceName) {
@@ -672,6 +774,7 @@ const ui = (() => {
   let previousParcel = null;
 
   function updateResourceDisplay(parcel) {
+    
     const resourceTable = new ResourceTable(parcel);
 
     // Check if the parcel has changed

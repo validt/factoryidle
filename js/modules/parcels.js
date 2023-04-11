@@ -41,6 +41,7 @@ class Parcel {
         this.maxBuildings = maxBuildings;
         this.buildings = createBuildingsHandler(createNumberGuard({
         }));
+        this.activeBuildings = {};
         this.resources = createNumberGuard({
             stone: 0,
         });
