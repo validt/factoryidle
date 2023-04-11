@@ -63,6 +63,19 @@ class Parcel {
         this.buildingProductionRateModifiers = {};
         this.buildingConsumptionRateModifiers = {};
         this.inputValues = {};
+        this.productionHistory = {};
+        const allResourceTypes = Object.keys(resourceCategories);
+        for (const resourceType of allResourceTypes) {
+          this.productionHistory[resourceType] = new CircularBuffer(300);
+        }
+    }
+
+    cheat(){
+      for(let resourceName in this.resources){
+        if(resourceName){
+          this.resources[resourceName] += 500000;
+        }
+      }
     }
 
     updatePreviousResources() {
@@ -122,6 +135,11 @@ class Parcel {
                 this.buildings[buildingType] = 0;
             }
             this.buildings[buildingType]++;
+            console.log(this.activeBuildings[buildingType]);
+            if (!this.activeBuildings[buildingType]) {
+              this.activeBuildings[buildingType] = 0;
+            }
+            this.activeBuildings[buildingType]++;
             return true;
         }
         return false;
@@ -264,6 +282,7 @@ const parcels = {
     getGlobalConsumptionRateModifier: function () {
       return Object.values(this.globalConsumptionRateModifiers).reduce((a, b) => a + b, 0);
     },
+
 
 
     createNewParcel() {

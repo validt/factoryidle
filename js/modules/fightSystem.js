@@ -10,6 +10,9 @@ let battle = {};
 let battleOngoing = false;
 let factoryUnits = [];
 let defeatedBiterUnits = [];
+let defeatedFactoryUnits = [];
+let startingAmmunitionCopy;
+let ammoUsedInBattle;
 
 const startingAmmunition = {};
 
@@ -82,6 +85,7 @@ class FactoryUnit extends Unit {
     this.consumesAmmo = consumesAmmo;
     this.cost = cost;
     this.payedFor = false;
+    this.faction = "factory";
   }
 }
 
@@ -98,6 +102,7 @@ class BiterUnit extends Unit {
   constructor(name, health, attack, armor, reward) {
     super(name, health, attack, armor);
     this.reward = reward;
+    this.faction = "biter";
   }
 }
 
@@ -154,6 +159,7 @@ class Battle {
   async run() {
     let battleStatus = null;
     defeatedBiterUnits = [];
+    defeatedFactoryUnits = [];
     for (let i = 0; i < this.ticks; i++) {
       if (this.factoryUnits.length === 0 || this.biterUnits.length === 0) {
         break;
@@ -182,16 +188,35 @@ class Battle {
   }
 
   async afterBattle(battleStatus) {
+    let ammunitionUsed = {};
+
+    ammunitionTypes.forEach((ammoType) => {
+      if (startingAmmunitionCopy.hasOwnProperty(ammoType.name)) {
+        const ammoUsed = startingAmmunitionCopy[ammoType.name] - (this.ammunition[ammoType.name] || 0);
+        if (ammoUsed > 0) {
+          ammunitionUsed[ammoType.name] = ammoUsed;
+        }
+      }
+    });
+
+
+    // Process defeated units
+    const defeatedBiterUnitCount = countDefeatedUnits(defeatedBiterUnits);
+    const defeatedFactoryUnitCount = countDefeatedUnits(defeatedFactoryUnits);
+
+    const rewards = calculateRewards(defeatedBiterUnits);
+
     switch (battleStatus) {
       case "win":
         this.result = "Victory 🎖";
 
-        // Assuming `defeatedBiters` is an array of defeated biter instances
-        const rewards = calculateRewards(defeatedBiterUnits);
+
         addRewardsToMilitaryHQParcel(window.parcels.parcelList, rewards);
 
         // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, rewards);
+        displayBattleResult(this.result, rewards, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
+
+
 
         // Increment pollution factor, for example
         gameState.pollution.pollutionBiterFactor += 0.005;
@@ -209,7 +234,7 @@ class Battle {
         this.result = "Defeat 💀";
 
         // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result);
+        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
 
         biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
         battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
@@ -221,7 +246,7 @@ class Battle {
         this.result = "Draw 🤷";
 
         // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result);
+        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
 
         biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
         battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
@@ -233,7 +258,7 @@ class Battle {
         this.result = "Inconclusive (This should not happen)";
 
         // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result);
+        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
 
         biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
         battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
@@ -299,8 +324,15 @@ class Battle {
             // Increment the kill count for this unit type
             killCounts[unit.name] = (killCounts[unit.name] || 0) + 1;
 
-            // Add defeated unit to defeatedBiterUnits array
-            defeatedBiterUnits.push(unit);
+            console.log(unit.faction);
+
+            if (unit.faction === "factory") {
+              // Add defeated unit to defeatedFactoryUnits array
+              defeatedFactoryUnits.push(unit);
+            } else if (unit.faction === "biter"){
+              // Add defeated unit to defeatedBiterUnits array
+              defeatedBiterUnits.push(unit);
+            }
 
             // Remove defeated unit from defendingUnits array
             defendingUnits.splice(i, 1);
@@ -329,6 +361,7 @@ class Battle {
     };
   }
 }
+
 biterUnits = generateBiterArmy(0);
 battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
 window.battle = battle
@@ -353,14 +386,37 @@ function prepareAmmunition() {
       buildingManager.deductAmmunitionFromMilitaryHQ(window.parcels.parcelList, ammoType.name, ammoQuantity);
     }
   });
+  startingAmmunitionCopy = deepCopyAmmunition(startingAmmunition);
 }
 
 function returnRemainingAmmunition(battleInstance) {
+
+
   ammunitionTypes.forEach((ammoType) => {
     if (battleInstance.ammunition[ammoType.name] > 0) {
       buildingManager.addAmmunitionToMilitaryHQ(window.parcels.parcelList, ammoType.name, battleInstance.ammunition[ammoType.name]);
     }
   });
+}
+
+function deepCopyAmmunition(ammunition) {
+  const copy = {};
+  for (const key in ammunition) {
+    copy[key] = ammunition[key];
+  }
+  return copy;
+}
+
+function countDefeatedUnits(defeatedUnits) {
+  const unitCount = {};
+
+  defeatedUnits.forEach((unit) => {
+    if (unit.health <= 0) {
+      unitCount[unit.name] = (unitCount[unit.name] || 0) + 1;
+    }
+  });
+
+  return unitCount;
 }
 
 function generateBiterArmy(pollutionFactor) {
@@ -886,7 +942,7 @@ function deductArmyCost(selectedParcel, armyCost, factoryUnits) {
   });
 }
 
-function displayBattleResult(result, reward = {alienArtefacts: 0}) {
+function displayBattleResult(result, reward = {alienArtefacts: 0}, ammunitionUsed = {}, defeatedFactoryUnits = [], defeatedBiterUnits = []) {
   const fightContainer = document.getElementById("fight-container");
 
   // Create overlay
@@ -897,7 +953,7 @@ function displayBattleResult(result, reward = {alienArtefacts: 0}) {
   overlay.style.top = "0";
   overlay.style.left = "0";
   overlay.style.width = "100%";
-  overlay.style.height = "100%";
+  overlay.style.minHeight = "100%";
 
   overlay.id = "battle-result-overlay";
 
@@ -914,26 +970,85 @@ function displayBattleResult(result, reward = {alienArtefacts: 0}) {
   const resultText = document.createElement("h1");
   resultText.innerText = result;
   resultText.style.textAlign = "center";
-  resultText.style.marginTop = "100px";
 
   // Create reward text
   const rewardText = document.createElement("h3");
-  rewardText.innerText = "Alien Artefacts Gained: " + reward.alienArtefacts.toFixed(2);
+  const rewardValue = (reward.alienArtefacts ?? 0).toFixed(2);
+  rewardText.innerText = "Alien Artefacts Gained: " + rewardValue;
   rewardText.style.textAlign = "center";
-  rewardText.style.marginTop = "100px";
 
   // Create continue button
   const continueButton = document.createElement("button");
   continueButton.innerText = "Continue";
   continueButton.style.display = "block";
-  continueButton.style.margin = "50px auto";
+  continueButton.style.margin = "0 auto 2em";
   continueButton.addEventListener("click", hideBattleResult);
+
+  // Create used ammunition table
+  const ammunitionTable = createTableFromObject("Used Ammunition", ammunitionUsed);
+  ammunitionTable.style.marginTop = "0px";
+
+  // Create defeated factory units table
+  const factoryUnitsTable = createTableFromObject("Factory Units Lost", defeatedFactoryUnits);
+  factoryUnitsTable.style.marginTop = "0px";
+
+  // Create defeated biter units table
+  const biterUnitsTable = createTableFromObject("Biter Units Defeated", defeatedBiterUnits);
+  biterUnitsTable.style.marginTop = "0px";
 
   // Append elements to the overlay and then to the fight container
   overlay.appendChild(resultText);
   overlay.appendChild(rewardText);
+  overlay.appendChild(ammunitionTable);
+  overlay.appendChild(factoryUnitsTable);
+  overlay.appendChild(biterUnitsTable);
   overlay.appendChild(continueButton);
   fightContainer.appendChild(overlay);
+}
+
+function createTableFromObject(title, object) {
+  const table = document.createElement("table");
+  const thead = document.createElement("thead");
+  const tbody = document.createElement("tbody");
+
+  const headerRow = document.createElement("tr");
+  const headerTitle = document.createElement("th");
+  const headerValue = document.createElement("th");
+  headerTitle.innerText = title;
+  headerTitle.classList.add("header");
+  headerValue.innerText = "Value";
+  headerRow.appendChild(headerTitle);
+  headerRow.appendChild(headerValue);
+  thead.appendChild(headerRow);
+
+  Object.entries(object).forEach(([key, value]) => {
+    const row = document.createElement("tr");
+    const cellKey = document.createElement("td");
+    const cellValue = document.createElement("td");
+    cellKey.innerText = key;
+    cellValue.innerText = value;
+    cellKey.classList.add("resource-name");
+    row.appendChild(cellKey);
+    row.appendChild(cellValue);
+    tbody.appendChild(row);
+  });
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  table.style.minWidth = "25%";
+  table.style.margin = "0px auto 2em";
+  table.style.borderCollapse = "collapse";
+  table.style.textAlign = "center";
+
+  // Set table header style
+  thead.style.fontWeight = "bold";
+
+  // Set table row and cell styles
+  tbody.querySelectorAll("tr, td").forEach((el) => {
+    el.style.border = "1px solid";
+    el.style.padding = "5px";
+  });
+
+  return table;
 }
 
 function hideBattleResult() {

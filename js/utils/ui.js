@@ -19,7 +19,7 @@ const ui = (() => {
           id: "amount"
         },
         {
-          label: "Production Rate",
+          label: "Ø Production",
           id: "productionRate",
           display: "none"
         },
@@ -70,7 +70,7 @@ const ui = (() => {
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
             const rowId = `resourceRow-${this.parcel.id}-${resourceName}`;
             let row = document.getElementById(rowId);
-            this.updateRow(resourceName, row);
+            this.updateRow(resource, row);
             /*
             if (!row) {
               // If the row doesn't exist, create it
@@ -284,6 +284,7 @@ const ui = (() => {
         const headerCell = document.createElement("th");
         headerCell.textContent = column.label;
         headerCell.id = `${column.id}-header-${this.parcel.id}`;
+        headerCell.classList.add("header");
         if(column.display === "none"){
           headerCell.style.display = "none";
         }
@@ -293,26 +294,44 @@ const ui = (() => {
     }
 
     updateHeader() {
+      // Function to create an img element with the given src
+      const createIcon = (src) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.style.width = "24px";
+        img.style.height = "24px";
+        img.style.marginLeft = "4px";
+        img.style.marginRight = "4px";
+        img.style.verticalAlign = "middle";
+        return img;
+      };
+
       const headerRow = document.createElement("tr");
       this.columns.forEach((column) => {
         if(column.id === "forwardBelt"){
-          let forwardBeltLabel = document.querySelector("[id^='forwardBelt-header-']");
-          if(forwardBeltLabel){
+          let forwardHeader = document.querySelector("[id^='forwardBelt-header-']");
+          if(forwardHeader){
+            const forwardIcon = createIcon("assets/forwardBelt-48.png");
             const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
             const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
-            forwardBeltLabel.textContent = `Forward ${forwardBeltCount}/${totalForwardBeltCount}`;
-            if(forwardBeltLabel.style.display === "none" && totalForwardBeltCount !== 0){
-              forwardBeltLabel.style.display = "";
+            forwardHeader.innerHTML  = "";
+            forwardHeader.appendChild(forwardIcon);
+            forwardHeader.appendChild(document.createTextNode(`Forward ${forwardBeltCount}/${totalForwardBeltCount}`));
+            if(forwardHeader.style.display === "none" && totalForwardBeltCount !== 0){
+              forwardHeader.style.display = "";
             }
           }
         }else if(column.id === "backwardBelt"){
-          let backwardBeltLabel = document.querySelector("[id^='backwardBelt-header-']");
-          if(backwardBeltLabel){
+          let backwardHeader = document.querySelector("[id^='backwardBelt-header-']");
+          if(backwardHeader){
+            const backwardIcon = createIcon("assets/backwardBelt-48.png");
             const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
             const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
-            backwardBeltLabel.textContent = `Backward ${backwardBeltCount}/${totalBackwardBeltCount}`;
-            if(backwardBeltLabel.style.display === "none" && totalBackwardBeltCount !== 0){
-              backwardBeltLabel.style.display = "";
+            backwardHeader.innerHTML  = "";
+            backwardHeader.appendChild(backwardIcon);
+            backwardHeader.appendChild(document.createTextNode(`Backward ${backwardBeltCount}/${totalBackwardBeltCount}`));
+            if(backwardHeader.style.display === "none" && totalBackwardBeltCount !== 0){
+              backwardHeader.style.display = "";
             }
           }
         }else if(column.id === "productionRate" || column.id === "activeBuildings" || column.id === "totalBuildings"){
@@ -328,6 +347,7 @@ const ui = (() => {
           }
         }
       });
+      this.tableElement.appendChild(headerRow);
     }
 
     createRow(resourceName) {
@@ -337,8 +357,38 @@ const ui = (() => {
 
       // Create the resource name cell
       const nameCell = document.createElement("td");
-      nameCell.textContent = resourceName;
       nameCell.classList.add("resource-name");
+      nameCell.style.whiteSpace = "nowrap";
+
+      const textWrapper = document.createElement("div");
+
+      // Create the icon element
+      const resourceData = resourceCategories[resourceName];
+      const icon = document.createElement("img");
+      icon.src = resourceData.icon48;
+      icon.style.width = "24px"; // Adjust the size as needed
+      icon.style.height = "24px"; // Adjust the size as needed
+      icon.style.verticalAlign = "middle";
+      icon.style.marginRight = "5px"; // Add some margin between the icon and the text
+      textWrapper.appendChild(icon);
+
+      // Insert the text after the icon
+      textWrapper.insertAdjacentText('beforeend', resourceName);
+
+      textWrapper.style.display = "inline-block";
+      textWrapper.style.verticalAlign = "-webkit-baseline-middle";
+      nameCell.appendChild(textWrapper);
+
+      // Create button inside name cell
+      if (building && building.minable) {
+        const mineButton = this.createMineButton(resourceName);
+        mineButton.style.display = "inline-block";
+        mineButton.style.verticalAlign = "-webkit-baseline-middle";
+        mineButton.style.float = "right";
+        mineButton.style.marginLeft = "1em"
+        nameCell.appendChild(mineButton);
+      }
+
       row.appendChild(nameCell);
 
       //row.appendChild(this.createCell(resourceName));
@@ -388,13 +438,9 @@ const ui = (() => {
         tooltip.style.top = event.pageY + 10 + "px";
       });
 
-      //Create action cells
-      const actionCell = document.createElement("td");
-      if (building && building.minable) {
-          const mineButton = this.createMineButton(resourceName);
-          actionCell.appendChild(mineButton);
-      }
-      row.appendChild(actionCell);
+      //Create productionRate cells
+      const productionRateCell = document.createElement("td");
+      row.appendChild(productionRateCell);
 
       const countCell = document.createElement("td"); // Create a new cell for the building count
       if (building) {
@@ -430,7 +476,7 @@ const ui = (() => {
       row.appendChild(productionCell);
 
       // Create input fields for forward and backward belts
-      const beltTypes = ["forwardBelt", "backwardBelt"];
+      const beltTypes = ["backwardBelt", "forwardBelt"];
       beltTypes.forEach((beltId, index) => {
         const beltController = this.createDirectionInput(beltId, resourceName);
         const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
@@ -458,7 +504,28 @@ const ui = (() => {
       */
     }
 
-    updateRow(resourceName, row) {
+    createResourceName(resource, cell){
+      cell.classList.add("resource-name");
+      cell.style.whiteSpace = "nowrap";
+
+      const textWrapper = document.createElement("div");
+      const icon = document.createElement("img");
+      icon.src = resource.icon48;
+      icon.style.width = "24px"; // Adjust the size as needed
+      icon.style.height = "24px"; // Adjust the size as needed
+      icon.style.verticalAlign = "middle";
+      icon.style.marginRight = "5px"; // Add some margin between the icon and the text
+      textWrapper.appendChild(icon);
+
+      textWrapper.insertAdjacentText('beforeend', resource.name);
+      textWrapper.style.display = "inline-block";
+      textWrapper.style.verticalAlign = "-webkit-baseline-middle";
+      cell.appendChild(textWrapper);
+      return cell;
+    }
+    
+    updateRow(resource, row) {
+      const resourceName = resource.name;
       const building = buildingManager.getBuildingByResourceName(resourceName);
       if (row === null) {
         row = document.createElement("tr");
@@ -486,8 +553,8 @@ const ui = (() => {
           if(column.id === 'resource'){
             if(isInit){
               //init
-              cell.textContent = `${resourceName} `;
-              cell.classList.add("resource-name");
+              cell = this.createResourceName(resource, cell)
+              
               if (building && building.minable) {
                 const mineButton = this.createMineButton(resourceName);
                 cell.appendChild(mineButton);
@@ -552,13 +619,77 @@ const ui = (() => {
               //init
             }
             //update
-            
-          }else if(column.id === 'activeBuildings'){
-            if(isInit){
-              //init
+            let targetInterval = 7;
+            let buildingCount = 0;
+            let buildingCountChecked = 0;
+            let productionRateModifier = 0;
+            let amount = 0;
+
+            if (building) {
+              if (building.id === "expansionCenter" || building.id === "researchCenter") {
+                targetInterval = 300;
+              }
+      
+              buildingCount = this.parcel.buildings[building.id];
+              buildingCountChecked = buildingCount || 0;
+              productionRateModifier = gameLoop.calculateProductionRateModifier(this.parcel, building, buildingCount);
+              amount = building.outputs[resourceName];
             }
-            
-            //update
+            const averageValue = this.parcel.productionHistory[resourceName].getAverage(targetInterval);
+
+            const maxValue = amount * buildingCountChecked * productionRateModifier;
+            const progressPercentage = Math.min(averageValue / maxValue, 1) * 100;
+
+            if (averageValue) {
+              if (averageValue < 0.1) {
+                cell.textContent = "+" + averageValue.toFixed(3) + "/s";
+              } else if (averageValue < 1) {
+                cell.textContent = "+" + averageValue.toFixed(2) + "/s";
+              } else {
+                cell.textContent = "+" + averageValue.toFixed(1) + "/s";
+              }
+              cell.style.background = `linear-gradient(90deg, rgba(0, 128, 0, 0.5) ${progressPercentage}%, transparent ${progressPercentage}%)`;
+            } else {
+              cell.textContent = "";
+              cell.style.background = "transparent";
+            }
+          }else if(column.id === 'activeBuildings'){
+            if(
+              building && 
+              progressionManager.isUnlocked("ironMiner") &&
+              progressionManager.isUnlocked("stoneMiner") &&
+              progressionManager.isUnlocked("coalMiner")
+            ){
+              const buildingCount = this.parcel.buildings[building.id] || 0;
+              const activeBuildingCount = this.parcel.activeBuildings[building.id] || 0;
+              const buildingDisplay = document.getElementById(`building-active-${resourceName}`);
+              if(buildingDisplay){
+                if(buildingCount === 0){
+                  buildingDisplay.textContent = 0;
+                }else{
+                  buildingDisplay.textContent = `${activeBuildingCount} / ${buildingCount}`;
+                }
+                
+              }else{
+                cell.innerHTML = `<span id="building-active-${resourceName}">${activeBuildingCount} / ${buildingCount}</span>`;
+              }
+              const activateButton = row.querySelector(`#activate-${building.id}`);
+              const deactivateButton = row.querySelector(`#deactivate-${building.id}`);
+              if(!activateButton && !deactivateButton && buildingCount > 0){
+                cell.innerHTML += `
+                  <button id="activate-${building.id}" data-building-id="${building.id}" class="buy-building-resource">+</button>
+                  <button id="deactivate-${building.id}" data-building-id="${building.id}" class="sell-building-resource">-</button>
+                `;
+              }
+              if(activateButton && deactivateButton){
+                if (activateButton.dataset.listenerAttached !== 'true') {
+                  this.addEventListenerToButtons(`#activate-${building.id}`, activateBuilding, activateButton);
+                }
+                if (deactivateButton.dataset.listenerAttached !== 'true') {
+                  this.addEventListenerToButtons(`#deactivate-${building.id}`, deactivateBuilding, deactivateButton);
+                }
+              }
+            }
           }else if(column.id === 'totalBuildings'){
             if(
               building && 
@@ -573,20 +704,20 @@ const ui = (() => {
               }else{
                 cell.innerHTML = `<span id="building-amount-${resourceName}">${buildingCount}</span>`;
               }
-              const buyButton = row.querySelector('.buy-building-resource');
-              const sellButton = row.querySelector('.sell-building-resource');
+              const buyButton = row.querySelector(`#buy-${building.id}`);
+              const sellButton = row.querySelector(`#sell-${building.id}`);
               if(!buyButton && !sellButton && buildingCount > 0){
                 cell.innerHTML += `
-                  <button data-building-id="${building.id}" class="buy-building-resource">+</button>
-                  <button data-building-id="${building.id}" class="sell-building-resource">-</button>
+                  <button id="buy-${building.id}" data-building-id="${building.id}" class="buy-building-resource">+</button>
+                  <button id="sell-${building.id}" data-building-id="${building.id}" class="sell-building-resource">-</button>
                 `;
               }
               if(buyButton && sellButton){
                 if (buyButton.dataset.listenerAttached !== 'true') {
-                  this.addEventListenerToButtons('.buy-building-resource', buyBuilding, buyButton);
+                  this.addEventListenerToButtons(`#buy-${building.id}`, buyBuilding, buyButton);
                 }
                 if (sellButton.dataset.listenerAttached !== 'true') {
-                  this.addEventListenerToButtons('.sell-building-resource', sellBuilding, sellButton);
+                  this.addEventListenerToButtons(`#sell-${building.id}`, sellBuilding, sellButton);
                 }
               }
             }
@@ -594,9 +725,15 @@ const ui = (() => {
             if(isInit){
               const beltController = this.createDirectionInput(column.id, resourceName);
               cell.appendChild(beltController);
+            }else if(cell.innerHTML === ""){
+              const beltController = this.createDirectionInput(column.id, resourceName);
+              cell.appendChild(beltController);
             }
           }else if(column.id === 'backwardBelt'){
             if(isInit){
+              const beltController = this.createDirectionInput(column.id, resourceName);
+              cell.appendChild(beltController);
+            }else if(cell.innerHTML === ""){
               const beltController = this.createDirectionInput(column.id, resourceName);
               cell.appendChild(beltController);
             }
@@ -653,7 +790,12 @@ const ui = (() => {
         const maxCellVal = maxVal - (beltUsage - currentVal);
 
         if (inputVal > maxCellVal) {
-          event.target.value = maxCellVal;
+          //Check for the edge case of selling belts where maxCellVal can get negative
+          if (maxCellVal < 0) {
+            event.target.value = 0;
+          } else {
+            event.target.value = maxCellVal;
+          }
         } else if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
           event.target.value = 0;
         }
@@ -672,6 +814,10 @@ const ui = (() => {
     createMineButton(resourceName) {
       const mineButton = document.createElement("button");
       mineButton.textContent = "Mine";
+      mineButton.style.display = "inline-block";
+      mineButton.style.verticalAlign = "-webkit-baseline-middle";
+      mineButton.style.float = "right";
+      mineButton.style.marginLeft = "1em"
       mineButton.addEventListener("click", () => {
         this.parcel.resources[resourceName]++;
         this.update();
@@ -806,9 +952,9 @@ const ui = (() => {
     function updateBuildingDisplay(parcel) {
         buildingDisplay.innerHTML = `
             <tr>
-                <th>Building</th>
-                <th>Count</th>
-                <th>Action</th>
+                <th class = "header">Building</th>
+                <th class = "header">Count</th>
+                <th class = "header">Action</th>
             </tr>
         `;
 
@@ -816,7 +962,7 @@ const ui = (() => {
             const buildingElement = document.createElement("tr");
             const building = buildingManager.getBuilding(key);
             buildingElement.innerHTML = `
-                <td data-building-id="${key}">${building.name}</td>
+                <td data-building-id="${key}" class="building-nameCell">${building.name}</td>
                 <td>${value}</td>
                 <td>
                     <button data-building-id="${key}" class="buy-building">Buy</button>
@@ -955,64 +1101,90 @@ const ui = (() => {
         });
     }
 
-    function buyBuilding(parcel, buildingId) {
-        const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
-        if (totalBuildings < parcel.maxBuildings) {
-            const building = buildingManager.getBuilding(buildingId);
-
-            const resourceCost = Object.entries(building.cost);
-
-            let canAfford = true;
-            for (const [resourceName, cost] of resourceCost) {
-                const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
-                if (totalResource < cost) {
-                    canAfford = false;
-                    break;
-                }
-            }
-
-            if (canAfford) {
-                if (parcel.buildings[buildingId] === undefined) {
-                    parcel.buildings[buildingId] = 0;
-                }
-                parcel.buildings[buildingId]++;
-
-                for (const [resourceName, cost] of resourceCost) {
-                    if (parcel.resources[resourceName] >= cost) {
-                        parcel.resources[resourceName] -= cost;
-                    } else {
-                        const parcelResource = parcel.resources[resourceName] || 0;
-                        const remainingResource = cost - parcelResource;
-                        parcel.resources[resourceName] = 0;
-                        buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
-                    }
-                }
-
-                buildingManager.initializeResourceOutput(parcel, building);
-
-                if (buildingId === "kiln" && !parcel.resources.coal) {
-                    parcel.resources = { coal: 0, ...parcel.resources };
-                }
-
-                if (buildingId === "ironSmelter" && !parcel.resources.ironOre) {
-                    parcel.resources = { ironOre: 0, ...parcel.resources };
-                }
-
-                updateBuildingDisplay(parcel);
-              } else {
-                const missingResources = resourceCost
-                  .filter(([resourceName, cost]) => {
-                    const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
-                    return totalResource < cost;
-                  })
-                  .map(([resourceName, cost]) => {
-                    const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
-                    return { resourceName, amount: cost - totalResource };
-                  });
-
-                showMissingResourceOverlay(missingResources);
-              }
+    function activateBuilding(parcel, buildingId){
+      if (parcel.buildings[buildingId] !== undefined) {
+        if (parcel.activeBuildings[buildingId] === undefined) {
+          parcel.activeBuildings[buildingId] = 0;
         }
+        if(parcel.activeBuildings[buildingId] < parcel.buildings[buildingId]){
+          parcel.activeBuildings[buildingId]++;
+        }
+      }
+    }
+
+    function deactivateBuilding(parcel, buildingId){
+      if (parcel.buildings[buildingId] !== undefined) {
+        if (parcel.activeBuildings[buildingId] === undefined) {
+          parcel.activeBuildings[buildingId] = 0;
+        }
+        if(parcel.activeBuildings[buildingId] > 0){
+          parcel.activeBuildings[buildingId]--;
+        }
+      }
+    }
+
+    function buyBuilding(parcel, buildingId) {
+      const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
+      if (totalBuildings < parcel.maxBuildings) {
+        const building = buildingManager.getBuilding(buildingId);
+
+        const resourceCost = Object.entries(building.cost);
+
+        let canAfford = true;
+        for (const [resourceName, cost] of resourceCost) {
+          const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+          if (totalResource < cost) {
+            canAfford = false;
+            break;
+          }
+        }
+
+        if (canAfford) {
+          if (parcel.buildings[buildingId] === undefined) {
+              parcel.buildings[buildingId] = 0;
+          }
+          parcel.buildings[buildingId]++;
+          if (parcel.activeBuildings[buildingId] === undefined) {
+            parcel.activeBuildings[buildingId] = 0;
+          }
+          parcel.activeBuildings[buildingId]++;
+
+          for (const [resourceName, cost] of resourceCost) {
+              if (parcel.resources[resourceName] >= cost) {
+                  parcel.resources[resourceName] -= cost;
+              } else {
+                  const parcelResource = parcel.resources[resourceName] || 0;
+                  const remainingResource = cost - parcelResource;
+                  parcel.resources[resourceName] = 0;
+                  buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName, remainingResource);
+              }
+          }
+
+          buildingManager.initializeResourceOutput(parcel, building);
+
+          if (buildingId === "kiln" && !parcel.resources.coal) {
+              parcel.resources = { coal: 0, ...parcel.resources };
+          }
+
+          if (buildingId === "ironSmelter" && !parcel.resources.ironOre) {
+              parcel.resources = { ironOre: 0, ...parcel.resources };
+          }
+
+          updateBuildingDisplay(parcel);
+        } else {
+          const missingResources = resourceCost
+            .filter(([resourceName, cost]) => {
+              const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+              return totalResource < cost;
+            })
+            .map(([resourceName, cost]) => {
+              const totalResource = (parcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+              return { resourceName, amount: cost - totalResource };
+            });
+
+          showMissingResourceOverlay(missingResources);
+        }
+      }
     }
 
     function showMissingResourceOverlay(missingResources) {
@@ -1053,10 +1225,18 @@ const ui = (() => {
                 parcel.resources[resource] = (parcel.resources[resource] || 0) + Math.floor(cost * 1);
             }
 
+            if(parcel.buildings[buildingId] == parcel.activeBuildings[buildingId]){
+              parcel.activeBuildings[buildingId]--;
+            }
+
             // Update building count
             parcel.buildings[buildingId]--;
 
             if (parcel.buildings[buildingId] === 0) {
+                const firstKey = Object.keys(buildingManager.getBuilding(buildingId).outputs)[0];
+                if (firstKey) {
+                  parcel.productionHistory[firstKey] = new CircularBuffer(300)
+                }
                 delete parcel.buildings[buildingId];
             }
             // Update building display
@@ -1139,10 +1319,10 @@ const ui = (() => {
     }
 
     function updateParcelsSectionVisibility() {
-      const expansionTechCenterBuilt = gameState.parcels.some(parcel => parcel.buildings.expansionCenter > 0);
+      const expansionTech = window.gameState.research.expansionTech;
 
-      updateSectionVisibility("parcels-section", expansionTechCenterBuilt);
-      updateSectionVisibility("global-header", expansionTechCenterBuilt);
+      updateSectionVisibility("parcels-section", expansionTech);
+      updateSectionVisibility("global-header", expansionTech);
       updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
       updateSectionVisibility("pollution-section", gameState.sectionVisibility.pollutionSection);
       updateSectionVisibility("fight-container", gameState.sectionVisibility.fightSection);
@@ -1150,6 +1330,9 @@ const ui = (() => {
       updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
       updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
       updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
+
+      // //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
+      // updateSectionVisibility("project-section", Object.values(window.projects.projects).length != 0);
     }
 
     function calculateFulfillmentAndModifier(energyDemand, energyProduction) {

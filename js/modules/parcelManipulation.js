@@ -287,50 +287,52 @@ const clipboard = (() => {
   }
 
   function executePaste(sourceParcel, targetParcel, pasteCosts) {
-      // Buy the required building limit upgrades
-      for (const upgrade of pasteCosts.requiredUpgrades) {
-          parcels.upgradeParcel(targetParcel, 'maxBuildingLimit');
-      }
-
-      // Sell the unnecessary buildings
-      for (const buildingId in targetParcel.buildings) {
-        if (!sourceParcel.buildings[buildingId]) {
-          const buildingCount = targetParcel.buildings[buildingId];
-          for (let i = 0; i < buildingCount; i++) {
-            ui.sellBuilding(targetParcel, buildingId);
-          }
-        }
-      }
-
-      // Buy the necessary buildings
-      for (const buildingId in sourceParcel.buildings) {
-        const required = sourceParcel.buildings[buildingId];
-        const existing = targetParcel.buildings[buildingId] || 0;
-        const difference = required - existing;
-
-        for (let i = 0; i < difference; i++) {
-          ui.buyBuilding(targetParcel, buildingId);
-        }
-      }
-
-      // Set the inputValues of the target parcel
-      targetParcel.inputValues = { ...sourceParcel.inputValues };
-
-      // Update the UI
-      ui.updateBuildingDisplay(targetParcel);
-
+    // Buy the required building limit upgrades
+    for (const upgrade of pasteCosts.requiredUpgrades) {
+      parcels.upgradeParcel(targetParcel, 'maxBuildingLimit');
     }
 
-  function copyCustomizations(sourceParcel, targetParcel) {
-    targetParcel.name = sourceParcel.name;
-    targetParcel.color = sourceParcel.color;
-    targetParcel.beltUsage = sourceParcel.beltUsage;
-
-    // Update UI
-    for (let i = 0; i < parcels.parcelList.length; i++) {
-        parcelManipulation.updateParcelTab(i);
+    // Sell the unnecessary buildings
+    for (const buildingId in targetParcel.buildings) {
+      if (!sourceParcel.buildings[buildingId]) {
+        const buildingCount = targetParcel.buildings[buildingId];
+        for (let i = 0; i < buildingCount; i++) {
+          ui.sellBuilding(targetParcel, buildingId);
+        }
+      }
     }
+
+    // Buy the necessary buildings
+    for (const buildingId in sourceParcel.buildings) {
+      const required = sourceParcel.buildings[buildingId];
+      const existing = targetParcel.buildings[buildingId] || 0;
+      const difference = required - existing;
+
+      for (let i = 0; i < difference; i++) {
+        ui.buyBuilding(targetParcel, buildingId);
+      }
+    }
+
+    // Set the inputValues of the target parcel
+    targetParcel.inputValues = Object.keys(sourceParcel.inputValues).reduce((acc, key) => {
+      acc[key] = { ...sourceParcel.inputValues[key] };
+      return acc;
+    }, {});
+
+    // Update the UI
+    ui.updateBuildingDisplay(targetParcel);
   }
+
+    function copyCustomizations(sourceParcel, targetParcel) {
+      targetParcel.name = sourceParcel.name;
+      targetParcel.color = sourceParcel.color;
+      targetParcel.beltUsage = JSON.parse(JSON.stringify(sourceParcel.beltUsage));
+
+      // Update UI
+      for (let i = 0; i < parcels.parcelList.length; i++) {
+        parcelManipulation.updateParcelTab(i);
+      }
+    }
 
   return {
     copyParcel,

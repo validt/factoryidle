@@ -13,7 +13,7 @@ const gameState = {
   sectionVisibility: {
     energySection: false,
     pollutionSection: false,
-    fight: false,
+    fightSection: false,
     projectSection: false,
     researchSection: false,
     blueprints: false,
@@ -39,14 +39,18 @@ window.saveGame = function() {
     window.gameState.battle = window.battle.exportData();
   }
 
-  localStorage.setItem('gameState', JSON.stringify(window.gameState));
-  const projectsJSON = JSON.stringify(projectsModule.projects);
+  // Convert unlockedBuildings Set to an Array before saving
+  const unlockedBuildingsArray = Array.from(window.progressionManager.unlockedBuildings);
+  const gameStateCopy = { ...window.gameState, progression: { ...window.gameState.progression, unlockedBuildings: unlockedBuildingsArray } };
+
+  localStorage.setItem('gameState', LZString.compress(JSON.stringify(gameStateCopy)));
+  const projectsJSON = LZString.compress(JSON.stringify(projectsModule.projects));
   localStorage.setItem("savedProjects", projectsJSON);
-  localStorage.setItem("researchData", window.researchManager.saveResearchData());
+  localStorage.setItem("researchData", LZString.compress(window.researchManager.saveResearchData()));
 };
 
 window.loadGame = function() {
-  const savedState = localStorage.getItem('gameState');
+  const savedState = LZString.decompress(localStorage.getItem('gameState'));
   if (savedState) {
     const parsedState = JSON.parse(savedState);
 
@@ -57,6 +61,7 @@ window.loadGame = function() {
 
       // Assign the properties from the saved parcel data
       Object.assign(parcel.buildings, parcelData.buildings);
+      Object.assign(parcel.activeBuildings, parcelData.activeBuildings);
       Object.assign(parcel.resources, parcelData.resources);
       Object.assign(parcel.beltUsage, parcelData.beltUsage);
       Object.assign(parcel.previousResources, parcelData.previousResources);
@@ -105,7 +110,7 @@ window.loadGame = function() {
       window.gameState.pollution = parsedState.pollution;
     }
 
-    const researchData = localStorage.getItem("researchData");
+    const researchData = LZString.decompress(localStorage.getItem("researchData"));
     if (researchData) {
       window.researchManager.loadResearchData(researchData);
     }
@@ -116,9 +121,9 @@ window.loadGame = function() {
       parsedState.progression.unlockedBuildings &&
       Array.isArray(parsedState.progression.unlockedBuildings)
     ) {
-      window.gameState.progression.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
+      window.progressionManager.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
     } else {
-      window.gameState.progression.unlockedBuildings = new Set();
+      window.progressionManager.unlockedBuildings = new Set();
     }
 
     // Add parcels to the UI
@@ -132,7 +137,7 @@ window.loadGame = function() {
     parcelManipulation.updateParcelTab(0);
 
     //Load saved Projects
-    const savedProjects = localStorage.getItem("savedProjects");
+    const savedProjects = LZString.decompress(localStorage.getItem("savedProjects"));
 
     if (savedProjects) {
       const parsedProjects = JSON.parse(savedProjects);
@@ -163,9 +168,9 @@ window.loadGame = function() {
 
 function getSaveStateString() {
   const saveData = {
-    gameState: JSON.parse(localStorage.getItem('gameState')),
-    savedProjects: JSON.parse(localStorage.getItem('savedProjects')),
-    researchData: localStorage.getItem('researchData'),
+    gameState: JSON.parse(LZString.decompress(localStorage.getItem('gameState'))),
+    savedProjects: JSON.parse(LZString.decompress(localStorage.getItem('savedProjects'))),
+    researchData: LZString.decompress(localStorage.getItem('researchData')),
   };
   return JSON.stringify(saveData);
 }
@@ -173,9 +178,9 @@ function getSaveStateString() {
 function loadSaveStateFromString(saveStateString) {
   try {
     const saveData = JSON.parse(saveStateString);
-    localStorage.setItem('gameState', JSON.stringify(saveData.gameState));
-    localStorage.setItem('savedProjects', JSON.stringify(saveData.savedProjects));
-    localStorage.setItem('researchData', saveData.researchData);
+    localStorage.setItem('gameState', LZString.compress(JSON.stringify(saveData.gameState)));
+    localStorage.setItem('savedProjects', LZString.compress(JSON.stringify(saveData.savedProjects)));
+    localStorage.setItem('researchData', LZString.compress(saveData.researchData));
 
     // Reload the page to apply the changes
     location.reload();
@@ -185,22 +190,51 @@ function loadSaveStateFromString(saveStateString) {
   }
 }
 
+// function loadSaveStateFromStringLegacy(saveStateString) {
+//   try {
+//     const saveData = JSON.parse(saveStateString);
+//     localStorage.setItem('gameState', LZString.compress(JSON.stringify(saveData.gameState)));
+//     localStorage.setItem('savedProjects', LZString.compress(JSON.stringify(saveData.savedProjects)));
+//     localStorage.setItem('researchData', LZString.compress(saveData.researchData));
+//
+//     // Reload the page to apply the changes
+//     location.reload();
+//   } catch (error) {
+//     console.error("Invalid save state string:", error);
+//     alert("Invalid save state string. Please check the input and try again.");
+//   }
+// }
+
 document.getElementById("exportButton").addEventListener("click", function () {
   const saveStateString = getSaveStateString();
   document.getElementById("exportTextarea").value = saveStateString;
   document.getElementById("exportContainer").style.display = "block";
   document.getElementById("importContainer").style.display = "none";
+  // document.getElementById("importLegacyContainer").style.display = "none";
+
 });
 
 document.getElementById("importButton").addEventListener("click", function () {
   document.getElementById("exportContainer").style.display = "none";
   document.getElementById("importContainer").style.display = "block";
+  // document.getElementById("importLegacyContainer").style.display = "none";
 });
 
 document.getElementById("loadSaveStateButton").addEventListener("click", function () {
   const saveStateString = document.getElementById("importTextarea").value;
   loadSaveStateFromString(saveStateString);
 });
+
+// document.getElementById("importLegacyButton").addEventListener("click", function () {
+//   document.getElementById("exportContainer").style.display = "none";
+//   document.getElementById("importContainer").style.display = "none";
+//   document.getElementById("importLegacyContainer").style.display = "block";
+// });
+//
+// document.getElementById("loadLegacySaveStateButton").addEventListener("click", function () {
+//   const saveStateStringLegacy = document.getElementById("importLegacyTextarea").value;
+//   loadSaveStateFromStringLegacy(saveStateStringLegacy);
+// });
 
 function showResetConfirmation() {
   const resetConfirmation = document.getElementById('resetConfirmation');

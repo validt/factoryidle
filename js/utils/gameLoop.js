@@ -1,3 +1,47 @@
+class CircularBuffer {
+  constructor(capacity) {
+    this.buffer = new Array(capacity);
+    this.capacity = capacity;
+    this.start = 0;
+    this.end = 0;
+    this.size = 0;
+    this.sum = 0;
+  }
+
+  insert(value) {
+    if (this.size === this.capacity) {
+      this.sum -= this.buffer[this.start];
+      this.start = (this.start + 1) % this.capacity;
+    } else {
+      this.size++;
+    }
+
+    this.buffer[this.end] = value;
+    this.sum += value;
+    this.end = (this.end + 1) % this.capacity;
+  }
+
+  getAverage(lastNValues) {
+    if (lastNValues >= this.size) {
+      return this.sum / this.size;
+    }
+
+    let sum = 0;
+    let index = (this.end - 1 + this.capacity) % this.capacity;
+    for (let i = 0; i < lastNValues; i++) {
+      sum += this.buffer[index];
+      index = (index - 1 + this.capacity) % this.capacity;
+    }
+
+    return sum / lastNValues;
+  }
+
+  // Add the getSize method
+  getSize() {
+    return this.size;
+  }
+}
+
 let currentTable;
 
 const gameLoop = (() => {
@@ -9,6 +53,7 @@ const gameLoop = (() => {
         window.loadGame();
         projects.renderProjects();
         ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
+        // initializeAnalytics();
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();
@@ -47,6 +92,26 @@ const gameLoop = (() => {
           parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT1 * 0.005;
         }
 
+        if (parcel.buildings.speedBeaconT2) {
+          parcel.productionRateModifier += parcel.buildings.speedBeaconT2 * 0.04;
+          parcel.consumptionRateModifier += parcel.buildings.speedBeaconT2 * 0.05;
+        }
+
+        if (parcel.buildings.productivityBeaconT2) {
+          parcel.productionRateModifier += parcel.buildings.productivityBeaconT2 * 0.02;
+          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT2 * 0.01;
+        }
+
+        if (parcel.buildings.speedBeaconT3) {
+          parcel.productionRateModifier += parcel.buildings.speedBeaconT3 * 0.08;
+          parcel.consumptionRateModifier += parcel.buildings.speedBeaconT3 * 0.010;
+        }
+
+        if (parcel.buildings.productivityBeaconT3) {
+          parcel.productionRateModifier += parcel.buildings.productivityBeaconT3 * 0.06;
+          parcel.consumptionRateModifier += parcel.buildings.productivityBeaconT3 * 0.03;
+        }
+
         // Call updatePreviousResources method for each parcel
         parcel.updatePreviousResources();
         parcel.updatePreviousResourceHistory();
@@ -72,8 +137,8 @@ const gameLoop = (() => {
       // Iterate through all the parcels
       for (const parcel of window.parcels.parcelList) {
         // Iterate through each building type in the current parcel
-        for (const buildingId in parcel.buildings) {
-          const buildingCount = parcel.buildings[buildingId];
+        for (const buildingId in parcel.activeBuildings) {
+          const buildingCount = parcel.activeBuildings[buildingId];
 
           // Check if there's at least one building of the current type
           if (buildingCount && buildingCount > 0) {
@@ -127,6 +192,13 @@ const gameLoop = (() => {
                   parcel.resources[key] = Math.round(updatedValue * 10) / 10;
                 }
               }
+
+              // Insert the new production rate into the circular buffer for each output resource
+              for (const [key, value] of Object.entries(building.outputs)) {
+                const productionRate = maxProducingBuildings > 0 ? value * maxProducingBuildings * building.rate * (totalProductionRateModifier) : 0;
+                parcel.productionHistory[key].insert(productionRate);
+              }
+
             } else {
               for (const [key, value] of Object.entries(building.outputs)) {
                 if (!parcel.resources[key]) {
@@ -134,6 +206,9 @@ const gameLoop = (() => {
                 }
                 const updatedValue = parcel.resources[key] + value * buildingCount * building.rate * (totalProductionRateModifier);
                 parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+
+                // Insert the new production rate into the circular buffer
+                parcel.productionHistory[key].insert(value * buildingCount * building.rate * (totalProductionRateModifier));
               }
             }
           }
@@ -143,10 +218,6 @@ const gameLoop = (() => {
       const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
       ui.updateResourceDisplay(selectedParcel);
     }
-
-
-
-
 
     function calculateProductionRateModifier(parcel, building, buildingCount) {
         const energyBasedModifier = parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier || 0;
@@ -196,10 +267,33 @@ const gameLoop = (() => {
       }
     }
 
-
     function stop() {
         clearInterval(gameInterval);
     }
+
+    // function initializeAnalytics() {
+    //   // Cookie Consent
+    //   var cookieBotScript = document.createElement('script');
+    //   cookieBotScript.src = 'https://consent.cookiebot.com/uc.js';
+    //   cookieBotScript.setAttribute('data-cbid', 'cc57599e-a483-42fd-9b14-380f6c566317');
+    //   cookieBotScript.setAttribute('data-blockingmode', 'auto');
+    //   cookieBotScript.type = 'text/javascript';
+    //   document.head.appendChild(cookieBotScript);
+    //
+    //   // Google Analytics
+    //   var gaScript = document.createElement('script');
+    //   gaScript.async = true;
+    //   gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-7EH8S2NR6P';
+    //   document.head.appendChild(gaScript);
+    //
+    //   window.dataLayer = window.dataLayer || [];
+    //   function gtag(){dataLayer.push(arguments);}
+    //   gtag('consent', 'default', {ad_storage:'denied', analytics_storage:'denied'});
+    //   gtag('set', 'ads_data_redaction', true);
+    //   gtag('set', 'url_passthrough', true);
+    //   gtag('js', new Date());
+    //   gtag('config', 'G-7EH8S2NR6P', {'anonymize_ip': true});
+    // }
 
     return {
         start,
