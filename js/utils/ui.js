@@ -268,8 +268,8 @@ const ui = (() => {
         "Ø Production",
         "Count",
         "Building",
-        "Forward 0/0",
         "Backward 0/0",
+        "Forward 0/0",
       ];
 
       headerLabels.forEach((label) => {
@@ -279,14 +279,39 @@ const ui = (() => {
         headerRow.appendChild(headerCell);
       });
 
+      // Function to create an img element with the given src
+      const createIcon = (src) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.style.width = "16px";
+        img.style.height = "16px";
+        img.style.marginLeft = "4px";
+        return img;
+      };
+
+      const backwardIcon = createIcon("assets/backwardBelt-48.png");
+      const forwardIcon = createIcon("assets/forwardBelt-48.png");
+
+      const backwardHeader = headerRow.children[5];
+      const forwardHeader = headerRow.children[6];
+
+      backwardHeader.textContent = "";
+      forwardHeader.textContent = "";
+
+      backwardHeader.appendChild(backwardIcon);
+      backwardHeader.appendChild(document.createTextNode("Backward 0/0"));
+
+      forwardHeader.appendChild(forwardIcon);
+      forwardHeader.appendChild(document.createTextNode("Forward 0/0"));
+
       headerRow.children[3].id = `countHeader-${this.parcel.id}`; // Add an ID to the Production header
 
       headerRow.children[4].id = `productionHeader-${this.parcel.id}`; // Add an ID to the Production header
-      headerRow.children[5].id = `forwardBeltHeader-${this.parcel.id}`; // Add an ID to the Forward header
-      headerRow.children[5].style.display = "none"; // Initially hide the Forward header
+      headerRow.children[6].id = `forwardBeltHeader-${this.parcel.id}`; // Add an ID to the Forward header
+      headerRow.children[6].style.display = "none"; // Initially hide the Forward header
 
-      headerRow.children[6].id = `backwardBeltHeader-${this.parcel.id}`; // Add an ID to the Backward header
-      headerRow.children[6].style.display = "none"; // Initially hide the Backward header
+      headerRow.children[5].id = `backwardBeltHeader-${this.parcel.id}`; // Add an ID to the Backward header
+      headerRow.children[5].style.display = "none"; // Initially hide the Backward header
 
       // Hide the Production header initially
       const productionHeader = headerRow.children[4];
@@ -303,13 +328,26 @@ const ui = (() => {
       // Create the resource name cell
       const nameCell = document.createElement("td");
       nameCell.classList.add("resource-name");
+      nameCell.style.whiteSpace = "nowrap";
 
       const textWrapper = document.createElement("div");
-      textWrapper.textContent = resourceName;
+
+      // Create the icon element
+      const resourceData = resourceCategories[resourceName];
+      const icon = document.createElement("img");
+      icon.src = resourceData.icon48;
+      icon.style.width = "24px"; // Adjust the size as needed
+      icon.style.height = "24px"; // Adjust the size as needed
+      icon.style.verticalAlign = "middle";
+      icon.style.marginRight = "5px"; // Add some margin between the icon and the text
+      textWrapper.appendChild(icon);
+
+      // Insert the text after the icon
+      textWrapper.insertAdjacentText('beforeend', resourceName);
+
       textWrapper.style.display = "inline-block";
       textWrapper.style.verticalAlign = "-webkit-baseline-middle";
       nameCell.appendChild(textWrapper);
-
 
       // Create button inside name cell
       if (building && building.minable) {
@@ -408,7 +446,7 @@ const ui = (() => {
       row.appendChild(productionCell);
 
       // Create input fields for forward and backward belts
-      const beltTypes = ["forwardBelt", "backwardBelt"];
+      const beltTypes = ["backwardBelt", "forwardBelt"];
       beltTypes.forEach((beltId, index) => {
         const beltController = this.createDirectionInput(beltId, resourceName);
         const beltUsage = this.parcel.beltUsage ? this.parcel.beltUsage[beltId] || 0 : 0;
@@ -589,8 +627,6 @@ const ui = (() => {
         backwardLabelElement.style.display = "";
       }
     }
-
-
 
     createDirectionInput(beltId, resourceName) {
       // Create elements
@@ -1146,8 +1182,8 @@ const ui = (() => {
       updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
       updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
 
-      //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
-      updateSectionVisibility("project-section", !Object.values(window.projects.projects).every(array => array.length === 0));
+      // //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
+      // updateSectionVisibility("project-section", Object.values(window.projects.projects).length != 0);
     }
 
     function calculateFulfillmentAndModifier(energyDemand, energyProduction) {
