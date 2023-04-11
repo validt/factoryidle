@@ -156,7 +156,7 @@ const ui = (() => {
       resourceNames.forEach((resourceName) => {
         if (resourceName.dataset.tooltipListenerAttached !== 'true') {
           resourceName.addEventListener("mouseover", (event) => {
-            const name = resourceName.parentNode.id.split('-')[3];
+            const name = resourceName.parentNode.id.split('-')[1];
             const resource = buildingManager.getBuildingByResourceName(name);
             const buildingCount = parcel.buildings[resource.id];
             const buildingCountChecked = buildingCount || 0;
