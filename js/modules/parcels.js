@@ -70,14 +70,6 @@ class Parcel {
         }
     }
 
-    cheat(){
-      for(let resourceName in this.resources){
-        if(resourceName){
-          this.resources[resourceName] += 500000;
-        }
-      }
-    }
-
     updatePreviousResources() {
       this.previousResources = { ...this.resources };
     }
