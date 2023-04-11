@@ -68,7 +68,7 @@ const ui = (() => {
         for (const resource of category.resources) {
           const resourceName = resource.name;
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
-            const rowId = `resourceRow-${this.parcel.id}-${resourceName}`;
+            const rowId = `resourceRow-${resourceName}`;
             let row = document.getElementById(rowId);
             this.updateRow(resource, row);
             /*
@@ -283,7 +283,7 @@ const ui = (() => {
       this.columns.forEach((column) => {
         const headerCell = document.createElement("th");
         headerCell.textContent = column.label;
-        headerCell.id = `${column.id}-header-${this.parcel.id}`;
+        headerCell.id = `${column.id}-header`;
         headerCell.classList.add("header");
         if(column.display === "none"){
           headerCell.style.display = "none";
@@ -309,7 +309,7 @@ const ui = (() => {
       const headerRow = document.createElement("tr");
       this.columns.forEach((column) => {
         if(column.id === "forwardBelt"){
-          let forwardHeader = document.querySelector("[id^='forwardBelt-header-']");
+          let forwardHeader = document.querySelector("[id^='forwardBelt-header']");
           if(forwardHeader){
             const forwardIcon = createIcon("assets/forwardBelt-48.png");
             const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
@@ -322,7 +322,7 @@ const ui = (() => {
             }
           }
         }else if(column.id === "backwardBelt"){
-          let backwardHeader = document.querySelector("[id^='backwardBelt-header-']");
+          let backwardHeader = document.querySelector("[id^='backwardBelt-header']");
           if(backwardHeader){
             const backwardIcon = createIcon("assets/backwardBelt-48.png");
             const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
@@ -335,7 +335,7 @@ const ui = (() => {
             }
           }
         }else if(column.id === "productionRate" || column.id === "activeBuildings" || column.id === "totalBuildings"){
-          let selector = `[id^='${column.id}-header-']`;
+          let selector = `[id^='${column.id}-header']`;
           const header = document.querySelector(selector);
           if(
             (progressionManager.isUnlocked("ironMiner") ||
@@ -529,17 +529,17 @@ const ui = (() => {
       const building = buildingManager.getBuildingByResourceName(resourceName);
       if (row === null) {
         row = document.createElement("tr");
-        row.id = `resourceRow-${this.parcel.id}-${resourceName}`;
+        row.id = `resourceRow-${resourceName}`;
         this.tableElement.appendChild(row);
       }
       this.columns.forEach((column) => {
-        let cell = document.getElementById(`${resourceName}-${column.id}-cell-${this.parcel.id}-resourceName`);
-        const header = document.getElementById(`${column.id}-header-${this.parcel.id}`);
+        let cell = document.getElementById(`${resourceName}-${column.id}-cell-resourceName`);
+        const header = document.getElementById(`${column.id}-header`);
         let isInit = false;
         if(cell === null && header){
           isInit = true;
           cell = document.createElement("td");
-          cell.id = `${resourceName}-${column.id}-cell-${this.parcel.id}-resourceName`;
+          cell.id = `${resourceName}-${column.id}-cell-resourceName`;
           if(header.style.display === "none"){
             cell.style.display = "none";
           }
@@ -1192,7 +1192,6 @@ const ui = (() => {
       const darkMode = localStorage.getItem('darkMode');
 
       overlay.id = "missing-resource-overlay";
-
 
       const title = document.createElement("h3");
       title.textContent = "Missing Resources";
