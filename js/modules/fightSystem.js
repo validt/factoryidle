@@ -547,8 +547,12 @@ function updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, log
     factoryUnitsTable.appendChild(row);
   }
 
+  // ======== Biter Units Table Setup ========= //
+
   // Group the biter units
   const groupedBiterUnits = groupUnits(biterUnits);
+  let totalBiterHealth = 0;
+  let totalBiterCount = 0;
 
   // Update the biter units table
   for (const [unitName, unitData] of Object.entries(groupedBiterUnits)) {
@@ -562,15 +566,34 @@ function updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, log
 
     const healthCell = document.createElement("td");
     const progressBar = createHealthProgressBar(unitData.health, unitData.maxHealth);
+    totalBiterHealth += unitData.health;
     healthCell.appendChild(progressBar);
     row.appendChild(healthCell);
 
     const countCell = document.createElement("td");
     countCell.innerText = unitData.count;
+    totalBiterCount += unitData.count;
     row.appendChild(countCell);
 
     biterUnitsTable.appendChild(row);
   }
+
+  // Create biter totals
+  const totalsRow  = document.createElement("tr");
+  const nameCell   = document.createElement("td");
+  const healthCell = document.createElement("td");
+  const countCell  = document.createElement("td");
+
+  nameCell.innerText  = 'Total';
+  countCell.innerText = totalBiterCount;
+  const progressBar   = createHealthProgressBar(totalBiterHealth, totalBiterHealth);
+
+  totalsRow .appendChild(nameCell);
+  healthCell.appendChild(progressBar);
+  totalsRow .appendChild(healthCell);
+  totalsRow .appendChild(countCell)
+  biterUnitsTable.appendChild(totalsRow)
+
 
   // Update the ammunition element
   updateAmmunitionDisplay(battleStarted);
