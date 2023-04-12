@@ -276,26 +276,31 @@
           </div>
             <table class="table" id="resourceTable"></table>
         </div>
-
+        
         <div class="game-section">
           <h3 id="buildingHeader">Buildings</h3>
-          <select id="buildingSelect"> <!-- Add this line for the new dropdown menu -->
-              <!-- Building options will be dynamically added here -->
-          </select>
-            <button id="buyBuilding">Build New Building</button> <!-- Update the ID here -->
-            <table class="table" id="buildings">
-                <thead>
-                    <tr>
-                        <th>Building</th>
-                        <th>Count</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Buildings will be dynamically added here -->
-                </tbody>
-            </table>
+          <div>
+            <input id="only-built" type="checkbox">
+            <label for="only-built">Show only built Buildings</label>
+          </div>
+          <div id="building-tabs">
 
+          </div>
+        
+          
+          <table class="table" id="buildings">
+            <thead>
+              <tr>
+                <th>Building</th>
+                <th>Count</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Buildings will be dynamically added here -->
+            </tbody>
+          </table>
+        
         </div>
     </div>
 

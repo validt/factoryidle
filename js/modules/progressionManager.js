@@ -26,7 +26,7 @@ class ProgressionManager {
         //productionHeader.style.display = ""; // Unhide the Production header
       }
     }
-
+    window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
   }
 
   // Check the requirements for a building

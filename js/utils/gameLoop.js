@@ -57,7 +57,6 @@ const gameLoop = (() => {
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();
-            ui.updateBuildingDropdown();
             ui.updateParcelsSectionVisibility();
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
             currentTable = window.ui.updateResourceDisplay(selectedParcel);
