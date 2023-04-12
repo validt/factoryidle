@@ -210,13 +210,10 @@ class Battle {
       case "win":
         this.result = "Victory 🎖";
 
-
         addRewardsToMilitaryHQParcel(window.parcels.parcelList, rewards);
 
         // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, rewards, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
-
-
+        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount, rewards);
 
         // Increment pollution factor, for example
         gameState.pollution.pollutionBiterFactor += 0.005;
@@ -942,7 +939,7 @@ function deductArmyCost(selectedParcel, armyCost, factoryUnits) {
   });
 }
 
-function displayBattleResult(result, reward = {alienArtefacts: 0}, ammunitionUsed = {}, defeatedFactoryUnits = [], defeatedBiterUnits = []) {
+function displayBattleResult(result, ammunitionUsed = {}, defeatedFactoryUnits = [], defeatedBiterUnits = [], reward = {alienArtefacts: 0}) {
   const fightContainer = document.getElementById("fight-container");
 
   // Create overlay
