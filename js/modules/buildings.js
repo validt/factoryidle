@@ -579,7 +579,7 @@ const buildings = [
   {
     id: "solarBatteryArray",
     name: "Solar & Battery Array",
-    category : "Beacons",
+    category : "Energy",
     cost: { steel: 100, copperCables: 100, greenChips: 50, sulfur: 50 },
     inputs: {},
     outputs: {},

@@ -530,7 +530,7 @@ const ui = (() => {
         g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
         b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
       };
-      return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
+      return 'rgba(' + [color.r, color.g, color.b, 0.5].join(',') + ')';
     }
 
     updateRow(resource, row) {
@@ -706,6 +706,7 @@ const ui = (() => {
             ) {
               const buildingCount = this.parcel.buildings[building.id] || 0;
               const buildingDisplay = document.getElementById(`building-amount-${resourceName}`);
+              const buildingUnlocked = window.progressionManager.unlockedBuildings.has(building.id);
               if (buildingDisplay) {
                 buildingDisplay.textContent = buildingCount;
               } else {
@@ -713,7 +714,7 @@ const ui = (() => {
               }
               const buyButton = row.querySelector(`#buy-${building.id}`);
               const sellButton = row.querySelector(`#sell-${building.id}`);
-              if (!buyButton && !sellButton && buildingCount > 0) {
+              if (!buyButton && !sellButton && buildingUnlocked) {
                 cell.innerHTML += `
                   <button id="sell-${building.id}" data-building-id="${building.id}" class="sell-building-resource">-</button>
                   <button id="buy-${building.id}" data-building-id="${building.id}" class="buy-building-resource">+</button>
