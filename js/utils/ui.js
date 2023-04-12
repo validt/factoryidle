@@ -985,28 +985,35 @@ const ui = (() => {
       mapCategoryToBuildings.get(building.category).push(building);
     }
     const tabContainer = document.getElementById("building-tabs");
-    tabContainer.innerHTML = "";
-    const allTab = document.createElement("button");
-    allTab.className = (selectedTab === "All" ? "building-tab selected" : "building-tab");
-    allTab.textContent = "All";
-    allTab.id = `tab-all`;
-    allTab.addEventListener("click", () => {
-      selectedTab = "All";
-      updateBuildingDisplay(parcel);
-    });
-    tabContainer.appendChild(allTab);
+    let allTab = document.getElementById("tab-all");
+    if(!allTab){
+      allTab = document.createElement("button");
+      allTab.className = (selectedTab === "All" ? "building-tab selected" : "building-tab");
+      allTab.textContent = "All";
+      allTab.id ="tab-all";
+      allTab.addEventListener("click", () => {
+        selectedTab = "All";
+        updateBuildingDisplay(parcel);
+      });
+      tabContainer.appendChild(allTab);
+    }
+    
+    
     mapCategoryToBuildings.forEach((value, key) => {
       if(value.length > 0){
         // display the tab
-        const buildingTab = document.createElement("button");
-        buildingTab.className = (selectedTab === key ? "building-tab selected" : "building-tab");
-        buildingTab.textContent = key;
-        buildingTab.id = `tab-${key}`;
-        buildingTab.addEventListener("click", () => {
-          selectedTab = key;
-          updateBuildingDisplay(parcel);
-        });
-        tabContainer.appendChild(buildingTab);
+        let buildingTab = document.getElementById(`tab-${key}`);
+        if(!buildingTab){
+          buildingTab = document.createElement("button");
+          buildingTab.className = (selectedTab === key ? "building-tab selected" : "building-tab");
+          buildingTab.textContent = key;
+          buildingTab.id = `tab-${key}`;
+          buildingTab.addEventListener("click", () => {
+            selectedTab = key;
+            updateBuildingDisplay(parcel);
+          });
+          tabContainer.appendChild(buildingTab);
+        }
       }
     })
 
@@ -1026,16 +1033,20 @@ const ui = (() => {
         if(onlyBuilt && buildingCount === 0){
           continue;
         }
-        const buildingElement = document.createElement("tr");
-        buildingElement.innerHTML = `
-                <td data-building-id="${buildingId}" class="building-nameCell">${building.name}</td>
-                <td>${buildingCount}</td>
-                <td>
-                    <button data-building-id="${buildingId}" class="buy-building">Buy</button>
-                    <button data-building-id="${buildingId}" class="sell-building">Sell</button>
-                </td>
-            `;
-        buildingDisplay.appendChild(buildingElement);
+        let buildingElement = document.getElementById(`building-row-${building.id}`);
+        if(!buildingElement){
+          buildingElement = document.createElement("tr");
+          buildingElement.id = `building-row-${building.id}`;
+          buildingElement.innerHTML = `
+                  <td data-building-id="${buildingId}" class="building-nameCell">${building.name}</td>
+                  <td>${buildingCount}</td>
+                  <td>
+                      <button data-building-id="${buildingId}" class="buy-building">Buy</button>
+                      <button data-building-id="${buildingId}" class="sell-building">Sell</button>
+                  </td>
+              `;
+          buildingDisplay.appendChild(buildingElement);
+        }
       }
     }
 
