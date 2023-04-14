@@ -636,7 +636,7 @@ const ui = (() => {
                 targetInterval = 300;
               }
 
-              buildingCount = this.parcel.buildings[building.id];
+              buildingCount = this.parcel.activeBuildings[building.id];
               buildingCountChecked = buildingCount || 0;
               productionRateModifier = gameLoop.calculateProductionRateModifier(this.parcel, building, buildingCount);
               amount = building.outputs[resourceName];
@@ -1205,10 +1205,15 @@ const ui = (() => {
       }
       if (parcel.activeBuildings[buildingId] > 0) {
         parcel.activeBuildings[buildingId]--;
+        if (parcel.activeBuildings[buildingId] === 0) {
+          const firstKey = Object.keys(buildingManager.getBuilding(buildingId).outputs)[0];
+          if (firstKey) {
+            parcel.productionHistory[firstKey] = new CircularBuffer(300)
+          }
+        }
       }
     }
   }
-
   function buyBuilding(parcel, buildingId) {
     const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
     if (totalBuildings < parcel.maxBuildings) {
