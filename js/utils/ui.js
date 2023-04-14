@@ -972,6 +972,18 @@ const ui = (() => {
   let selectedTab = "All";
 
   function updateBuildingDisplay(parcel) {
+
+    // Helper function to update the class of the tabs
+    function updateTabClasses() {
+      const allTabs = document.querySelectorAll(".building-tab");
+      allTabs.forEach(tab => {
+        tab.classList.remove("selected");
+        if ((tab.id === `tab-${selectedTab}`) || (selectedTab === "All" && tab.id === "tab-all")) {
+          tab.classList.add("selected");
+        }
+      });
+    }
+
     // Create / update the tabs
     const categories = window.buildingManager.getCateories()
     const mapCategoryToBuildings = new Map();
@@ -1001,7 +1013,9 @@ const ui = (() => {
       allTab.id ="tab-all";
       allTab.addEventListener("click", () => {
         selectedTab = "All";
+        console.log("2", selectedTab);
         updateBuildingDisplay(parcel);
+        updateTabClasses();
       });
       tabContainer.appendChild(allTab);
     }
@@ -1014,11 +1028,14 @@ const ui = (() => {
         if(!buildingTab){
           buildingTab = document.createElement("button");
           buildingTab.className = (selectedTab === key ? "building-tab selected" : "building-tab");
+          console.log(buildingTab.className);
           buildingTab.textContent = key;
           buildingTab.id = `tab-${key}`;
           buildingTab.addEventListener("click", () => {
             selectedTab = key;
+            console.log("1", selectedTab);
             updateBuildingDisplay(parcel);
+            updateTabClasses();
           });
           tabContainer.appendChild(buildingTab);
         }
