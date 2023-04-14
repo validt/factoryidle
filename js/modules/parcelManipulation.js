@@ -19,9 +19,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Rename
   document.getElementById('renameDropdownItem').addEventListener('click', () => {
       document.getElementById('renameParcelOverlay').style.display = 'flex';
+      const input = document.getElementById('parcelNameInput')
+      input.focus();
+      input.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") 
+          document.getElementById("renameParcelButton").click();
+      });
   });
 
   document.getElementById('renameParcelButton').addEventListener('click', () => {
+      document.getElementById('parcelNameInput').removeEventListener("keypress", event)
       parcelManipulation.renameParcel();
       document.getElementById('renameParcelOverlay').style.display = 'none';
   });
