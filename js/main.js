@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", () => {
     const buyParcelButton = document.getElementById("buyParcel");
-    const buyBuildingButton = document.getElementById("buyBuilding");
     const startResearchButton = document.getElementById("startResearch");
     const researchSelect = document.getElementById("researchSelect");
 
@@ -76,27 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add tooltip to Buy Parcel button
     ui.addTooltipToBuyParcelButton(buyParcelButton);
-
-    // Buy Building button event listener
-    buyBuildingButton.addEventListener("click", () => {
-        const selectedParcelIndex = ui.getSelectedParcelIndex();
-        const selectedBuildingId = buildingSelect.value;
-
-        if (selectedParcelIndex !== null) {
-            const selectedParcel = parcels.getParcel(selectedParcelIndex);
-
-            // Call the buyBuilding function instead of repeating the code
-            ui.buyBuilding(selectedParcel, selectedBuildingId);
-
-            // Update the UI
-            ui.updateBuildingDisplay(selectedParcel);
-
-            const totalBuildings = Object.values(selectedParcel.buildings).reduce((a, b) => a + b, 0);
-            //ui.updateParcelBuildingCount(selectedParcelIndex, totalBuildings);
-        }
-    });
-
-
 
     //Start Research button event listener
     startResearchButton.addEventListener("click", () => {

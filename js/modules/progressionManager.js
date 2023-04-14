@@ -21,11 +21,12 @@ class ProgressionManager {
       const productionHeader = document.getElementById(`productionHeader-${window.gameState.parcels[ui.getSelectedParcelIndex()].id}`);
       const countHeader = document.getElementById(`countHeader-${window.gameState.parcels[ui.getSelectedParcelIndex()].id}`);
       if (productionHeader) {
-        countHeader.style.display = "";
-        productionHeader.style.display = ""; // Unhide the Production header
+        console.log("UNLOCKED");
+        //countHeader.style.display = "";
+        //productionHeader.style.display = ""; // Unhide the Production header
       }
     }
-
+    window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
   }
 
   // Check the requirements for a building

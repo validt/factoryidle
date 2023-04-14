@@ -48,9 +48,15 @@
 }
 
 .dark-mode .parcel-tab.selected {
-    background-image: -webkit-linear-gradient(top, rgb(0, 2, 4), rgb(48, 50, 53));
-    background-color: initial;
-    border-color: rgb(140, 130, 115);
+  background-image: -webkit-linear-gradient(top, rgb(0, 2, 4), rgb(48, 50, 53));
+  background-color: initial;
+  border-color: rgb(140, 130, 115);
+}
+
+.dark-mode .building-tab.selected {
+  background-image: -webkit-linear-gradient(top, rgb(0, 2, 4), rgb(48, 50, 53));
+  background-color: initial;
+  border-color: rgb(140, 130, 115);
 }
 
 .dark-mode :root {
@@ -221,10 +227,42 @@ h1 {
     border: 1px solid #888;
 }
 
+#building-tabs {
+  display: flex;
+  justify-content: start;
+  margin-bottom: 10px;
+}
+
+.building-tab {
+border: 1px solid #1a1a1a;
+background: -webkit-linear-gradient(top, #ffffff, #888888);
+padding: 4px 8px;
+border-radius: 2px;
+box-shadow: rgba(255,255,255,0.4) 0 0px 0, inset rgba(255,255,255,0.4) 0 1px 0;
+text-shadow: #cccccc 0 1px 0;
+color: #000;
+font-size: 14px;
+font-family: helvetica, serif;
+text-decoration: none;
+vertical-align: middle;
+outline: none;
+cursor: pointer;
+}
+
+.building-tab:hover {
+  background: -webkit-linear-gradient(top, #888888, #ffffff);
+}
+
+.building-tab.selected {
+  background-color: #007bff;
+  background: -webkit-linear-gradient(top, #ccc, #fff);
+  border: 1px solid #888;
+}
 
 /* Resources styles */
 .header {
   text-align: center;
+  white-space: nowrap;
 }
 
 #resources {
@@ -605,4 +643,10 @@ h1 {
 .dark-mode #missing-resource-overlay {
     background-color: rgba(0, 2, 4, 0.8);
     outline: 1px solid rgb(131, 122, 108);
+}
+
+/* Cell Buttons */
+.buttonWrapper {
+    float: right;
+    margin-left: 1em;
 }

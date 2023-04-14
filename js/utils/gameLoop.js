@@ -57,7 +57,6 @@ const gameLoop = (() => {
         gameInterval = setInterval(() => {
             updateResources();
             updateBeltLogistics();
-            ui.updateBuildingDropdown();
             ui.updateParcelsSectionVisibility();
             const selectedParcel = window.parcels.getParcel(window.ui.getSelectedParcelIndex());
             currentTable = window.ui.updateResourceDisplay(selectedParcel);
@@ -137,8 +136,8 @@ const gameLoop = (() => {
       // Iterate through all the parcels
       for (const parcel of window.parcels.parcelList) {
         // Iterate through each building type in the current parcel
-        for (const buildingId in parcel.buildings) {
-          const buildingCount = parcel.buildings[buildingId];
+        for (const buildingId in parcel.activeBuildings) {
+          const buildingCount = parcel.activeBuildings[buildingId];
 
           // Check if there's at least one building of the current type
           if (buildingCount && buildingCount > 0) {

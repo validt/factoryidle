@@ -61,6 +61,7 @@ window.loadGame = function() {
 
       // Assign the properties from the saved parcel data
       Object.assign(parcel.buildings, parcelData.buildings);
+      Object.assign(parcel.activeBuildings, parcelData.activeBuildings);
       Object.assign(parcel.resources, parcelData.resources);
       Object.assign(parcel.beltUsage, parcelData.beltUsage);
       Object.assign(parcel.previousResources, parcelData.previousResources);

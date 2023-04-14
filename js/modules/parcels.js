@@ -41,6 +41,7 @@ class Parcel {
         this.maxBuildings = maxBuildings;
         this.buildings = createBuildingsHandler(createNumberGuard({
         }));
+        this.activeBuildings = {};
         this.resources = createNumberGuard({
             stone: 0,
         });
@@ -126,6 +127,11 @@ class Parcel {
                 this.buildings[buildingType] = 0;
             }
             this.buildings[buildingType]++;
+            console.log(this.activeBuildings[buildingType]);
+            if (!this.activeBuildings[buildingType]) {
+              this.activeBuildings[buildingType] = 0;
+            }
+            this.activeBuildings[buildingType]++;
             return true;
         }
         return false;
