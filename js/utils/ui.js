@@ -670,22 +670,26 @@ const ui = (() => {
               const buildingCount = this.parcel.buildings[building.id] || 0;
               const activeBuildingCount = this.parcel.activeBuildings[building.id] || 0;
               const buildingDisplay = document.getElementById(`building-active-${resourceName}`);
+              const activeBuildingsCell = document.getElementById(`${resourceName}-activeBuildings-cell-resourceName`);
+              activeBuildingsCell.style.textAlign = "left";
               if (buildingDisplay) {
                 if (buildingCount === 0) {
                   buildingDisplay.textContent = 0;
                 } else {
-                  buildingDisplay.textContent = `${activeBuildingCount} / ${buildingCount}`;
+                  buildingDisplay.textContent = `${activeBuildingCount}`;
                 }
 
               } else {
-                cell.innerHTML = `<span id="building-active-${resourceName}">${activeBuildingCount}</span>`;
+                cell.innerHTML = `<span id="building-active-${resourceName}" style="display: inline-block; vertical-align: -webkit-baseline-middle;">${activeBuildingCount}</span>`;
               }
               const activateButton = row.querySelector(`#activate-${building.id}`);
               const deactivateButton = row.querySelector(`#deactivate-${building.id}`);
               if (!activateButton && !deactivateButton && buildingCount > 0) {
                 cell.innerHTML += `
+                  <div class="buttonWrapper">
                   <button id="deactivate-${building.id}" data-building-id="${building.id}" class="deactivate-building-resource">-</button>
                   <button id="activate-${building.id}" data-building-id="${building.id}" class="activate-building-resource">+</button>
+                  </div>
                 `;
               }
               if (activateButton && deactivateButton) {
@@ -707,17 +711,21 @@ const ui = (() => {
               const buildingCount = this.parcel.buildings[building.id] || 0;
               const buildingDisplay = document.getElementById(`building-amount-${resourceName}`);
               const buildingUnlocked = window.progressionManager.unlockedBuildings.has(building.id);
+              const totalBuildingsCell = document.getElementById(`${resourceName}-totalBuildings-cell-resourceName`);
+              totalBuildingsCell.style.textAlign = "left";
               if (buildingDisplay) {
                 buildingDisplay.textContent = buildingCount;
               } else {
-                cell.innerHTML = `<span id="building-amount-${resourceName}">${buildingCount}</span>`;
+                cell.innerHTML = `<span id="building-amount-${resourceName}" style="display: inline-block; vertical-align: -webkit-baseline-middle;">${buildingCount}</span>`;
               }
               const buyButton = row.querySelector(`#buy-${building.id}`);
               const sellButton = row.querySelector(`#sell-${building.id}`);
               if (!buyButton && !sellButton && buildingUnlocked) {
                 cell.innerHTML += `
+                  <div class="buttonWrapper">
                   <button id="sell-${building.id}" data-building-id="${building.id}" class="sell-building-resource">-</button>
                   <button id="buy-${building.id}" data-building-id="${building.id}" class="buy-building-resource">+</button>
+                  </div>
                 `;
               }
               if (buyButton && sellButton) {
@@ -997,8 +1005,8 @@ const ui = (() => {
       });
       tabContainer.appendChild(allTab);
     }
-    
-    
+
+
     mapCategoryToBuildings.forEach((value, key) => {
       if(value.length > 0){
         // display the tab

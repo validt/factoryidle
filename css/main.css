@@ -262,6 +262,7 @@ cursor: pointer;
 /* Resources styles */
 .header {
   text-align: center;
+  white-space: nowrap;
 }
 
 #resources {
@@ -642,4 +643,10 @@ h1 {
 .dark-mode #missing-resource-overlay {
     background-color: rgba(0, 2, 4, 0.8);
     outline: 1px solid rgb(131, 122, 108);
+}
+
+/* Cell Buttons */
+.buttonWrapper {
+    float: right;
+    margin-left: 1em;
 }
