@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('renameDropdownItem').addEventListener('click', () => {
       document.getElementById('renameParcelOverlay').style.display = 'flex';
       const input = document.getElementById('parcelNameInput')
+      input.value = "";
       input.focus();
       input.addEventListener("keypress", (event) => {
         if (event.key === "Enter") 
