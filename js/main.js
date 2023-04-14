@@ -72,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gameState.buyParcelCost.expansionPoints += 0.7;
         gameState.buyParcelCost.alienArtefacts += 0.5;
       }
+      else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest right parcel\n(or in an Remote Construction Facility)")
     });
 
     // Add tooltip to Buy Parcel button
