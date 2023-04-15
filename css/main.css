@@ -23,7 +23,8 @@
 
 .dark-mode button {
   border-color: rgb(131, 122, 108);
-  background-image: -webkit-linear-gradient(top, rgb(24, 26, 27), rgb(91, 99, 103));
+  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+
   background-color: initial;
   box-shadow: rgba(24, 26, 27, 0.4) 0px 0px 0px, rgba(24, 26, 27, 0.4) 0px 1px 0px inset;
   text-shadow: rgb(53, 57, 59) 0px 1px 0px;
@@ -33,7 +34,7 @@
 }
 
 .dark-mode button:hover {
-    background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+    background-image: -webkit-linear-gradient(top, rgb(24, 26, 27), rgb(91, 99, 103));
     background-color: initial;
 }
 
@@ -196,9 +197,8 @@ h1 {
 
 /* Parcel tabs styles */
 #parcel-tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
+    display: block;
+    margin-bottom: 2em;
 }
 
 .parcel-tab {
@@ -322,7 +322,8 @@ cursor: pointer;
 /* Buttons */
 button {
     border: 1px solid #1a1a1a;
-    background: -webkit-linear-gradient(top, #ffffff, #888888);
+
+    background: -webkit-linear-gradient(top, #888888, #ffffff);
     padding: 4px 8px;
     border-radius: 2px;
     box-shadow: rgba(255,255,255,0.4) 0 0px 0, inset rgba(255,255,255,0.4) 0 1px 0;
@@ -337,7 +338,7 @@ button {
 }
 
 button:hover {
-    background: -webkit-linear-gradient(top, #888888, #ffffff);
+    background: -webkit-linear-gradient(top, #ffffff, #888888);
 }
 
 button:disabled {
@@ -649,4 +650,33 @@ h1 {
 .buttonWrapper {
     float: right;
     margin-left: 1em;
+}
+
+/* Cluster Styles */
+#parcel-section {
+  display: block;
+}
+
+.cluster-container {
+  margin-bottom: 10px;
+  margin-right: 4px;
+}
+
+.cluster-content {
+  display: none;
+  overflow: hidden;
+  padding: 10px;
+}
+
+button.cluster-header {
+  background-image: -webkit-linear-gradient(top, rgba(91, 99, 103, 0), rgba(24, 26, 27, 0));
+  border: none;
+  width: min-content;
+  white-space: nowrap;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: bold;
 }

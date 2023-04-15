@@ -36,8 +36,11 @@ function createBuildingsHandler(target) {
 }
 
 class Parcel {
-    constructor(id, maxBuildings) {
+    constructor(id, maxBuildings, cluster = 0, continent = 0, planet = 0) {
         this.id = id;
+        this.cluster = cluster,
+        this.continent = continent,
+        this.planet = planet,
         this.maxBuildings = maxBuildings;
         this.buildings = createBuildingsHandler(createNumberGuard({
         }));

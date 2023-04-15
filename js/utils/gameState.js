@@ -47,6 +47,7 @@ window.saveGame = function() {
   const projectsJSON = LZString.compress(JSON.stringify(projectsModule.projects));
   localStorage.setItem("savedProjects", projectsJSON);
   localStorage.setItem("researchData", LZString.compress(window.researchManager.saveResearchData()));
+  console.log('Game Saved.');
 };
 
 window.loadGame = function() {
@@ -57,7 +58,13 @@ window.loadGame = function() {
     // Ensure parcels object is properly linked and updated
     const updatedParcelList = parsedState.parcels.map((parcelData, index) => {
       // Create a new parcel object using the saved parcel data
-      const parcel = new Parcel(parcelData.id, parcelData.maxBuildings);
+      const parcel = new Parcel(
+        parcelData.id,
+        parcelData.maxBuildings,
+        parcelData.cluster ?? 0,
+        parcelData.continent ?? 0,
+        parcelData.planet ?? 0
+      );
 
       // Assign the properties from the saved parcel data
       Object.assign(parcel.buildings, parcelData.buildings);

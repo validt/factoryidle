@@ -53,6 +53,7 @@ const gameLoop = (() => {
         window.loadGame();
         projects.renderProjects();
         ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
+        updateClusterParcels();
         // initializeAnalytics();
         gameInterval = setInterval(() => {
             updateResources();
@@ -233,33 +234,58 @@ const gameLoop = (() => {
         return (1 + energyBasedModifier) * (1 + parcels.getGlobalConsumptionRateModifier() + building.consumptionRateModifier + parcel.consumptionRateModifier + buildingConsumptionRateModifier + remoteConstructionFacilityModifier) || 0;
     }
 
+    let clusterParcels = {};
+
+    function updateClusterParcels() {
+      const parcelList = parcels.parcelList;
+      clusterParcels = {};
+
+      for (let i = 0; i < parcelList.length; i++) {
+        const currentParcel = parcelList[i];
+        const currentCluster = currentParcel.cluster || 0;
+
+        if (!clusterParcels[currentCluster]) {
+          clusterParcels[currentCluster] = [];
+        }
+
+        clusterParcels[currentCluster].push(currentParcel);
+      }
+      console.log(clusterParcels);
+    }
+
     function updateBeltLogistics() {
-      for (let i = 0; i < parcels.getParcelCount(); i++) {
-        const currentParcel = parcels.getParcel(i);
-        const nextParcelIndex = (i + 1) % parcels.getParcelCount();
-        const previousParcelIndex = (i - 1 + parcels.getParcelCount()) % parcels.getParcelCount();
-        const nextParcel = parcels.getParcel(nextParcelIndex);
-        const previousParcel = parcels.getParcel(previousParcelIndex);
+      for (const cluster in clusterParcels) {
+        const parcelList = clusterParcels[cluster];
 
-        for (const resourceName in currentParcel.resources) {
-          if (currentParcel.inputValues && currentParcel.inputValues[resourceName]) {
-            const forwardValue = currentParcel.inputValues[resourceName].forwardBelt || 0;
-            const backwardValue = currentParcel.inputValues[resourceName].backwardBelt || 0;
+        for (let i = 0; i < parcelList.length; i++) {
+          const currentParcel = parcelList[i];
 
-            // Transfer resources using forward belts
-            if (forwardValue > 0) {
-              const availableResources = currentParcel.resources[resourceName];
-              const transferAmount = Math.min(availableResources, forwardValue);
-              currentParcel.resources[resourceName] -= transferAmount;
-              nextParcel.resources[resourceName] = (nextParcel.resources[resourceName] || 0) + transferAmount;
-            }
+          const nextParcelIndex = (i + 1) % parcelList.length;
+          const previousParcelIndex = (i - 1 + parcelList.length) % parcelList.length;
 
-            // Transfer resources using backward belts
-            if (backwardValue > 0) {
-              const availableResources = currentParcel.resources[resourceName];
-              const transferAmount = Math.min(availableResources, backwardValue);
-              currentParcel.resources[resourceName] -= transferAmount;
-              previousParcel.resources[resourceName] = (previousParcel.resources[resourceName] || 0) + transferAmount;
+          const nextParcel = parcelList[nextParcelIndex];
+          const previousParcel = parcelList[previousParcelIndex];
+
+          for (const resourceName in currentParcel.resources) {
+            if (currentParcel.inputValues && currentParcel.inputValues[resourceName]) {
+              const forwardValue = currentParcel.inputValues[resourceName].forwardBelt || 0;
+              const backwardValue = currentParcel.inputValues[resourceName].backwardBelt || 0;
+
+              // Transfer resources using forward belts
+              if (forwardValue > 0) {
+                const availableResources = currentParcel.resources[resourceName];
+                const transferAmount = Math.min(availableResources, forwardValue);
+                currentParcel.resources[resourceName] -= transferAmount;
+                nextParcel.resources[resourceName] = (nextParcel.resources[resourceName] || 0) + transferAmount;
+              }
+
+              // Transfer resources using backward belts
+              if (backwardValue > 0) {
+                const availableResources = currentParcel.resources[resourceName];
+                const transferAmount = Math.min(availableResources, backwardValue);
+                currentParcel.resources[resourceName] -= transferAmount;
+                previousParcel.resources[resourceName] = (previousParcel.resources[resourceName] || 0) + transferAmount;
+              }
             }
           }
         }
@@ -299,6 +325,8 @@ const gameLoop = (() => {
         stop,
         calculateProductionRateModifier,
         calculateConsumptionRateModifier,
+        clusterParcels,
+        updateClusterParcels,
     };
 })();
 

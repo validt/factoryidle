@@ -365,71 +365,75 @@ function updateParcelTab(index) {
 
 /* Move Parcel Functions */
 function moveParcel() {
-    const moveAmount = parseInt(document.getElementById('parcelMoveInput').value);
-    if (!isNaN(moveAmount)) {
-        const selectedParcelIndex = ui.getSelectedParcelIndex();
-        const newIndex = selectedParcelIndex + moveAmount;
-        const parcelList = window.parcels.parcelList;
+  const moveAmount = parseInt(document.getElementById('parcelMoveInput').value);
+  if (!isNaN(moveAmount)) {
+    const selectedParcelIndex = ui.getSelectedParcelIndex();
+    const selectedParcel = window.parcels.parcelList[selectedParcelIndex];
+    const clusterId = selectedParcel.cluster || 0;
 
-        // Check if the new index is within the bounds of the parcel list
-        if (newIndex >= 0 && newIndex < parcelList.length) {
-            // Move the parcel in the parcelList
-            const parcel = parcelList.splice(selectedParcelIndex, 1)[0];
-            parcelList.splice(newIndex, 0, parcel);
+    // Filter the parcelList to get an array of parcels belonging to the same cluster
+    const filteredParcelList = window.parcels.parcelList.filter(parcel => parcel.cluster === clusterId);
 
-            // Update the parcel IDs in the parcelList
-            for (let i = 0; i < parcelList.length; i++) {
-                parcelList[i].id = `parcel-${i + 1}`;
-            }
+    const selectedIndexInFiltered = filteredParcelList.findIndex(parcel => parcel.id === selectedParcel.id);
+    const newIndexInFiltered = selectedIndexInFiltered + moveAmount;
 
-            // Update the parcel tabs in the UI
-            for (let i = 0; i < parcelList.length; i++) {
-                const parcel = parcelList[i];
-                const parcelTab = document.getElementById(`tab-${parcel.id}`);
-                if (parcelTab) {
-                    parcelTab.id = `tab-${parcel.id}`;
+    // Check if the new index is within the bounds of the filtered list
+    if (newIndexInFiltered >= 0 && newIndexInFiltered < filteredParcelList.length) {
+      // Remove the selected parcel from its current position in the filtered list
+      filteredParcelList.splice(selectedIndexInFiltered, 1);
 
-                    // Remove the old event listener
-                    const newParcelTab = parcelTab.cloneNode(true);
-                    parcelTab.parentNode.replaceChild(newParcelTab, parcelTab);
+      // Insert the selected parcel at the new index, shifting other parcels as needed
+      filteredParcelList.splice(newIndexInFiltered, 0, selectedParcel);
 
-                    // Attach the new event listener with the updated parcel id
-                    ui.addParcelClickListener(newParcelTab);
-
-                    updateParcelTab(i);
-                }
-            }
-
-            // Select the moved parcel in its new position
-            selectParcel(newIndex);
-
-            // Move the parcel visually
-            const parcelContainer = document.getElementById('parcels');
-            const parcelTab = document.getElementById(`tab-${parcel.id}`);
-            const targetTab = newIndex < parcelList.length - 1
-                ? document.getElementById(`tab-${parcelList[newIndex + 1].id}`)
-                : null;
-
-            if (newIndex > selectedParcelIndex) {
-                if (targetTab) {
-                    parcelContainer.insertBefore(parcelTab, targetTab);
-                } else {
-                    parcelContainer.appendChild(parcelTab);
-                }
-            } else {
-                parcelContainer.insertBefore(parcelTab, targetTab);
-            }
-            const resourceTable = document.getElementById("resourceTable");
-            while (resourceTable.rows.length > 1) {
-                resourceTable.deleteRow(-1);
-            }
-        } else {
-            alert('Invalid move amount. Please enter a valid number.');
+      // Update the parcelList to reflect the new order
+      let newIndex = 0;
+      for (let i = 0; i < window.parcels.parcelList.length; i++) {
+        const parcel = window.parcels.parcelList[i];
+        if (parcel.cluster === clusterId) {
+          window.parcels.parcelList[i] = filteredParcelList[newIndex];
+          newIndex++;
         }
+      }
+
+      // Update the parcel IDs in the parcelList
+      for (let i = 0; i < window.parcels.parcelList.length; i++) {
+        window.parcels.parcelList[i].id = `parcel-${i + 1}`;
+      }
+
+      // Update the parcel tabs in the UI
+      for (let i = 0; i < window.parcels.parcelList.length; i++) {
+        const parcel = window.parcels.parcelList[i];
+        const parcelTab = document.getElementById(`tab-${parcel.id}`);
+        if (parcelTab) {
+          parcelTab.id = `tab-${parcel.id}`;
+
+          // Remove the old event listener
+          const newParcelTab = parcelTab.cloneNode(true);
+          parcelTab.parentNode.replaceChild(newParcelTab, parcelTab);
+
+          // Attach the new event listener with the updated parcel id
+          ui.addParcelClickListener(newParcelTab);
+
+          parcelManipulation.updateParcelTab(i);
+        }
+      }
+
+      // Select the moved parcel in its new position
+      const newSelectedParcelIndex = window.parcels.parcelList.findIndex(parcel => parcel.id === selectedParcel.id);
+      selectParcel(newSelectedParcelIndex);
+      ui.updateResourceDisplay(parcels.getParcel(newSelectedParcelIndex));
+      console.log(newSelectedParcelIndex);
+      console.log(selectedParcelIndex);
+      ui.updateBuildingDisplay(parcels.getParcel(newSelectedParcelIndex));
+      gameLoop.updateClusterParcels();
     } else {
-        alert('Please enter a valid move amount.');
+      alert('Invalid move amount. Please enter a valid number.');
     }
+  } else {
+    alert('Please enter a valid move amount.');
+  }
 }
+
 
 function setSelectedParcelIndex(index) {
     selectedParcelIndex = index;

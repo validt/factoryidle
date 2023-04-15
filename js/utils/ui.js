@@ -911,18 +911,72 @@ const ui = (() => {
   }
 
   function addParcelToUI(parcel) {
+    const clusterId = parcel.cluster || 0;
+    const clusterContainerId = `cluster-${clusterId}`;
+
+    let clusterContainer = document.getElementById(clusterContainerId);
+
+    // Create a new cluster container if it doesn't exist
+    if (!clusterContainer) {
+      clusterContainer = document.createElement("div");
+      clusterContainer.className = "cluster-container";
+      clusterContainer.id = clusterContainerId;
+      clusterContainer.style.display = "inline-block";
+
+      const clusterHeader = document.createElement("button");
+      clusterHeader.className = "cluster-header";
+      clusterHeader.textContent = `Cluster ${clusterId}`;
+      clusterHeader.addEventListener("click", () => {
+        clusterContent.classList.toggle("active");
+        clusterContent.style.display = clusterContent.style.display === "none" ? "block" : "none";
+        clusterContainer.style.display = clusterContainer.style.display === "inline-block" ? "block" : "inline-block";
+      });
+
+      const clusterContent = document.createElement("div");
+      clusterContent.className = "cluster-content";
+      clusterContent.id = `cluster-content-${clusterId}`;
+      clusterContent.style.display = "none";
+      clusterContainer.appendChild(clusterHeader);
+      clusterContainer.appendChild(clusterContent);
+
+      // Find the correct position for the new cluster container
+      const existingClusterContainers = Array.from(parcelContainer.children).filter(child => child.className === "cluster-container");
+      let insertPosition = existingClusterContainers.length;
+
+      for (let i = 0; i < existingClusterContainers.length; i++) {
+        const currentClusterId = parseInt(existingClusterContainers[i].id.split('-')[1], 10);
+
+        if (clusterId < currentClusterId) {
+          insertPosition = i;
+          break;
+        }
+      }
+
+      if (insertPosition < existingClusterContainers.length) {
+        parcelContainer.insertBefore(clusterContainer, existingClusterContainers[insertPosition]);
+      } else {
+        parcelContainer.appendChild(clusterContainer);
+      }
+    }
+
+    const clusterContent = document.getElementById(`cluster-content-${clusterId}`);
     const parcelTab = document.createElement("button");
+    const selectedParcel = parcels.getParcel(selectedParcelIndex);
     parcelTab.className = "parcel-tab";
     parcelTab.id = `tab-${parcel.id}`;
     parcelTab.textContent = parcel.id;
 
+    if (parcel === selectedParcel) {
+      parcelTab.classList.add("selected");
+    }
+
     // Add event listener for selecting the parcel
     addParcelClickListener(parcelTab);
 
-    parcelContainer.appendChild(parcelTab);
+    clusterContent.appendChild(parcelTab);
 
     // Update the parcel tab with color and name if available
-    const parcelIndex = window.parcels.parcelList.findIndex(p => p.id === parcel.id);
+    const parcelIndex = window.parcels.parcelList.findIndex((p) => p.id === parcel.id);
     parcelManipulation.updateParcelTab(parcelIndex);
   }
 
@@ -1364,8 +1418,8 @@ const ui = (() => {
   }
 
   function selectParcel(parcelIndex) {
-    selectedParcelIndex = parcelIndex;
     const parcelButtons = document.querySelectorAll(".parcel-button");
+    selectedParcelIndex = parcelIndex;
     parcelButtons.forEach((button, index) => {
       button.classList.toggle("selected", index === parcelIndex);
     });
