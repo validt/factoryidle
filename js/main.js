@@ -27,8 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Buy Parcel button event listener
     buyParcelButton.addEventListener("click", () => {
-      const highestParcelIndex = parcels.getParcelCount() - 1;
-      const highestParcel = parcels.getParcel(highestParcelIndex);
+      // Code used to look for highest parcel to pull resources from, now we pull from first parcel
+      // const highestParcelIndex = parcels.getParcelCount() - 1; // old code
+      const highestParcel = parcels.getParcel(0);
       const highestParcelResourceEP = highestParcel.resources.expansionPoints || 0;
       const highestParcelResourceAA = highestParcel.resources.alienArtefacts || 0;
 
@@ -71,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
         gameState.buyParcelCost.expansionPoints += 0.7;
         gameState.buyParcelCost.alienArtefacts += 0.5;
       }
-      else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest right parcel\n(or in an Remote Construction Facility)")
+      else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
     });
 
     // Add tooltip to Buy Parcel button
