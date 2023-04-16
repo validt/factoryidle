@@ -299,7 +299,7 @@ const ui = (() => {
           if (forwardHeader) {
             const forwardIcon = createIcon("assets/forwardBelt-48.png");
             const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
-            const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
             forwardHeader.innerHTML = "";
             forwardHeader.appendChild(forwardIcon);
             forwardHeader.appendChild(document.createTextNode(`Forward ${forwardBeltCount}/${totalForwardBeltCount}`));
@@ -312,7 +312,8 @@ const ui = (() => {
           if (backwardHeader) {
             const backwardIcon = createIcon("assets/backwardBelt-48.png");
             const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
-            const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
+
             backwardHeader.innerHTML = "";
             backwardHeader.appendChild(backwardIcon);
             backwardHeader.appendChild(document.createTextNode(`Backward ${backwardBeltCount}/${totalBackwardBeltCount}`));
@@ -806,7 +807,7 @@ const ui = (() => {
 
       directionInput.addEventListener("input", (event) => {
         const inputVal = parseInt(event.target.value, 10) || 0;
-        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
         const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
         const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
         const maxCellVal = maxVal - (beltUsage - currentVal);
