@@ -209,60 +209,39 @@ class Battle {
     switch (battleStatus) {
       case "win":
         this.result = "Victory 🎖";
-
         addRewardsToMilitaryHQParcel(window.parcels.parcelList, rewards);
-
-        // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount, rewards);
+        resolveBattle(this.result, rewards)
 
         // Increment pollution factor, for example
         gameState.pollution.pollutionBiterFactor += 0.005;
         gameState.pollution.pollutionBiterFactor = Math.min(gameState.pollution.pollutionBiterFactor, 1);
         updatePollutionValues();
 
-        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
-        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
-        window.battle = battle;
-        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
         // Set the next biter army
 
         break;
       case "lose":
         this.result = "Defeat 💀";
-
-        // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
-
-        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
-        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
-        window.battle = battle;
-        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
-
+        resolveBattle(this.result)
         break;
       case "draw":
         this.result = "Draw 🤷";
-
-        // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
-
-        biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
-        battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
-        window.battle = battle;
-        updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
-
+        resolveBattle(this.result)
         break;
       default:
         this.result = "Inconclusive (This should not happen)";
+        resolveBattle(this.result)
+        break;
+    }
 
-        // Call displayBattleResult directly from afterBattle
-        displayBattleResult(this.result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount);
+
+    async function resolveBattle(result, rewards) {
+        displayBattleResult(result, ammunitionUsed, defeatedFactoryUnitCount, defeatedBiterUnitCount, rewards);
 
         biterUnits = await generateBiterArmy(gameState.pollution.pollutionFactor);
         battle = new Battle(factoryUnits, biterUnits, startingAmmunition, updateUI);
         window.battle = battle;
         updateUI(factoryUnits, factorUnitCatalogue, biterUnits, ammunition, [], false);
-
-        break;
     }
   }
 
