@@ -28,17 +28,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Buy Parcel button event listener
     buyParcelButton.addEventListener("click", () => {
       // Code used to look for highest parcel to pull resources from, now we pull from first parcel
-      // const highestParcelIndex = parcels.getParcelCount() - 1; // old code
-      const highestParcel = parcels.getParcel(0);
-      const highestParcelResourceEP = highestParcel.resources.expansionPoints || 0;
-      const highestParcelResourceAA = highestParcel.resources.alienArtefacts || 0;
+      // const firstParcelIndex = parcels.getParcelCount() - 1; // old code
+      const firstParcel = parcels.getParcel(0);
+      const firstParcelResourceEP = firstParcel.resources.expansionPoints || 0;
+      const firstParcelResourceAA = firstParcel.resources.alienArtefacts || 0;
 
       const selectedParcel = window.parcels.getParcel(ui.getSelectedParcelIndex());
       const selectedParcelHasRCF = selectedParcel.buildings.remoteConstructionFacility;
 
       const resourceCounts = {
-        expansionPoints: highestParcelResourceEP + (selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
-        alienArtefacts: highestParcelResourceAA + (selectedParcelHasRCF ? selectedParcel.resources.alienArtefacts : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
+        expansionPoints: firstParcelResourceEP + (selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
+        alienArtefacts: firstParcelResourceAA + (selectedParcelHasRCF ? selectedParcel.resources.alienArtefacts : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
       };
 
 
@@ -48,14 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const cost = gameState.buyParcelCost;
 
         for (const [resource, amount] of Object.entries(cost)) {
-          // Handle the case where highestParcel.resources[resource] is undefined
-          highestParcel.resources[resource] = highestParcel.resources[resource] || 0;
+          // Handle the case where firstParcel.resources[resource] is undefined
+          firstParcel.resources[resource] = firstParcel.resources[resource] || 0;
 
-          if (highestParcel.resources[resource] >= amount) {
-            highestParcel.resources[resource] -= amount;
+          if (firstParcel.resources[resource] >= amount) {
+            firstParcel.resources[resource] -= amount;
           } else {
-            const remainingCost = amount - highestParcel.resources[resource];
-            highestParcel.resources[resource] = 0;
+            const remainingCost = amount - firstParcel.resources[resource];
+            firstParcel.resources[resource] = 0;
             buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingCost);
           }
         }
@@ -72,7 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
         gameState.buyParcelCost.expansionPoints += 0.7;
         gameState.buyParcelCost.alienArtefacts += 0.5;
       }
-      else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
+      //else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
+      else alert(`Missing Resources:\n(${resourceCounts.expansionPoints}/${gameState.buyParcelCost.expansionPoints}) Expansion Points,\n${resourceCounts.alienArtefacts}/${gameState.buyParcelCost.alienArtefacts} Alien Artifacts\n\nDid you know: To buy a parcel, you need the relevant resources inside your leftmost parcel or a parcel with a Remote Construction Facility`)
     });
 
     // Add tooltip to Buy Parcel button
