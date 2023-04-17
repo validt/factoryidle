@@ -1,4 +1,4 @@
-const resourceCategories = {
+const resourceMetadata = {
   stone: { category: "1Raw", order: 1, icon48: "assets/stone-48.png" },
   coal: { category: "1Raw", order: 2, icon48: "assets/coal-48.png" },
   ironOre: { category: "1Raw", order: 3, icon48: "assets/ironOre-48.png" },
@@ -19,17 +19,17 @@ const resourceCategories = {
   researchPoints: { category: "4Points", order: 1, icon48: "assets/researchPoints-48.png" },
   expansionPoints: { category: "4Points", order: 2, icon48: "assets/expansionPoints-48.png" },
   alienArtefacts: { category: "4Points", order: 3, icon48: "assets/alienArtefacts-48.png" },
-  standardAmmunition:  { category: "5Military", order: 1, icon48: "assets/standardAmmunition-48.png"},
-  armorPenetratingAmmunition:  { category: "5Military", order: 2, icon48: "assets/armorPenetratingAmmunition-48.png"},
-  piercingAmmunition:  { category: "5Military", order: 3, icon48: "assets/piercingAmmunition-48.png"},
+  standardAmmunition:  { category: "5Military", order: 1, icon48: "assets/standardAmmunition-48.png", density: 0.1},
+  armorPenetratingAmmunition:  { category: "5Military", order: 2, icon48: "assets/armorPenetratingAmmunition-48.png", density: 0.1},
+  piercingAmmunition:  { category: "5Military", order: 3, icon48: "assets/piercingAmmunition-48.png", density: 0.1},
 };
 
-window.resourceCategories = Object.keys(resourceCategories)
+window.resourceMetadata = Object.keys(resourceMetadata)
   .map(resource => ({
     name: resource,
-    category: resourceCategories[resource].category,
-    order: resourceCategories[resource].order,
-    icon48: resourceCategories[resource].icon48,
+    category: resourceMetadata[resource].category,
+    order: resourceMetadata[resource].order,
+    icon48: resourceMetadata[resource].icon48,
   }))
   .reduce((categories, resource) => {
     const index = categories.findIndex(cat => cat.name === resource.category);
@@ -46,3 +46,8 @@ window.resourceCategories = Object.keys(resourceCategories)
     resources: category.resources.sort((a, b) => b.order - a.order),
   }))
   .reverse();
+
+  function getResourceDensity(resourceName) {
+    const density = resourceMetadata[resourceName] && resourceMetadata[resourceName].density;
+    return density || 1;
+  }

@@ -63,7 +63,7 @@ window.loadGame = function() {
         parcelData.maxBuildings,
         parcelData.cluster ?? 0,
         parcelData.continent ?? 0,
-        parcelData.planet ?? 0
+        parcelData.planet ?? 0,
       );
 
       // Assign the properties from the saved parcel data
@@ -77,6 +77,9 @@ window.loadGame = function() {
       parcel.consumptionRateModifier = parcelData.consumptionRateModifier;
       Object.assign(parcel.buildingProductionRateModifiers, parcelData.buildingProductionRateModifiers);
       Object.assign(parcel.buildingConsumptionRateModifiers, parcelData.buildingConsumptionRateModifiers);
+      parcel.maxResources = parcels.calcParcelMaxResources(parcelData.maxBuildings);
+
+
 
       // Assign the inputValues property from the saved parcel data
       Object.assign(parcel.inputValues, parcelData.inputValues);

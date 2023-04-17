@@ -64,7 +64,7 @@ const ui = (() => {
       this.updateHeader();
 
       // Iterate over each resource in the parcel
-      for (const category of window.resourceCategories) {
+      for (const category of window.resourceMetadata) {
         for (const resource of category.resources) {
           const resourceName = resource.name;
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
@@ -350,7 +350,7 @@ const ui = (() => {
       const textWrapper = document.createElement("div");
 
       // Create the icon element
-      const resourceData = resourceCategories[resourceName];
+      const resourceData = resourceMetadata[resourceName];
       const icon = document.createElement("img");
       icon.src = resourceData.icon48;
       icon.style.width = "24px"; // Adjust the size as needed
@@ -609,23 +609,14 @@ const ui = (() => {
                 tooltip.style.top = event.pageY + 10 + "px";
               });
             }
-            //update
-            const bgColor = getResourceRateColor(this.parcel, resourceName);
-            cell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
-            if (bgColor === "green") {
-              cell.style.color = "white";
-              cell.style.backgroundColor = bgColor;
-            } else if (bgColor === "red") {
-              if (localStorage.getItem('darkMode') === 'true') {
-                cell.style.color = "white";
-              } else {
-                cell.style.color = "black";
-              }
-              cell.style.backgroundColor = bgColor;
-            } else {
-              cell.style.color = null;
-              cell.style.backgroundColor = null;
-            }
+            // update
+            const currentAmount = Math.round(this.parcel.resources[resourceName] * 10) / 10;
+            cell.textContent = currentAmount;
+            const maxResourceValue = this.parcel.maxResources * (1 / getResourceDensity(resourceName));
+            const progressPercentage = Math.min(currentAmount / maxResourceValue, 1) * 100;
+
+            let colorPercent = this.getColorFromPercentage(progressPercentage / 100);
+            cell.style.background = `linear-gradient(90deg, ${colorPercent} ${progressPercentage}%, transparent ${progressPercentage}%)`;
           } else if (column.id === 'productionRate') {
             //update
             let targetInterval = 7;
@@ -922,7 +913,7 @@ const ui = (() => {
       clusterContainer = document.createElement("div");
       clusterContainer.className = "cluster-container";
       clusterContainer.id = clusterContainerId;
-      clusterContainer.style.display = "inline-block";
+      clusterContainer.style.display = "block";
 
       const clusterHeader = document.createElement("button");
       clusterHeader.className = "cluster-header";
@@ -936,7 +927,7 @@ const ui = (() => {
       const clusterContent = document.createElement("div");
       clusterContent.className = "cluster-content";
       clusterContent.id = `cluster-content-${clusterId}`;
-      clusterContent.style.display = "none";
+      clusterContent.style.display = "block";
       clusterContainer.appendChild(clusterHeader);
       clusterContainer.appendChild(clusterContent);
 
@@ -1614,6 +1605,8 @@ const ui = (() => {
     addParcelClickListener,
     addTooltipToBuyParcelButton,
     formatResourceCost,
+    activateBuilding,
+    deactivateBuilding,
   };
 })();
 

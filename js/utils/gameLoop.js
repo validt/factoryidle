@@ -176,26 +176,30 @@ const gameLoop = (() => {
                 percentage: utilization,
                 bottlenecks: bottlenecks
               };
-
+              let actualProductionFactor;
               // If there are buildings that can produce, consume the input resources and produce output resources
               if (maxProducingBuildings > 0) {
-                for (const [key, value] of Object.entries(building.inputs)) {
-                  const updatedValue = parcel.resources[key] - value * maxProducingBuildings * building.rate * (totalConsumptionRateModifier);
-                  parcel.resources[key] = Math.round(updatedValue * 10) / 10;
-                }
-
                 for (const [key, value] of Object.entries(building.outputs)) {
                   if (!parcel.resources[key]) {
                     parcel.resources[key] = 0;
                   }
-                  const updatedValue = parcel.resources[key] + value * maxProducingBuildings * building.rate * (totalProductionRateModifier);
-                  parcel.resources[key] = Math.round(updatedValue * 10) / 10;
+                  const potentialUpdatedValue = parcel.resources[key] + value * maxProducingBuildings * building.rate * (totalProductionRateModifier);
+                  const maxResourceValue = parcel.maxResources * (1 / getResourceDensity(key));
+                  const finalUpdatedValue = Math.min(potentialUpdatedValue, maxResourceValue);
+                  actualProductionFactor = (finalUpdatedValue - parcel.resources[key]) / (value * maxProducingBuildings * building.rate * (totalProductionRateModifier));
+
+                  parcel.resources[key] = Math.round(finalUpdatedValue * 10) / 10;
+
+                  for (const [inputKey, inputValue] of Object.entries(building.inputs)) {
+                    const updatedValue = parcel.resources[inputKey] - inputValue * maxProducingBuildings * building.rate * (totalConsumptionRateModifier) * actualProductionFactor;
+                    parcel.resources[inputKey] = Math.round(updatedValue * 10) / 10;
+                  }
                 }
               }
 
               // Insert the new production rate into the circular buffer for each output resource
               for (const [key, value] of Object.entries(building.outputs)) {
-                const productionRate = maxProducingBuildings > 0 ? value * maxProducingBuildings * building.rate * (totalProductionRateModifier) : 0;
+                const productionRate = maxProducingBuildings > 0 ? value * maxProducingBuildings * building.rate * (totalProductionRateModifier) * actualProductionFactor : 0;
                 parcel.productionHistory[key].insert(productionRate);
               }
 
@@ -275,16 +279,26 @@ const gameLoop = (() => {
               if (forwardValue > 0) {
                 const availableResources = currentParcel.resources[resourceName];
                 const transferAmount = Math.min(availableResources, forwardValue);
-                currentParcel.resources[resourceName] -= transferAmount;
-                nextParcel.resources[resourceName] = (nextParcel.resources[resourceName] || 0) + transferAmount;
+
+                const nextParcelMaxResourceValue = nextParcel.maxResources * (1 / getResourceDensity(resourceName));
+                const nextParcelAvailableSpace = nextParcelMaxResourceValue - (nextParcel.resources[resourceName] || 0);
+                const finalTransferAmount = Math.min(transferAmount, nextParcelAvailableSpace);
+
+                currentParcel.resources[resourceName] -= finalTransferAmount;
+                nextParcel.resources[resourceName] = (nextParcel.resources[resourceName] || 0) + finalTransferAmount;
               }
 
               // Transfer resources using backward belts
               if (backwardValue > 0) {
                 const availableResources = currentParcel.resources[resourceName];
                 const transferAmount = Math.min(availableResources, backwardValue);
-                currentParcel.resources[resourceName] -= transferAmount;
-                previousParcel.resources[resourceName] = (previousParcel.resources[resourceName] || 0) + transferAmount;
+
+                const previousParcelMaxResourceValue = previousParcel.maxResources * (1 / getResourceDensity(resourceName));
+                const previousParcelAvailableSpace = previousParcelMaxResourceValue - (previousParcel.resources[resourceName] || 0);
+                const finalTransferAmount = Math.min(transferAmount, previousParcelAvailableSpace);
+
+                currentParcel.resources[resourceName] -= finalTransferAmount;
+                previousParcel.resources[resourceName] = (previousParcel.resources[resourceName] || 0) + finalTransferAmount;
               }
             }
           }

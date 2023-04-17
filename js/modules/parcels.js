@@ -42,6 +42,7 @@ class Parcel {
         this.continent = continent,
         this.planet = planet,
         this.maxBuildings = maxBuildings;
+        this.maxResources = 500;
         this.buildings = createBuildingsHandler(createNumberGuard({
         }));
         this.activeBuildings = {};
@@ -67,7 +68,7 @@ class Parcel {
         this.buildingConsumptionRateModifiers = {};
         this.inputValues = {};
         this.productionHistory = {};
-        const allResourceTypes = Object.keys(resourceCategories);
+        const allResourceTypes = Object.keys(resourceMetadata);
         for (const resourceType of allResourceTypes) {
           this.productionHistory[resourceType] = new CircularBuffer(300);
         }
@@ -363,11 +364,16 @@ const parcels = {
       // Update the max building limit for the parcel
       if (upgradeInfo && upgradeInfo.maxBuildingLimit) {
         parcel.maxBuildings = upgradeInfo.maxBuildingLimit;
+        parcel.maxResources = this.calcParcelMaxResources(upgradeInfo.maxBuildingLimit);
         ui.updateBuildingDisplay(parcel);
       }
 
       parcel.upgrades[upgradeType]++;
       console.log(`Upgraded ${upgradeType} to level ${parcel.upgrades[upgradeType]}`);
+    },
+
+    calcParcelMaxResources(maxBuildings) {
+      return maxBuildings / 8 * 250 + 250;
     }
 
 };
