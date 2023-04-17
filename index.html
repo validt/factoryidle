@@ -209,6 +209,129 @@
           -->
 
         </div>
+
+        <div id="train-management" class="train-management">
+          <h2>Train Management</h2>
+
+          <div class="train-list" style="display: inline-block; vertical-align: top;">
+            <h3>Trains</h3>
+            <table id="train-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Schedule</th>
+                  <th>Current Action</th>
+                  <th>Cargo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Train 1 <button id="edit-train-1" class="menu-button">⚙</button> </td>
+                  <td>Schedule A</td>
+                  <td>Loading</td>
+                  <td>500 / 1000</td>
+                </tr>
+                <tr>
+                  <td>Train 2 <button id="edit-train-2" class="menu-button">⚙</button> </td>
+                  <td>Schedule B</td>
+                  <td>Moving 3p/s</td>
+                  <td>400 / 1000</td>
+                </tr>
+              </tbody>
+            </table>
+            <button id="buy-train">Buy Train</button>
+          </div>
+
+          <div class="schedule-list" style="display: inline-block; vertical-align: top; margin-left: 20px;">
+            <h3>Schedules</h3>
+            <table id="schedule-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Trains</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Schedule A <button id="edit-schedule-a" class="menu-button">⚙</button> </td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>Schedule B <button id="edit-schedule-b" class="menu-button">⚙</button> </td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
+            <button id="add-schedule">Add Schedule</button>
+          </div>
+
+          <div id="schedule-overlay" class="schedule-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
+            <div class="schedule-overlay-content" style="width: 80%; max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 4px;">
+              <h2>Manage Train Schedule</h2>
+              <label for="schedule-name">Schedule Name:</label>
+              <input id="schedule-name" type="text" placeholder="Enter schedule name">
+
+              <h3>Stations</h3>
+              <label for="search-station">Search station:</label>
+              <input id="search-station" type="text" placeholder="Search for a station">
+
+              <table id="stations-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Cluster</th>
+                    <th>Next Stop Distance</th>
+                    <th>Load</th>
+                    <th>Unload</th>
+                    <th>Condition</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Station A</td>
+                    <td>Cluster 1</td>
+                    <td>30p</td>
+                    <td>Iron Ore</td>
+                    <td></td>
+                    <td>Time: 30s</td>
+                    <td>
+                      <button>Move Up</button>
+                      <button>Move Down</button>
+                      <button>Remove</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Station B</td>
+                    <td>Cluster 2</td>
+                    <td>8p</td>
+                    <td></td>
+                    <td>Iron Ore</td>
+                    <td>Time: 30s</td>
+                    <td>
+                      <button>Move Up</button>
+                      <button>Move Down</button>
+                      <button>Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <select id="stations-dropdown">
+                <option value="green-chips">Green Chips Parcel - Cluster 3</option>
+                <option value="iron-patch">Iron Patch Parcel - Cluster 2</option>
+                <option value="science">Science Parcel - Cluster 2</option>
+              </select>
+              <button id="add-station">Add Station</button>
+
+              <div style="text-align: right;">
+                <button id="save-schedule" style="margin-right: 10px;">Save Schedule</button>
+                <button id="close-schedule-overlay">Close</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         <div class="game-section" id="parcels-section">
           <h2>Parcels</h2>
           <!-- Buy Parcel -->
@@ -322,6 +445,7 @@
     <script src="js/modules/parcelManipulation.js"></script>
     <script src="js/modules/waves.js"></script>
     <script src="js/modules/fightSystem.js"></script>
+    <script src="js/modules/trains.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
     <script src="js/utils/gameState.js"></script>
     <script src="js/modules/pollutionSystem.js"></script>
