@@ -88,7 +88,7 @@ const ui = (() => {
         // Create a new event listener
         const newListener = (event) => {
           const buildingId = event.target.dataset.buildingId;
-          actionFunction(this.parcel, buildingId);
+          actionFunction(this.parcel, buildingId, event);
         };
 
         // Add the new event listener and store it in the WeakMap
@@ -1120,8 +1120,12 @@ const ui = (() => {
     });
 
     // Add event listener for Upgrade button
-    upgradeButton.addEventListener("click", () => {
-      parcels.upgradeParcel(parcel, "maxBuildingLimit");
+    upgradeButton.addEventListener("click", (event) => {
+      const upgradeSuccess = parcels.upgradeParcel(parcel, "maxBuildingLimit");
+      if (!upgradeSuccess) {
+        const missingResources = parcels.getMissingUpgradeResources(parcel, "maxBuildingLimit");
+        showMissingResourceOverlay(missingResources, event);
+      }
       updateBuildingDisplay(parcel);
     });
 
@@ -1172,7 +1176,7 @@ const ui = (() => {
     buttons.forEach((button) => {
       button.addEventListener("click", (event) => {
         const buildingId = event.target.dataset.buildingId;
-        actionFunction(parcel, buildingId);
+        actionFunction(parcel, buildingId, event);
         updateBuildingDisplay(parcel);
       });
 
@@ -1233,7 +1237,7 @@ const ui = (() => {
       }
     }
   }
-  function buyBuilding(parcel, buildingId) {
+  function buyBuilding(parcel, buildingId, event) {
     const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
     if (totalBuildings < parcel.maxBuildings) {
       const building = buildingManager.getBuilding(buildingId);
@@ -1292,23 +1296,85 @@ const ui = (() => {
             return { resourceName, amount: cost - totalResource };
           });
 
-        showMissingResourceOverlay(missingResources);
+        showMissingResourceOverlay(missingResources, event);
       }
     }
   }
 
-  function showMissingResourceOverlay(missingResources) {
-    const overlay = document.createElement("div");
-    overlay.id = "missing-resource-overlay";
-    overlay.classList.add("train-manipulation-overlay");
+  function showMissingResourceOverlay(missingResources, event, descriptionText = "", timer = 2000) {
+    // Remove any existing popup
+    const existingPopup = document.querySelector("#missing-resource-overlay");
+    if (existingPopup) {
+      document.body.removeChild(existingPopup);
+    }
 
-    const container = document.createElement("div");
-    container.classList.add("overlay-container");
+    const overlay = document.createElement("div");
+
+    overlay.id = "missing-resource-overlay";
+    overlay.classList.add("notification-popup");
 
     const title = document.createElement("h3");
     title.textContent = "Missing Resources";
-    container.appendChild(title);
+    title.classList.add("notification-popup-content");
+    overlay.appendChild(title);
 
+    const resourceTable = document.createElement("table");
+    const tableHeader = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const resourceHeader = document.createElement("th");
+    resourceHeader.textContent = "Resource";
+    headerRow.appendChild(resourceHeader);
+    const amountHeader = document.createElement("th");
+    amountHeader.textContent = "Amount";
+    headerRow.appendChild(amountHeader);
+    tableHeader.appendChild(headerRow);
+    resourceTable.appendChild(tableHeader);
+    const tableBody = document.createElement("tbody");
+    resourceTable.classList.add("notification-popup-content");
+    missingResources.forEach((resource) => {
+      const tableRow = document.createElement("tr");
+
+      const resourceNameCell = document.createElement("td");
+      resourceNameCell.textContent = resource.resourceName;
+      tableRow.appendChild(resourceNameCell);
+
+      const amountCell = document.createElement("td");
+      amountCell.textContent = resource.amount;
+      tableRow.appendChild(amountCell);
+
+      tableBody.appendChild(tableRow);
+    });
+    resourceTable.appendChild(tableBody);
+    overlay.appendChild(resourceTable);
+
+    if (descriptionText) {
+      const description = document.createElement("p");
+      description.textContent = descriptionText;
+      description.classList.add("notification-popup-content");
+      description.style.maxWidth = "15em";
+      overlay.appendChild(description);
+    }
+
+    document.body.appendChild(overlay);
+
+    // Position the overlay next to the mouse pointer
+    overlay.style.left = event.pageX + 10 + "px";
+    overlay.style.top = event.pageY + 10 + "px";
+
+    // Stop event propagation to prevent triggering the document click event listener
+    event.stopPropagation();
+
+    // Automatically close the overlay after 2 seconds
+    const closeOverlay = () => {
+      document.body.removeChild(overlay);
+    };
+    setTimeout(closeOverlay, timer);
+
+    // Add an event listener to close the overlay when clicking anywhere on the page
+    document.addEventListener("click", closeOverlay, { once: true });
+  }
+
+  function createResourceTable(missingResources) {
     const table = document.createElement("table");
     const tableHeader = document.createElement("thead");
     const headerRow = document.createElement("tr");
@@ -1334,14 +1400,7 @@ const ui = (() => {
     });
     table.appendChild(tableBody);
 
-    container.appendChild(table);
-    overlay.appendChild(container);
-    document.body.appendChild(overlay);
-
-    // Close the overlay when clicked anywhere
-    overlay.addEventListener("click", () => {
-      document.body.removeChild(overlay);
-    });
+    return table;
   }
 
   function sellBuilding(parcel, buildingId) {
@@ -1578,6 +1637,7 @@ const ui = (() => {
     addParcelClickListener,
     addTooltipToBuyParcelButton,
     formatResourceCost,
+    showMissingResourceOverlay,
   };
 })();
 

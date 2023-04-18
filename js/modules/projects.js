@@ -47,7 +47,7 @@ const projectsModule = (() => {
       new Project("Defense Contract 3/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25) }),
       new Project("Defense Contract 4/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25) }),
       new Project("Defense Contract 5/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25 * 1.25) }),
-      new Project("Defense Contract 6/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25 * 1.25 * 1.25) }),      
+      new Project("Defense Contract 6/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25 * 1.25 * 1.25) }),
     ],
   };
 
@@ -71,7 +71,9 @@ const projectsModule = (() => {
 
         const startProjectButton = document.createElement("button");
         startProjectButton.textContent = "Start Project";
-        startProjectButton.onclick = () => startProject(project);
+        startProjectButton.addEventListener("click", (event) => {
+          startProject(project, event);
+        });
         projectDetails.appendChild(startProjectButton);
 
         addTooltipToProjectButtons(startProjectButton, project);
@@ -125,7 +127,7 @@ const projectsModule = (() => {
     return true;
   }
 
-  function startProject(project) {
+  function startProject(project, event) {
       const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
 
       if (hasEnoughResources(selectedParcel, project.cost)) {
@@ -162,7 +164,17 @@ const projectsModule = (() => {
           //projectsContainer.innerHTML = ""; // Remove this line
           renderProjects();
       } else {
-          alert("You don't have enough resources to start this project.");
+        const missingResources = Object.entries(project.cost)
+          .filter(([resourceName, cost]) => {
+            const totalResource = (selectedParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+            return totalResource < cost;
+          })
+          .map(([resourceName, cost]) => {
+            const totalResource = (selectedParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+            return { resourceName, amount: cost - totalResource };
+          });
+
+        ui.showMissingResourceOverlay(missingResources, event);
       }
   }
 

@@ -328,7 +328,7 @@ const parcels = {
 
       if (!upgradeCost) {
         console.log("Max level reached");
-        return;
+        return false;
       }
 
       const canAfford = Object.keys(upgradeCost).every((resource) => {
@@ -338,7 +338,7 @@ const parcels = {
 
       if (!canAfford) {
         console.log("Not enough resources");
-        return;
+        return false;
       }
 
       Object.keys(upgradeCost).forEach((resource) => {
@@ -365,6 +365,21 @@ const parcels = {
 
       parcel.upgrades[upgradeType]++;
       console.log(`Upgraded ${upgradeType} to level ${parcel.upgrades[upgradeType]}`);
+      return true;
+    },
+
+    getMissingUpgradeResources(parcel, upgradeType) {
+      const upgradeCost = this.getUpgradeCost(parcel, upgradeType);
+      const missingResources = [];
+
+      for (const resource in upgradeCost) {
+        const totalResource = (parcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
+        if (totalResource < upgradeCost[resource]) {
+          missingResources.push({ resourceName: resource, amount: upgradeCost[resource] - totalResource });
+        }
+      }
+
+      return missingResources;
     }
 
 };

@@ -71,16 +71,30 @@ document.addEventListener("DOMContentLoaded", () => {
         // Increment the costs for the next purchase
         gameState.buyParcelCost.expansionPoints = (gameState.buyParcelCost.expansionPoints + 0.7).toFixed(1);
         gameState.buyParcelCost.alienArtefacts = (gameState.buyParcelCost.alienArtefacts + 0.5).toFixed(1);
+      } else {
+        const missingResources = [
+          {
+            resourceName: "Expansion Points",
+            amount: gameState.buyParcelCost.expansionPoints - resourceCounts.expansionPoints,
+          },
+          {
+            resourceName: "Alien Artifacts",
+            amount: gameState.buyParcelCost.alienArtefacts - resourceCounts.alienArtefacts,
+          },
+        ];
+
+        const descriptionText = "To buy a parcel, your resources need to be in your first parcel (or a parcel with a Remote Construction Facility).";
+        const timer = 10000; // 10 seconds
+
+        ui.showMissingResourceOverlay(missingResources, event, descriptionText, timer);
       }
-      //else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
-      else alert(`Missing Resources:\n(${resourceCounts.expansionPoints}/${gameState.buyParcelCost.expansionPoints}) Expansion Points,\n(${resourceCounts.alienArtefacts}/${gameState.buyParcelCost.alienArtefacts}) Alien Artifacts\n\nDid you know: To buy a parcel, you need the relevant resources inside your leftmost parcel or a parcel with a Remote Construction Facility`)
     });
 
     // Add tooltip to Buy Parcel button
     ui.addTooltipToBuyParcelButton(buyParcelButton);
 
     //Start Research button event listener
-    startResearchButton.addEventListener("click", () => {
+    startResearchButton.addEventListener("click", (event) => {
       const selectedResearchId = researchSelect.value;
       const selectedResearch = window.researchManager.getResearch(selectedResearchId);
       const resourceCost = Object.entries(selectedResearch.cost);
@@ -116,6 +130,18 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update the UI as needed
         window.researchManager.populateResearchDropdown();
         ui.updateParcelsSectionVisibility();
+      } else {
+        const missingResources = resourceCost
+          .filter(([resourceName, cost]) => {
+            const totalResource = (selectedParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+            return totalResource < cost;
+          })
+          .map(([resourceName, cost]) => {
+            const totalResource = (selectedParcel.resources[resourceName] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resourceName);
+            return { resourceName, amount: cost - totalResource };
+          });
+
+        ui.showMissingResourceOverlay(missingResources, event);
       }
     });
 

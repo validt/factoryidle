@@ -604,6 +604,13 @@ h1 {
   position: relative;
 }
 
+/* Cell Buttons */
+.buttonWrapper {
+    float: right;
+    margin-left: 1em;
+}
+
+
 /* Move Parcel Pop Up */
 .parcel-manipulation-overlay {
     position: fixed;
@@ -624,20 +631,19 @@ h1 {
 }
 
 /* Missing Resource Overlay */
-
 #missing-resource-overlay {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    padding: 12px
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 1001;
+    z-index: 1000;
     background-color: rgba(255, 255, 255, 0.8);
     outline: 1px solid;
+    text-align: center;
 }
 
 .dark-mode #missing-resource-overlay {
@@ -645,8 +651,6 @@ h1 {
     outline: 1px solid rgb(131, 122, 108);
 }
 
-/* Cell Buttons */
-.buttonWrapper {
-    float: right;
-    margin-left: 1em;
+.notification-popup-content {
+  margin: 2em;
 }
