@@ -1151,8 +1151,19 @@ const ui = (() => {
         const outputText = Object.entries(building.outputs || {})
           .map(([outputResource, amount]) => `${amount} ${outputResource}`)
           .join("<br>");
+        const energyInputText = building.energyInput ? `Energy Consumption: ${building.energyInput}` : "";
+        const energyOutputText = building.energyOutput ? `Energy Production: ${building.energyOutput}` : "";
+        const descriptionText = building.description ? `Description:<br>${building.description}` : "";
 
-        const tooltipText = `Input:<br>${inputText || "None"}<br>Output:<br>${outputText || "None"}`;
+        const tooltipElements = [
+          inputText ? `Input:<br>${inputText}` : "",
+          outputText ? `Output:<br>${outputText}` : "",
+          energyInputText,
+          energyOutputText,
+          descriptionText
+        ];
+
+        const tooltipText = tooltipElements.filter(el => el !== "").join("<br><br>");
 
         tooltip.innerHTML = tooltipText;
         tooltip.style.display = "block";

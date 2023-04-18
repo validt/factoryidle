@@ -46,6 +46,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0),
+    description: "Besides energy this produces lots of pollution 🏭💨"
   },
   {
     id: "coalMiner",
@@ -511,6 +512,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.research.blueprintTech,
+    description: "Unlocks 'Copy & Paste' in the parcel context menu",
   },
   {
     id: "militaryHQ",
@@ -527,6 +529,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.research.militaryTech,
+    description: "Makes ammunition from this parcel available for Military Operations"
   },
   {
     id: "standardAmmunitionFactory",
