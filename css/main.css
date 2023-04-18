@@ -172,9 +172,10 @@ h1 {
 
 /* Parcels styles */
 #parcels {
-    display: block;
+    display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .parcel {
@@ -229,7 +230,9 @@ h1 {
 
 #building-tabs {
   display: flex;
+  flex-wrap: wrap;
   justify-content: start;
+  gap: 5px;
   margin-bottom: 10px;
 }
 
@@ -653,4 +656,11 @@ h1 {
 
 .notification-popup-content {
   margin: 2em;
+}
+
+.main-flexbox {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 40px;
 }
