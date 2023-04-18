@@ -1649,6 +1649,8 @@ const ui = (() => {
     addTooltipToBuyParcelButton,
     formatResourceCost,
     showMissingResourceOverlay,
+    activateBuilding,
+    deactivateBuilding,
   };
 })();
 

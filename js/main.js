@@ -145,6 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // Add event listeners for the buttons
+    document.getElementById('factoryOff').addEventListener('click', factoryOff);
+    document.getElementById('factoryOn').addEventListener('click', factoryOn);
+
     gameLoop.start();
     researchManager.populateResearchDropdown();
     ui.updateParcelsSectionVisibility();
@@ -188,3 +192,27 @@ darkModeToggle.addEventListener('click', () => {
   body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
 });
+
+// Factory Off function
+function factoryOff() {
+  for (const parcel of window.parcels.parcelList) {
+    for (const buildingId in parcel.activeBuildings) {
+      const buildingCount = parcel.activeBuildings[buildingId];
+      for (let i = 0; i < buildingCount; i++) {
+        ui.deactivateBuilding(parcel, buildingId);
+      }
+    }
+  }
+}
+
+// Factory On function
+function factoryOn() {
+  for (const parcel of window.parcels.parcelList) {
+    for (const buildingId in parcel.buildings) {
+      const buildingCount = parcel.buildings[buildingId];
+      for (let i = 0; i < buildingCount; i++) {
+        ui.activateBuilding(parcel, buildingId);
+      }
+    }
+  }
+}
