@@ -1079,7 +1079,7 @@ const ui = (() => {
 
     const totalBuildings = Object.values(parcel.buildings).reduce((a, b) => a + b, 0);
     const buildingHeader = document.getElementById("buildingHeader");
-    buildingHeader.textContent = `Buildings (${totalBuildings} / ${parcel.maxBuildings})`;
+    buildingHeader.textContent = `Buildings (${totalBuildings} / ${parcel.maxBuildings}) `;
 
     // Add Upgrade button
     const upgradeButton = document.createElement("button");
@@ -1445,7 +1445,7 @@ const ui = (() => {
   function updateParcelBuildingCount(parcelIndex, buildingCount) {
     const selectedParcel = document.getElementById(`parcel-${parcelIndex + 1}`);
     const buildingHeader = document.getElementById("buildingHeader");
-    buildingHeader.textContent = `Buildings (${buildingCount} / ${parcels.maxBuildingsPerParcel})`;
+    buildingHeader.textContent = `Buildings (${buildingCount} / ${parcels.maxBuildingsPerParcel}) `;
   }
 
   function getSelectedParcelIndex() {
