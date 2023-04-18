@@ -239,7 +239,13 @@
                 </tr>
               </tbody>
             </table>
-            <button id="buy-train">Buy Train</button>
+            <button id="buy-train-button">Buy Train</button>
+          </div>
+
+          <div id="trainMenu" class="menu hidden" style="position: fixed;" data-train-id="">
+            <button id="assignScheduleDropdownItem" class="menu-item">Assign Schedule</button>
+            <button id="renameTrainDropdownItem" class="menu-item">Rename</button>
+            <button id="sellTrainDropdownItem" class="menu-item">Sell</button>
           </div>
 
           <div class="schedule-list" style="display: inline-block; vertical-align: top; margin-left: 20px;">
@@ -253,11 +259,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Schedule A <button id="edit-schedule-a" class="menu-button">⚙</button> </td>
+                  <td>Schedule A <button id="edit-schedule-a" class="edit-schedule-button">⚙</button> </td>
                   <td>1</td>
                 </tr>
                 <tr>
-                  <td>Schedule B <button id="edit-schedule-b" class="menu-button">⚙</button> </td>
+                  <td>Schedule B <button id="edit-schedule-b" class="edit-schedule-button">⚙</button> </td>
                   <td>1</td>
                 </tr>
               </tbody>
@@ -267,7 +273,7 @@
 
           <div id="schedule-overlay" class="schedule-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
             <div class="schedule-overlay-content" style="width: 80%; max-width: 600px; margin: 5% auto; padding: 20px; border-radius: 4px;">
-              <h2>Manage Train Schedule</h2>
+              <h2>Manage Schedule</h2>
               <label for="schedule-name">Schedule Name:</label>
               <input id="schedule-name" type="text" placeholder="Enter schedule name">
 
@@ -325,6 +331,7 @@
 
               <div style="text-align: right;">
                 <button id="save-schedule" style="margin-right: 10px;">Save Schedule</button>
+                <button id="delete-schedule" style="margin-right: 10px;">Delete Schedule</button>
                 <button id="close-schedule-overlay">Close</button>
               </div>
             </div>

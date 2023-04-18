@@ -54,6 +54,8 @@ const gameLoop = (() => {
         projects.renderProjects();
         ui.updateBuildingDisplay(window.parcels.getParcel(window.ui.getSelectedParcelIndex()));
         updateClusterParcels();
+        updateScheduleListUI();
+        updateTrainListUI();
         // initializeAnalytics();
         gameInterval = setInterval(() => {
             updateResources();

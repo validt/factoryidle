@@ -1,8 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
-  setTimeout(function () {
-    const intro = document.getElementById("intro");
+  const intro = document.getElementById("intro");
+  let introTimeout;
+
+  // Function to hide the intro
+  function hideIntro() {
+    clearTimeout(introTimeout);
     intro.style.display = "none";
-  }, 6000);
+  }
+
+  // Set the timeout to hide the intro after 6 seconds
+  introTimeout = setTimeout(hideIntro, 6000);
+
+  // Add a double-click event listener to interrupt the intro
+  intro.addEventListener("dblclick", hideIntro);
 });
 
 document.addEventListener("DOMContentLoaded", () => {

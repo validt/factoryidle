@@ -27,6 +27,8 @@ const gameState = {
     pollutionEnergyValue: 0,
     pollutionBuildingValue: 0,
   },
+  scheduleList: [],
+  trainList: [],
   // Add other relevant game state data as needed
 };
 
@@ -134,6 +136,16 @@ window.loadGame = function() {
       window.progressionManager.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
     } else {
       window.progressionManager.unlockedBuildings = new Set();
+    }
+
+    // Assign scheduleList
+    if (parsedState.scheduleList) {
+      window.gameState.scheduleList = parsedState.scheduleList;
+    }
+
+    // Assign scheduleList
+    if (parsedState.trainList) {
+      window.gameState.trainList = parsedState.trainList;
     }
 
     // Add parcels to the UI

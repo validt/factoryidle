@@ -73,6 +73,7 @@ window.researchManager.addResearch(new Research('oilProcessing', 'Oil Processing
 window.researchManager.addResearch(new Research('solarTech', 'Solar Tech', { researchPoints: 32 }));
 window.researchManager.addResearch(new Research('advancedElectronics', 'Advanced Electronics', { researchPoints: 36 }));
 window.researchManager.addResearch(new Research('blueprintTech', 'Blueprint Tech', { researchPoints: 40 }));
+window.researchManager.addResearch(new Research('trains', 'Trains', { researchPoints: 50 }));
 window.researchManager.addResearch(new Research('beaconTech', 'Beacon Tech', { researchPoints: 100 }));
 window.researchManager.addResearch(new Research('militaryTech2', 'Armor Penetrating Ammunition', { researchPoints: 150 }));
 window.researchManager.addResearch(new Research('beaconTech2', 'Beacon Tech 2', { researchPoints: 300 }));
