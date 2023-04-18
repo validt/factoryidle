@@ -136,76 +136,7 @@
         </div>
 
 
-        <div id="fight-container" style="display: none;">
-          <h2>Military Operations</h2>
-          <button id="start-battle">Start Battle</button>
-          <br></br>
-          <div style="display: flex;">
-            <div>
-            <table id="resource-cost-table">
-              <tr>
-                <th>Resource</th>
-                <th>Cost</th>
-              </tr>
-            </table>
-            </div>
 
-          </div>
-
-
-
-          <div class="tables-container">
-
-            <div>
-              <h3>Factory Units</h3>
-
-              <table id="factory-units-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Health</th>
-                    <th>Attack</th>
-                    <th>Armor</th>
-                    <th>Ammo Consumption</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Factory units will be dynamically added here -->
-                </tbody>
-              </table>
-
-
-            </div>
-            <div>
-              <h3>Biter Units</h3>
-              <table id="biter-units-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Health</th>
-                    <th>Attack</th>
-                    <th>Armor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Biter units will be dynamically added here -->
-                </tbody>
-              </table>
-
-            </div>
-          </div>
-          <div style="display: flex;">
-            <h3>Ammunition:</h3>
-            <div id="ammunition" style="margin: 1.33em;"></div>
-          </div>
-          <!--
-          <h2>Battle Log</h2>
-          <div class="battle-log" id="battle-log">
-
-          </div>
-          -->
-
-        </div>
         <div class="game-section" id="parcels-section">
             <h2>Parcels</h2>
             <!-- Buy Parcel -->
@@ -278,7 +209,7 @@
           </div>
 
           <div class="game-section">
-            <h3 id="buildingHeader">Buildings</h3>
+            <h2 id="buildingHeader">Buildings</h2>
             <div>
               <input id="only-built" type="checkbox">
               <label for="only-built">Show only built Buildings</label>
@@ -303,6 +234,78 @@
 
           </div>
         </div>
+
+        <div class="game-section">
+          <div id="fight-container" style="display: none;">
+            <h2>Military Operations <button id="start-battle">Start Battle</button> </h2>
+            <div style="display: flex;">
+              <h3>Ammunition:</h3>
+              <div id="ammunition" style="margin: 1.33em;"></div>
+            </div>
+            <div style="display: flex;">
+              <div>
+              <table id="resource-cost-table">
+                <tr>
+                  <th>Resource</th>
+                  <th>Cost</th>
+                </tr>
+              </table>
+              </div>
+
+            </div>
+
+
+
+            <div class="tables-container">
+
+              <div>
+                <h3>Factory Units</h3>
+
+                <table id="factory-units-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Health</th>
+                      <th>Attack</th>
+                      <th>Armor</th>
+                      <th>Ammo Consumption</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Factory units will be dynamically added here -->
+                  </tbody>
+                </table>
+
+
+              </div>
+              <div>
+                <h3>Biter Units</h3>
+                <table id="biter-units-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Health</th>
+                      <th>Attack</th>
+                      <th>Armor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Biter units will be dynamically added here -->
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <!--
+            <h2>Battle Log</h2>
+            <div class="battle-log" id="battle-log">
+
+            </div>
+            -->
+
+          </div>
+        </div>
+
     </div>
 
     <footer style="text-align: right; padding: 20px; font-size: 10px;">

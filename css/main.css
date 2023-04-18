@@ -167,7 +167,8 @@ h1 {
 }
 
 .game-section {
-    margin-bottom: 30px;
+  padding-right: 20px;
+  padding-bottom: 40px;
 }
 
 /* Parcels styles */
@@ -297,7 +298,6 @@ cursor: pointer;
     display: block;
     flex-wrap: wrap;
     justify-content: space-evenly;
-    margin-bottom: 200px;
 }
 
 .building {
