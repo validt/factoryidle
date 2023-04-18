@@ -1299,30 +1299,49 @@ const ui = (() => {
 
   function showMissingResourceOverlay(missingResources) {
     const overlay = document.createElement("div");
-    const darkMode = localStorage.getItem('darkMode');
-
     overlay.id = "missing-resource-overlay";
+    overlay.classList.add("train-manipulation-overlay");
+
+    const container = document.createElement("div");
+    container.classList.add("overlay-container");
 
     const title = document.createElement("h3");
     title.textContent = "Missing Resources";
-    overlay.appendChild(title);
+    container.appendChild(title);
 
-    const resourceList = document.createElement("ul");
+    const table = document.createElement("table");
+    const tableHeader = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    const resourceHeader = document.createElement("th");
+    resourceHeader.textContent = "Resource";
+    const amountHeader = document.createElement("th");
+    amountHeader.textContent = "Amount";
+    headerRow.appendChild(resourceHeader);
+    headerRow.appendChild(amountHeader);
+    tableHeader.appendChild(headerRow);
+    table.appendChild(tableHeader);
+
+    const tableBody = document.createElement("tbody");
     missingResources.forEach((resource) => {
-      const listItem = document.createElement("li");
-      listItem.textContent = `${resource.resourceName}: ${resource.amount}`;
-      resourceList.appendChild(listItem);
+      const row = document.createElement("tr");
+      const resourceNameCell = document.createElement("td");
+      resourceNameCell.textContent = resource.resourceName;
+      const amountCell = document.createElement("td");
+      amountCell.textContent = resource.amount;
+      row.appendChild(resourceNameCell);
+      row.appendChild(amountCell);
+      tableBody.appendChild(row);
     });
-    overlay.appendChild(resourceList);
+    table.appendChild(tableBody);
 
-    const closeButton = document.createElement("button");
-    closeButton.textContent = "Close";
-    closeButton.addEventListener("click", () => {
+    container.appendChild(table);
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+
+    // Close the overlay when clicked anywhere
+    overlay.addEventListener("click", () => {
       document.body.removeChild(overlay);
     });
-    overlay.appendChild(closeButton);
-
-    document.body.appendChild(overlay);
   }
 
   function sellBuilding(parcel, buildingId) {
