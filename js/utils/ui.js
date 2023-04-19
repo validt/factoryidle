@@ -1155,6 +1155,16 @@ const ui = (() => {
         const energyOutputText = building.energyOutput ? `Energy Production: ${building.energyOutput}` : "";
         const descriptionText = building.description ? `Description:<br>${building.description}` : "";
 
+        const ariaLabelElements = [
+          inputText ? `Input: ${inputText}` : "",
+          outputText ? `Output: ${outputText}` : "",
+          energyInputText,
+          energyOutputText,
+          descriptionText
+        ];
+
+        const ariaLabelText = ariaLabelElements.filter(el => el !== "").join(". ");
+
         const tooltipElements = [
           inputText ? `Input:<br>${inputText}` : "",
           outputText ? `Output:<br>${outputText}` : "",
@@ -1164,6 +1174,7 @@ const ui = (() => {
         ];
 
         const tooltipText = tooltipElements.filter(el => el !== "").join("<br><br>");
+        tooltip.setAttribute("aria-live", ariaLabelText);
 
         tooltip.innerHTML = tooltipText;
         tooltip.style.display = "block";
@@ -1319,14 +1330,23 @@ const ui = (() => {
       document.body.removeChild(existingPopup);
     }
 
-    const overlay = document.createElement("div");
+    if (accessibilityMode) {
+      timer = 120000
+    }
 
+    const overlay = document.createElement("div");
     overlay.id = "missing-resource-overlay";
     overlay.classList.add("notification-popup");
+
+    // Create the live region container
+    const liveRegion = document.createElement("div");
+    liveRegion.setAttribute("aria-live", "assertive");
+    overlay.appendChild(liveRegion);
 
     const title = document.createElement("h3");
     title.textContent = "Missing Resources";
     title.classList.add("notification-popup-content");
+    liveRegion.appendChild(title);
     overlay.appendChild(title);
 
     const resourceTable = document.createElement("table");

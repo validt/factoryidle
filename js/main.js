@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }, 6000);
 });
 
+let accessibilityMode = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     const buyParcelButton = document.getElementById("buyParcel");
     const startResearchButton = document.getElementById("startResearch");
@@ -148,6 +150,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add event listeners for the buttons
     document.getElementById('factoryOff').addEventListener('click', factoryOff);
     document.getElementById('factoryOn').addEventListener('click', factoryOn);
+
+    // Event listener for Accessibility Mode
+    const accessibilityModeToggle = document.getElementById("accessibility-mode-toggle");
+    accessibilityModeToggle.addEventListener("click", () => {
+      accessibilityMode = !accessibilityMode;
+      accessibilityModeToggle.textContent = `Accessibility Mode: ${accessibilityMode ? "On" : "Off"}`;
+
+      // Update the overlay behavior based on the accessibility mode
+      updateOverlayBehavior();
+    });
 
     gameLoop.start();
     researchManager.populateResearchDropdown();
