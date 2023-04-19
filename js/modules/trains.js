@@ -74,7 +74,11 @@ document.addEventListener("DOMContentLoaded", function () {
     scheduleOverlay.style.display = "none";
   }
 
-  addScheduleButton.addEventListener("click", openScheduleOverlay);
+  addScheduleButton.addEventListener("click", () => {
+    const newScheduleId = findAvailableScheduleId();
+    const name = `Schedule ${newScheduleId}`;
+    addSchedule(name, []);
+  });
 
   closeScheduleOverlayButton.addEventListener("click", closeScheduleOverlay);
 });
