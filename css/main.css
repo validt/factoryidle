@@ -721,7 +721,47 @@ button.cluster-header {
 
  .overlay-container {
   border: 1px solid #1a1a1a;
-  background-color: #f2f2f2;  
+  background-color: #f2f2f2;
   padding: 16px;
   border-radius: 4px;
+}
+
+.left-cell {
+  text-align: left;
+}
+
+.action-cell {
+  white-space: nowrap;
+}
+
+.dark-mode .schedule-overlay-content {
+  background-color: #222326;
+}
+
+.schedule-overlay-content {
+  background-color: #f2f2f2;
+  width: min-content;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.dark-mode .station-overlay-content {
+  background-color: #222326;
+}
+
+.station-overlay-content {
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, 15%);
+  padding: 20px;
+  border-radius: 10px;
+  overflow-y: auto;
+  background-color: #f2f2f2;
+}
+
+#load-section, #unload-section {
+  display: flex;
+  justify-content: space-between;
+  white-space: nowrap;
 }

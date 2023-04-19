@@ -1,8 +1,13 @@
 // trains.js
+const addStationButtonListeners = new WeakMap();
+const saveScheduleButtonListeners = new WeakMap();
+const deleteScheduleButtonListeners = new WeakMap();
+const closeScheduleOverlayButtonListeners = new WeakMap();
+const saveEditStationButtonListeners = new Map();
+const cancelEditStationButtonListeners = new Map();
 
 document.addEventListener("DOMContentLoaded", function () {
   const scheduleOverlay = document.getElementById("schedule-overlay");
-  const closeScheduleOverlayButton = document.getElementById("close-schedule-overlay");
   const addScheduleButton = document.getElementById("add-schedule");
 
   // Add an event listener for the "Buy Train" button
@@ -54,33 +59,11 @@ document.addEventListener("DOMContentLoaded", function () {
     trainMenu.classList.add("hidden");
   });
 
-  function openScheduleOverlay() {
-    // Perform any necessary preparations before opening the overlay, such as:
-    // - Resetting form fields
-    // - Loading the selected schedule data into the form fields
-    // - Updating the overlay content based on the selected schedule
-
-    // Open the schedule overlay by setting its display style to 'block'
-    scheduleOverlay.style.display = "block";
-  }
-
-  function closeScheduleOverlay() {
-    // Perform any necessary cleanup after closing the overlay, such as:
-    // - Clearing form fields
-    // - Resetting validation states
-    // - Clearing any temporary data related to the overlay
-
-    // Close the schedule overlay by setting its display style to 'none'
-    scheduleOverlay.style.display = "none";
-  }
-
   addScheduleButton.addEventListener("click", () => {
     const newScheduleId = findAvailableScheduleId();
     const name = `Schedule ${newScheduleId}`;
     addSchedule(name, []);
   });
-
-  closeScheduleOverlayButton.addEventListener("click", closeScheduleOverlay);
 });
 
 // Train constructor
@@ -101,13 +84,20 @@ function Train(id, name, scheduleId) {
 }
 
 // Schedule constructor
-function Schedule(id, name, parcelIds) {
+function Schedule(id, name, stations) {
   this.id = id;
   this.name = name;
-  this.parcelIds = parcelIds;
+  this.stations = stations;
 }
 
-// Train Stations will be accessible via parcels.parcelList[i].buildings.trainStation
+function createStation(parcelId, load, unload, condition) {
+  return {
+    parcelId: parcelId,
+    load: load,
+    unload: unload,
+    condition: condition,
+  };
+}
 
 function generateUniqueTrainId() {
   let id = 1;
@@ -133,13 +123,13 @@ function removeTrain(trainId) {
   // This could involve updating a table, list, or other HTML elements
 }
 
-function addSchedule(name, parcelIds) {
+function addSchedule(name, stations) {
   // Add a new schedule to the schedule list
   const newScheduleId = findAvailableScheduleId();
-  const newSchedule = new Schedule(newScheduleId, name, parcelIds);
+  const newSchedule = new Schedule(newScheduleId, name, stations);
   gameState.scheduleList.push(newSchedule);
   // Update the UI to display the new schedule
-  updateScheduleListUI()
+  updateScheduleListUI();
 }
 
 function findAvailableScheduleId() {
@@ -155,31 +145,42 @@ function findAvailableScheduleId() {
 
 function removeSchedule(scheduleId) {
   // Remove a schedule from the schedule list
+  console.log(scheduleId);
   gameState.scheduleList = gameState.scheduleList.filter((schedule) => schedule.id !== scheduleId);
+
+  // Remove the references to the removed schedule from any trains
+  gameState.trainList.forEach((train) => {
+    if (train.scheduleId === scheduleId) {
+      train.scheduleId = null;
+    }
+  });
+
   // Update the UI to remove the schedule
   // This could involve updating a table, list, or other HTML elements
 }
 
-function addStationToSchedule(scheduleId, parcelId) {
-  // Add a parcel to the given schedule
+function addStationToSchedule(scheduleId, station) {
+  // Add a station to the given schedule
   // Find the schedule in your schedule list data structure
   const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
   if (schedule) {
-    // Add the parcel to the schedule's parcelIds array
-    schedule.parcelIds.push(parcelId);
-    // Update the UI to display the new parcel in the schedule
+    // Add the station to the schedule's stations array
+    schedule.stations.push(station);
+    // Update the UI to display the new station in the schedule
     // This could involve updating a table, list, or other HTML elements
   }
 }
 
-function removeStationFromSchedule(scheduleId, parcelId) {
-  // Remove a parcel from the given schedule
+function removeStationFromSchedule(scheduleId, parcelId, position) {
+  // Remove a station from the given schedule
   // Find the schedule in your schedule list data structure
   const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
   if (schedule) {
-    // Remove the parcel from the schedule's parcelIds array
-    schedule.parcelIds = schedule.parcelIds.filter((id) => id !== parcelId);
-    // Update the UI to remove the parcel from the schedule
+    // Remove the station at the specified position in the schedule's stations array
+    if (position >= 0 && position < schedule.stations.length) {
+      schedule.stations.splice(position, 1);
+    }
+    // Update the UI to remove the station from the schedule
     // This could involve updating a table, list, or other HTML elements
   }
 }
@@ -230,19 +231,36 @@ function updateTrain(trainId, newName = null, newScheduleId = null) {
   updateTrainListUI();
 }
 
-function moveUpStation(scheduleId, stationId) {
-// Move a station up in the given schedule
-// Find the schedule in your schedule list data structure
-// Swap the station with the one above it in the schedule's stations array
-// Update the UI to reflect the changes
+function moveUpStation(scheduleId, parcelId, index) {
+  // Move a station up in the given schedule
+  // Find the schedule in your schedule list data structure
+  const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
+  if (schedule && index > 0) {
+    // Swap the station with the one above it in the schedule's stations array
+    const temp = schedule.stations[index - 1];
+    schedule.stations[index - 1] = schedule.stations[index];
+    schedule.stations[index] = temp;
+
+    // Update the UI to reflect the changes
+    showScheduleOverlay(scheduleId);
+  }
 }
 
-function moveDownStation(scheduleId, stationId) {
-// Move a station down in the given schedule
-// Find the schedule in your schedule list data structure
-// Swap the station with the one below it in the schedule's stations array
-// Update the UI to reflect the changes
+function moveDownStation(scheduleId, parcelId, index) {
+  // Move a station down in the given schedule
+  // Find the schedule in your schedule list data structure
+  const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
+  if (schedule && index < schedule.stations.length - 1) {
+    // Swap the station with the one below it in the schedule's stations array
+    const temp = schedule.stations[index + 1];
+    schedule.stations[index + 1] = schedule.stations[index];
+    schedule.stations[index] = temp;
+
+    // Update the UI to reflect the changes
+    showScheduleOverlay(scheduleId);
+  }
 }
+
 
 function saveSchedule(scheduleId) {
 // Save changes made to a schedule
@@ -275,6 +293,11 @@ function sellTrain(trainId) {
   // Update the UI to reflect the changes (handled by removeTrain function)
 }
 
+//---------------------------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------- Game Logic Functions -------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------
+
+
 function calculateCargoSpace(cargo) {
   let totalSpace = 0;
 
@@ -287,11 +310,43 @@ function calculateCargoSpace(cargo) {
   return totalSpace;
 }
 
+function calculateDistance(startParcelId, endParcelId) {
+  const startParcel = parcels.parcelList.find(parcel => parcel.id === startParcelId);
+  const endParcel = parcels.parcelList.find(parcel => parcel.id === endParcelId);
+
+  if (startParcel.cluster === endParcel.cluster) {
+    // Same cluster
+    return Math.abs(parcels.parcelList.indexOf(startParcel) - parcels.parcelList.indexOf(endParcel));
+  } else {
+    // Different clusters
+    const startClusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === startParcel.cluster);
+    const endClusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === endParcel.cluster);
+
+    const distances = [];
+
+    // Scenario 1: Leave via the first parcel of the start cluster and enter via the first parcel of the end cluster
+    const distanceScenario1 =
+      startClusterParcels.indexOf(startParcel) +
+      endClusterParcels.indexOf(endParcel) +
+      Math.abs(endParcel.cluster - startParcel.cluster) * 20;
+    distances.push(distanceScenario1);
+
+    // Scenario 2: Leave via the last parcel of the start cluster and enter via the last parcel of the end cluster
+    const distanceScenario2 =
+      (startClusterParcels.length - 1 - startClusterParcels.indexOf(startParcel)) +
+      (endClusterParcels.length - 1 - endClusterParcels.indexOf(endParcel)) +
+      Math.abs(endParcel.cluster - startParcel.cluster) * 20;
+    distances.push(distanceScenario2);
+
+    return Math.min(...distances);
+  }
+}
+
 //---------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------- UI Functions -------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------
 
-/* ---------------------------------------- Train Menu ---------------------------------------- */
+/* ---------------------------------------- Train Table ---------------------------------------- */
 
 function updateTrainListUI() {
   const trainTableBody = document.querySelector("#train-table tbody");
@@ -444,7 +499,7 @@ function showRenameTrainOverlay(trainId) {
   });
 }
 
-/* ---------------------------------------- Schedule Menu ---------------------------------------- */
+/* ---------------------------------------- Schedule Table ---------------------------------------- */
 
 function createScheduleRow(schedule) {
   const row = document.createElement("tr");
@@ -488,7 +543,403 @@ function updateScheduleListUI() {
   gameState.scheduleList.forEach(schedule => {
     const editButton = document.getElementById(`edit-schedule-${schedule.id}`);
     editButton.addEventListener("click", () => {
-      openScheduleOverlay(schedule.id);
+      showScheduleOverlay(schedule.id);
     });
   });
+}
+
+/* ---------------------------------------- Schedule Overlay ---------------------------------------- */
+
+function showScheduleOverlay(scheduleId) {
+  const schedule = gameState.scheduleList.find((s) => s.id === scheduleId);
+
+  // Create the overlay and its content
+  const overlay = document.getElementById("schedule-overlay");
+  overlay.style.display = "block";
+
+  const scheduleNameInput = document.getElementById("schedule-name");
+  scheduleNameInput.value = schedule.name;
+
+  // Populate the Dropdown with available Stations
+  populateStationsDropdown();
+
+  // Populate the stations table with data from the schedule
+  const stationsTableBody = document.getElementById("stations-table").querySelector("tbody");
+  stationsTableBody.innerHTML = "";
+
+  schedule.stations.forEach((station, index) => {
+    // Get parcel and cluster data (replace with your actual data retrieval methods)
+    console.log(station);
+    const parcel = parcels.parcelList.find(p => p.id === station.parcelId);
+    const cluster = parcel.cluster;
+
+    // Create a table row for each parcel in the schedule
+    const row = document.createElement("tr");
+
+    // Add the table cells and their content
+    const nameCell = document.createElement("td");
+    nameCell.textContent = parcel.name;
+    nameCell.classList.add("left-cell");
+    row.appendChild(nameCell);
+
+    const clusterCell = document.createElement("td");
+    clusterCell.textContent = cluster;
+    clusterCell.classList.add("left-cell");
+    row.appendChild(clusterCell);
+
+    // Add Distance to Next Stop cell
+    const distanceCell = document.createElement("td");
+    distanceCell.classList.add("left-cell");
+    if (index < schedule.stations.length - 1) {
+      const nextParcelId = schedule.stations[index + 1].parcelId;
+      const distance = calculateDistance(station.parcelId, nextParcelId);
+      distanceCell.textContent = distance + " units";
+    } else {
+      const firstParcelId = schedule.stations[0].parcelId;
+      const distance = calculateDistance(station.parcelId, firstParcelId);
+      distanceCell.textContent = distance + " units (to first station)";
+    }
+    row.appendChild(distanceCell);
+
+    // Add Load cell
+    const loadCell = document.createElement("td");
+    loadCell.classList.add("left-cell");
+    station.load.forEach(resource => {
+      const resourceMetadataItem = resourceMetadata[resource];
+      if (resourceMetadataItem) {
+        const loadContainer = document.createElement("div");
+        loadContainer.style.display = "inline-flex";
+        loadContainer.style.alignItems = "center";
+        loadContainer.style.whiteSpace = "nowrap";
+        loadCell.appendChild(loadContainer);
+
+        const loadIcon = document.createElement("img");
+        loadIcon.src = resourceMetadataItem.icon48;
+        loadIcon.alt = resourceMetadataItem.name;
+        loadIcon.style.width = "18px"; // Adjust the size of the icon as needed
+        loadContainer.appendChild(loadIcon);
+
+        const loadText = document.createElement("span");
+        loadText.textContent = resourceMetadataItem.name;
+        loadContainer.appendChild(loadText);
+      }
+    });
+    row.appendChild(loadCell);
+
+    // Add Unload cell
+    const unloadCell = document.createElement("td");
+    unloadCell.classList.add("left-cell");
+    station.unload.forEach(resource => {
+      const resourceMetadataItem = resourceMetadata[resource];
+      if (resourceMetadataItem) {
+        const unloadContainer = document.createElement("div");
+        unloadContainer.style.display = "inline-flex";
+        unloadContainer.style.alignItems = "center";
+        unloadContainer.style.whiteSpace = "nowrap";
+        unloadCell.appendChild(unloadContainer);
+
+        const unloadIcon = document.createElement("img");
+        unloadIcon.src = resourceMetadataItem.icon48;
+        unloadIcon.alt = resourceMetadataItem.name;
+        unloadIcon.style.width = "18px"; // Adjust the size of the icon as needed
+        unloadContainer.appendChild(unloadIcon);
+
+        const unloadText = document.createElement("span");
+        unloadText.textContent = resourceMetadataItem.name;
+        unloadContainer.appendChild(unloadText);
+      }
+    });
+    row.appendChild(unloadCell);
+
+    // Add Condition cell
+    const conditionCell = document.createElement("td");
+    conditionCell.classList.add("left-cell");
+
+    // Create a container for the type element
+    const typeContainer = document.createElement("div");
+    typeContainer.style.display = "inline-flex";
+    typeContainer.style.alignItems = "center";
+    typeContainer.style.whiteSpace = "nowrap";
+    conditionCell.appendChild(typeContainer);
+
+    const typeLabel = document.createElement("span");
+    typeLabel.textContent = "Type: ";
+    typeContainer.appendChild(typeLabel);
+
+    const typeValue = document.createElement("span");
+    typeValue.textContent = station.condition.type;
+    typeContainer.appendChild(typeValue);
+
+    // Add a line break between the elements
+    conditionCell.appendChild(document.createElement("br"));
+
+    // Create a container for the amount element
+    const amountContainer = document.createElement("div");
+    amountContainer.style.display = "inline-flex";
+    amountContainer.style.alignItems = "center";
+    amountContainer.style.whiteSpace = "nowrap";
+    conditionCell.appendChild(amountContainer);
+
+    const amountLabel = document.createElement("span");
+    amountLabel.textContent = "Amount: ";
+    amountContainer.appendChild(amountLabel);
+
+    const amountValue = document.createElement("span");
+    amountValue.textContent = station.condition.amount;
+    amountContainer.appendChild(amountValue);
+
+    row.appendChild(conditionCell);
+
+    // Add the action buttons
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => {
+      openEditStationOverlay(scheduleId, index);
+    });
+
+    const actionCell = document.createElement("td");
+    actionCell.classList.add("action-cell");
+    const moveUpButton = document.createElement("button");
+    moveUpButton.textContent = "Move Up";
+    moveUpButton.addEventListener("click", () => moveUpStation(scheduleId, station.parcelId, index));
+
+    const moveDownButton = document.createElement("button");
+    moveDownButton.textContent = "Move Down";
+    moveDownButton.addEventListener("click", () => moveDownStation(scheduleId, station.parcelId, index));
+
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      removeStationFromSchedule(scheduleId, station.parcelId, index);
+      showScheduleOverlay(scheduleId);
+    });
+
+    actionCell.appendChild(editButton);
+    actionCell.appendChild(moveUpButton);
+    actionCell.appendChild(moveDownButton);
+    actionCell.appendChild(removeButton);
+    row.appendChild(actionCell);
+
+    stationsTableBody.appendChild(row);
+  });
+
+  // Hook up the remaining buttons and dropdowns for adding stations, saving the schedule, etc.
+  const addStationButton = document.getElementById("add-station");
+  const addStationClickListener = onAddStationClick(scheduleId);
+  if (addStationButtonListeners.has(addStationButton)) {
+    addStationButton.removeEventListener("click", addStationButtonListeners.get(addStationButton));
+  }
+  addStationButton.addEventListener("click", addStationClickListener);
+  addStationButtonListeners.set(addStationButton, addStationClickListener);
+
+  const saveScheduleButton = document.getElementById("save-schedule");
+  const saveScheduleClickListener = onSaveScheduleClick(scheduleId, scheduleNameInput, schedule, overlay);
+  if (saveScheduleButtonListeners.has(saveScheduleButton)) {
+    saveScheduleButton.removeEventListener("click", saveScheduleButtonListeners.get(saveScheduleButton));
+  }
+  saveScheduleButton.addEventListener("click", saveScheduleClickListener);
+  saveScheduleButtonListeners.set(saveScheduleButton, saveScheduleClickListener);
+
+  const deleteScheduleButton = document.getElementById("delete-schedule");
+  const deleteScheduleClickListener = onDeleteScheduleClick(scheduleId, overlay);
+  if (deleteScheduleButtonListeners.has(deleteScheduleButton)) {
+    deleteScheduleButton.removeEventListener("click", deleteScheduleButtonListeners.get(deleteScheduleButton));
+  }
+  deleteScheduleButton.addEventListener("click", deleteScheduleClickListener);
+  deleteScheduleButtonListeners.set(deleteScheduleButton, deleteScheduleClickListener);
+
+  const closeScheduleOverlayButton = document.getElementById("close-schedule-overlay");
+  const closeScheduleOverlayClickListener = onCloseScheduleOverlayClick(overlay);
+  if (closeScheduleOverlayButtonListeners.has(closeScheduleOverlayButton)) {
+    closeScheduleOverlayButton.removeEventListener("click", closeScheduleOverlayButtonListeners.get(closeScheduleOverlayButton));
+  }
+  closeScheduleOverlayButton.addEventListener("click", closeScheduleOverlayClickListener);
+  closeScheduleOverlayButtonListeners.set(closeScheduleOverlayButton, closeScheduleOverlayClickListener);
+}
+
+function onAddStationClick(scheduleId) {
+  return () => {
+    const selectedParcelId = document.getElementById("stations-dropdown").value;
+    const load = [];
+    const unload = [];
+    const condition = {};
+    const station = createStation(selectedParcelId, load, unload, condition);
+    addStationToSchedule(scheduleId, station);
+    showScheduleOverlay(scheduleId);
+  };
+}
+
+function onSaveScheduleClick(scheduleId, scheduleNameInput, schedule, overlay) {
+  return () => {
+    updateSchedule(scheduleId, {
+      name: scheduleNameInput.value,
+      parcelIds: schedule.parcelIds
+    });
+    overlay.style.display = "none";
+    updateScheduleListUI();
+    updateTrainListUI();
+  };
+}
+
+function onDeleteScheduleClick(scheduleId, overlay) {
+  return () => {
+    removeSchedule(scheduleId);
+    overlay.style.display = "none";
+    updateScheduleListUI();
+    updateTrainListUI();
+  };
+}
+
+function onCloseScheduleOverlayClick(overlay) {
+  return () => {
+    overlay.style.display = "none";
+    updateScheduleListUI();
+    updateTrainListUI();
+  };
+}
+
+function populateStationsDropdown() {
+  const stationsDropdown = document.getElementById("stations-dropdown");
+
+  // Clear the existing options
+  stationsDropdown.innerHTML = "";
+
+  // Filter parcels with at least one train station building
+  const stationParcels = parcels.parcelList.filter(parcel => {
+    return parcel.buildings && parcel.buildings.trainStation && parcel.buildings.trainStation > 0;
+  });
+
+  // Add station parcels as options to the dropdown
+  stationParcels.forEach(stationParcel => {
+    const option = document.createElement("option");
+    option.value = stationParcel.id;
+    option.textContent = stationParcel.name;
+    stationsDropdown.appendChild(option);
+  });
+}
+
+/* ---------------------------------------- Edit Station Overlay ---------------------------------------- */
+
+function openEditStationOverlay(scheduleId, stationIndex) {
+  const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
+  const station = schedule.stations[stationIndex];
+  const overlay = document.getElementById("edit-station-overlay");
+  overlay.style.display = "block";
+
+  populateResourceCheckboxes("load-section", station.load);
+  populateResourceCheckboxes("unload-section", station.unload);
+
+  const conditionTypeSelect = document.getElementById("condition-type");
+  conditionTypeSelect.value = station.condition.type;
+
+  const conditionAmountInput = document.getElementById("condition-amount");
+  conditionAmountInput.value = station.condition.amount;
+
+
+
+  // Add event listeners for Save and Cancel buttons
+  const saveEditStationButton = document.getElementById("save-edit-station");
+  const saveEditStationClickListener = () => {
+    saveEditStation(scheduleId, stationIndex);
+    overlay.style.display = "none";
+  };
+  if (saveEditStationButtonListeners.has(saveEditStationButton)) {
+    saveEditStationButton.removeEventListener("click", saveEditStationButtonListeners.get(saveEditStationButton));
+  }
+  saveEditStationButton.addEventListener("click", saveEditStationClickListener);
+  saveEditStationButtonListeners.set(saveEditStationButton, saveEditStationClickListener);
+
+  const cancelEditStationButton = document.getElementById("cancel-edit-station");
+  const cancelEditStationClickListener = () => {
+    overlay.style.display = "none";
+  };
+  if (cancelEditStationButtonListeners.has(cancelEditStationButton)) {
+    cancelEditStationButton.removeEventListener("click", cancelEditStationButtonListeners.get(cancelEditStationButton));
+  }
+  cancelEditStationButton.addEventListener("click", cancelEditStationClickListener);
+  cancelEditStationButtonListeners.set(cancelEditStationButton, cancelEditStationClickListener);
+}
+
+function populateResourceCheckboxes(sectionId, selectedResources) {
+  const section = document.getElementById(sectionId);
+  section.innerHTML = "";
+
+  const resources = Object.keys(resourceMetadata);
+  const resourcesPerColumn = Math.ceil(resources.length / 3);
+
+  const containers = [document.createElement("div"), document.createElement("div"), document.createElement("div")];
+  containers.forEach((container) => {
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    section.appendChild(container);
+  });
+
+  let currentContainerIndex = 0;
+  let currentResourceCount = 0;
+
+  for (const resourceId in resourceMetadata) {
+    const resource = resourceMetadata[resourceId];
+
+    const label = document.createElement("label");
+    label.style.display = "flex";
+    label.style.alignItems = "left";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = resourceId;
+    checkbox.checked = selectedResources.includes(resourceId);
+    checkbox.style.marginRight = "8px"; // Add some space after the checkbox
+    label.appendChild(checkbox);
+
+    const icon = document.createElement("img");
+    icon.src = resource.icon48;
+    icon.alt = resource.name;
+    icon.style.width = "24px";
+    icon.style.marginRight = "4px"; // Add some space after the icon
+    label.appendChild(icon);
+
+    const text = document.createElement("span");
+    text.textContent = resource.name;
+    text.style.alignSelf = "end";
+    label.appendChild(text); // Add the text after the icon
+
+    containers[currentContainerIndex].appendChild(label);
+
+    currentResourceCount++;
+    if (currentResourceCount >= resourcesPerColumn) {
+      currentResourceCount = 0;
+      currentContainerIndex++;
+    }
+  }
+}
+
+function saveEditStation(scheduleId, stationIndex) {
+  const schedule = gameState.scheduleList.find((schedule) => schedule.id === scheduleId);
+  const station = schedule.stations[stationIndex];
+
+  station.load = getSelectedResources("load-section");
+  station.unload = getSelectedResources("unload-section");
+
+  const conditionTypeSelect = document.getElementById("condition-type");
+  station.condition.type = conditionTypeSelect.value;
+
+  const conditionAmountInput = document.getElementById("condition-amount");
+  station.condition.amount = parseInt(conditionAmountInput.value);
+
+  // Update the UI to reflect the changes
+  showScheduleOverlay(scheduleId);
+}
+
+function getSelectedResources(sectionId) {
+  const section = document.getElementById(sectionId);
+  const checkboxes = section.getElementsByTagName("input");
+  const selectedResources = [];
+
+  for (const checkbox of checkboxes) {
+    if (checkbox.checked) {
+      selectedResources.push(checkbox.value);
+    }
+  }
+
+  return selectedResources;
 }
