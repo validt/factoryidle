@@ -835,11 +835,30 @@ const ui = (() => {
 
     createMineButton(resourceName) {
       const mineButton = document.createElement("button");
+      var mousedownID = -1;
       mineButton.textContent = "Mine";
       mineButton.style.display = "inline-block";
       mineButton.style.verticalAlign = "-webkit-baseline-middle";
       mineButton.style.float = "right";
       mineButton.style.marginLeft = "1em"
+      function mousedown(event) {
+        if(mousedownID==-1){  //Prevent multimple loops!
+          mousedownID = setInterval(whilemousedown, 100 /*Interval, ms*/);
+        }
+      }
+      function mouseup(event) {
+        if(mousedownID!=-1) {  //Only stop if exists
+          clearInterval(mousedownID);
+          mousedownID=-1;
+        }
+      }
+      function whilemousedown(){
+        this.parcel.resources[resourceName]++;
+        this.update();
+      }
+      document.addEventListener("mousedown", mousedown);
+      document.addEventListener("mouseup", mouseup);
+      document.addEventListener("mouseout", mouseup); //Also clear the interval when user leaves the window with mouse
       mineButton.addEventListener("click", () => {
         this.parcel.resources[resourceName]++;
         this.update();
