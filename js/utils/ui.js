@@ -853,8 +853,8 @@ const ui = (() => {
         }
       }
       function whilemousedown(){
-        this.parcel.resources[resourceName]++;
-        this.update();
+        mineButton.parcel.resources[resourceName]++;
+        mineButton.update();
       }
       document.addEventListener("mousedown", mousedown);
       document.addEventListener("mouseup", mouseup);
