@@ -1,4 +1,5 @@
 // trains.js
+const interClusterDistance = 10;
 const addStationButtonListeners = new WeakMap();
 const saveScheduleButtonListeners = new WeakMap();
 const deleteScheduleButtonListeners = new WeakMap();
@@ -71,9 +72,14 @@ function Train(id, name, scheduleId) {
   this.id = id;
   this.name = name;
   this.scheduleId = scheduleId;
+  this.currentLocation = "parcel-1"; //a parcelId
+  this.interClusterTravel = 0;
+  this.nextStop;        //a parcelId
   this.currentAction = "Waiting";
+  this.status = "";
   this.acceleration = 1;
   this.maxSpeed = 10;
+  this.speed = 1;
   this.cargo = [
     /*
     stone: 100,
@@ -81,6 +87,7 @@ function Train(id, name, scheduleId) {
     */
   ];
   this.maxCargo = 1000;
+  this.loadRate = 100;
 }
 
 // Schedule constructor
@@ -296,7 +303,13 @@ function sellTrain(trainId) {
 //---------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------- Game Logic Functions -------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------
+function getScheduleById(scheduleId) {
+  return gameState.scheduleList.find(schedule => schedule.id === scheduleId);
+}
 
+function getTrainById(trainId) {
+  return gameState.trainList.find(train => train.id === trainId);
+}
 
 function calculateCargoSpace(cargo) {
   let totalSpace = 0;
@@ -328,19 +341,193 @@ function calculateDistance(startParcelId, endParcelId) {
     const distanceScenario1 =
       startClusterParcels.indexOf(startParcel) +
       endClusterParcels.indexOf(endParcel) +
-      Math.abs(endParcel.cluster - startParcel.cluster) * 20;
+      Math.abs(endParcel.cluster - startParcel.cluster) * interClusterDistance;
     distances.push(distanceScenario1);
 
-    // Scenario 2: Leave via the last parcel of the start cluster and enter via the last parcel of the end cluster
+    // Scenario 2: Leave via the first parcel of the start cluster and enter via the last parcel of the end cluster
     const distanceScenario2 =
+      startClusterParcels.indexOf(startParcel) +
+      (endClusterParcels.length - 1 - endClusterParcels.indexOf(endParcel)) +
+      Math.abs(endParcel.cluster - startParcel.cluster) * interClusterDistance;
+    distances.push(distanceScenario2);
+
+    // Scenario 3: Leave via the last parcel of the start cluster and enter via the first parcel of the end cluster
+    const distanceScenario3 =
+      (startClusterParcels.length - 1 - startClusterParcels.indexOf(startParcel)) +
+      endClusterParcels.indexOf(endParcel) +
+      Math.abs(endParcel.cluster - startParcel.cluster) * interClusterDistance;
+    distances.push(distanceScenario3);
+
+    // Scenario 4: Leave via the last parcel of the start cluster and enter via the last parcel of the end cluster
+    const distanceScenario4 =
       (startClusterParcels.length - 1 - startClusterParcels.indexOf(startParcel)) +
       (endClusterParcels.length - 1 - endClusterParcels.indexOf(endParcel)) +
-      Math.abs(endParcel.cluster - startParcel.cluster) * 20;
-    distances.push(distanceScenario2);
+      Math.abs(endParcel.cluster - startParcel.cluster) * interClusterDistance;
+    distances.push(distanceScenario4);
 
     return Math.min(...distances);
   }
 }
+
+function getClosestClusterExitParcel(currentParcel) {
+  const clusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === currentParcel.cluster);
+  const firstParcel = clusterParcels[0];
+  const lastParcel = clusterParcels[clusterParcels.length - 1];
+
+  const distanceToFirst = calculateDistance(currentParcel.id, firstParcel.id);
+  const distanceToLast = calculateDistance(currentParcel.id, lastParcel.id);
+
+  return distanceToFirst <= distanceToLast ? firstParcel : lastParcel;
+}
+
+function getClosestClusterEntryParcel(destinationCluster, currentLocationId) {
+  const destinationClusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === destinationCluster);
+  const firstParcel = destinationClusterParcels[0];
+  const lastParcel = destinationClusterParcels[destinationClusterParcels.length - 1];
+
+  const distanceToFirst = calculateDistance(currentLocationId, firstParcel.id);
+  const distanceToLast = calculateDistance(currentLocationId, lastParcel.id);
+
+  return distanceToFirst <= distanceToLast ? firstParcel : lastParcel;
+}
+
+function getNextParcel(currentParcelId, direction) {
+  const currentParcel = parcels.parcelList.find(parcel => parcel.id === currentParcelId);
+  const currentClusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === currentParcel.cluster);
+  const currentClusterParcelIndex = currentClusterParcels.findIndex(parcel => parcel.id === currentParcelId);
+
+  const nextClusterParcelIndex = currentClusterParcelIndex + direction;
+
+  if (nextClusterParcelIndex >= 0 && nextClusterParcelIndex < currentClusterParcels.length) {
+    return currentClusterParcels[nextClusterParcelIndex];
+  } else {
+    return null;
+  }
+}
+
+function getClusterTravelDistance(currentCluster, destinationCluster) {
+  const clusterDistance = Math.abs(destinationCluster - currentCluster);
+  return interClusterDistance * clusterDistance;
+}
+
+function moveTrain(trainId) {
+  const train = getTrainById(trainId);
+  if (!train) return;
+
+  const schedule = getScheduleById(train.scheduleId);
+  if (!schedule) return;
+
+  if (train.nextStop === undefined || Number.isNaN(train.nextStop)) {
+    train.nextStop = 0;
+  }
+  console.log("Train starts at: ", train.currentLocation);
+  console.log("Train drives towards: ", train.nextStop);
+  if (!train || !schedule) {
+    console.error(`Could not find train or schedule for trainId: ${trainId}`);
+    return;
+  }
+
+  const currentLocation = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+  console.log("currentLocation", currentLocation);
+  const destinationParcelId = schedule.stations[train.nextStop] ? schedule.stations[train.nextStop].parcelId : "parcel-1";
+  let destinationParcel = parcels.parcelList.find(parcel => parcel.id === destinationParcelId);
+  console.log("destinationParcel", destinationParcel);
+
+  if (currentLocation === destinationParcel) {
+    // Train has arrived at its destination
+    train.nextStop = (train.nextStop + 1) % schedule.stations.length;
+    train.status = `Arrived at station "${destinationParcel.id}"`;
+    console.log("TSSSS");
+    return;
+  }
+
+  console.log("currentLocation", currentLocation);
+  console.log("destinationParcel", destinationParcel);
+
+  let distanceToDestination = 0;
+  if (currentLocation.cluster === destinationParcel.cluster) {
+    distanceToDestination = calculateDistance(train.currentLocation, destinationParcelId)
+  } else {
+    if (train.interClusterTravel > 0) {
+      distanceToDestination = calculateDistance(train.currentLocation, destinationParcelId) - (interClusterDistance - train.interClusterTravel);
+    } else {
+      distanceToDestination = calculateDistance(train.currentLocation, destinationParcelId);
+    }
+  }
+
+
+  console.log("distanceToDestination", distanceToDestination);
+  console.log(currentLocation.cluster);
+  console.log(destinationParcel.cluster);
+
+  const currentCluster = currentLocation.cluster;
+  const destinationCluster = destinationParcel.cluster;
+
+  // Check if the train is at the cluster entrance/exit parcel
+  const isAtClusterEntranceExit = (parcel) => {
+    const clusterParcels = parcels.parcelList.filter(p => p.cluster === parcel.cluster);
+    return parcel.id === clusterParcels[0].id || parcel.id === clusterParcels[clusterParcels.length - 1].id;
+  };
+
+  if (currentCluster === destinationCluster) {
+    train.interClusterTravel = 0; // Reset interClusterTravel
+    console.log("intracluster");
+  } else if (train.interClusterTravel === 0) {
+    if (!isAtClusterEntranceExit(currentLocation)) {
+      const clusterExitParcel = getClosestClusterExitParcel(currentLocation);
+      destinationParcel = clusterExitParcel;
+      distanceToDestination = calculateDistance(train.currentLocation, destinationParcel.id);
+      console.log("drive to cluster exit");
+    } else {
+      const clusterTravelDistance = getClusterTravelDistance(currentCluster, destinationCluster);
+      train.interClusterTravel = clusterTravelDistance; // Initialize interClusterTravel
+      console.log("init intercluster");
+    }
+  }
+
+  // Handle inter-cluster travel
+  if (train.interClusterTravel > 0) {
+    train.interClusterTravel -= train.speed;
+    console.log("intercluster", train.interClusterTravel);
+
+    const remainingDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster) - train.interClusterTravel;
+    const totalDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
+
+    train.status = `Traveling to cluster ${destinationParcel.cluster} (${remainingDistance}/${totalDistance})`;
+
+    if (train.interClusterTravel <= 0) {
+      const closestClusterEntryParcel = getClosestClusterEntryParcel(destinationParcel.cluster, train.currentLocation);
+      train.currentLocation = closestClusterEntryParcel.id;
+      console.log("Train arrives at the entry parcel: ", train.currentLocation);
+    }
+
+    return;
+  }
+
+  if (train.speed <= distanceToDestination) {
+    // Train can move towards the destination without overshooting
+    const currentParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === train.currentLocation);
+    const destinationParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === destinationParcel.id);
+    const direction = (destinationParcelIndex > currentParcelIndex) ? 1 : -1;
+    console.log("direction", direction);
+    console.log("currentParcelIndex", currentParcelIndex);
+    console.log("destinationParcelIndex", destinationParcelIndex);
+    console.log(train.currentLocation);
+    const nextParcel = getNextParcel(train.currentLocation, direction);
+    console.log("nextParcel", nextParcel);
+
+    if (nextParcel) {
+      train.currentLocation = nextParcel.id;
+      train.status = `Traveling to "${destinationParcel.id}"`;
+    }
+  } else {
+    // Train overshoots the destination
+    train.currentLocation = destinationParcel.id;
+  }
+  console.log("Train arrives at: ", train.currentLocation);
+}
+
+//Loading and Unloading: Loads for 10s and loads all at once
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------- UI Functions -------------------------------------------------------------
@@ -360,7 +547,8 @@ function updateTrainListUI() {
 
     const nameCell = document.createElement("td");
     const scheduleCell = document.createElement("td");
-    const currentActionCell = document.createElement("td");
+    const statusCell = document.createElement("td");
+    const currentLocationCell = document.createElement("td");
     const cargoCell = document.createElement("td");
 
     // Assuming the train object is named 'train'
@@ -401,12 +589,14 @@ function updateTrainListUI() {
       scheduleCell.textContent = "No Schedule";
     }
 
-    currentActionCell.textContent = train.currentAction;
+    statusCell.textContent = train.status;
+    currentLocationCell.textContent = train.currentLocation;
     cargoCell.textContent = `${currentCargoSpace} / ${train.maxCargo}`;
 
     row.appendChild(nameCell);
     row.appendChild(scheduleCell);
-    row.appendChild(currentActionCell);
+    row.appendChild(currentLocationCell);
+    row.appendChild(statusCell);
     row.appendChild(cargoCell);
 
     trainTableBody.appendChild(row);
@@ -441,6 +631,7 @@ function showAssignScheduleOverlay(trainId) {
     const selectedScheduleId = parseInt(dropdown.value, 10);
     console.log(selectedScheduleId);
     updateTrain(trainId, null, selectedScheduleId);
+    updateScheduleListUI();
     document.body.removeChild(overlay);
   });
 
@@ -515,7 +706,7 @@ function createScheduleRow(schedule) {
   nameCell.appendChild(editButton);
 
   const trainCountCell = document.createElement("td");
-  const trainCount = gameState.trainList.filter(train => train.schedule === schedule.id).length;
+  const trainCount = gameState.trainList.filter(train => train.scheduleId === schedule.id).length;
   const trainCountText = document.createTextNode(trainCount);
   trainCountCell.appendChild(trainCountText);
 

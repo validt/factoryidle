@@ -71,6 +71,8 @@ const gameLoop = (() => {
             updatePollutionDisplay();
             reduceBiterFactor();
             ui.updateEnergyDisplay();
+            moveTrain(1);
+            updateTrainListUI();
             window.progressionManager.update(gameState);
             tickCounter++;
 
