@@ -765,3 +765,18 @@ button.cluster-header {
   justify-content: space-between;
   white-space: nowrap;
 }
+
+/* Train visualization */
+.clusterViz {
+  stroke: black;
+  fill: none;
+}
+
+.parcelViz {
+  stroke: blue;
+  fill: grey;
+}
+
+.trainViz {
+  fill: red;
+}

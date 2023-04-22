@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const trainMenu = document.getElementById("trainMenu");
     const trainId = trainMenu.getAttribute("data-train-id");
     trainMenu.classList.add("hidden");
-    console.log("open with id", trainId);
+    //console.log("open with id", trainId);
     showAssignScheduleOverlay(trainId);
   });
 
@@ -152,7 +152,7 @@ function findAvailableScheduleId() {
 
 function removeSchedule(scheduleId) {
   // Remove a schedule from the schedule list
-  console.log(scheduleId);
+  //console.log(scheduleId);
   gameState.scheduleList = gameState.scheduleList.filter((schedule) => schedule.id !== scheduleId);
 
   // Remove the references to the removed schedule from any trains
@@ -211,7 +211,7 @@ function updateTrain(trainId, newName = null, newScheduleId = null) {
     trainId = parseInt(trainId);
   }
   const train = gameState.trainList.find((t) => t.id === trainId);
-  console.log(train);
+  //console.log(train);
 
   if (!train) {
     console.error(`Train with ID ${trainId} not found.`);
@@ -420,29 +420,29 @@ function moveTrain(trainId) {
   if (train.nextStop === undefined || Number.isNaN(train.nextStop)) {
     train.nextStop = 0;
   }
-  console.log("Train starts at: ", train.currentLocation);
-  console.log("Train drives towards: ", train.nextStop);
+  //console.log("Train starts at: ", train.currentLocation);
+  //console.log("Train drives towards: ", train.nextStop);
   if (!train || !schedule) {
     console.error(`Could not find train or schedule for trainId: ${trainId}`);
     return;
   }
 
   const currentLocation = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
-  console.log("currentLocation", currentLocation);
+  //console.log("currentLocation", currentLocation);
   const destinationParcelId = schedule.stations[train.nextStop] ? schedule.stations[train.nextStop].parcelId : "parcel-1";
   let destinationParcel = parcels.parcelList.find(parcel => parcel.id === destinationParcelId);
-  console.log("destinationParcel", destinationParcel);
+  //console.log("destinationParcel", destinationParcel);
 
   if (currentLocation === destinationParcel) {
     // Train has arrived at its destination
     train.nextStop = (train.nextStop + 1) % schedule.stations.length;
     train.status = `Arrived at station "${destinationParcel.id}"`;
-    console.log("TSSSS");
+    //console.log("TSSSS");
     return;
   }
 
-  console.log("currentLocation", currentLocation);
-  console.log("destinationParcel", destinationParcel);
+  //console.log("currentLocation", currentLocation);
+  //console.log("destinationParcel", destinationParcel);
 
   let distanceToDestination = 0;
   if (currentLocation.cluster === destinationParcel.cluster) {
@@ -456,9 +456,9 @@ function moveTrain(trainId) {
   }
 
 
-  console.log("distanceToDestination", distanceToDestination);
-  console.log(currentLocation.cluster);
-  console.log(destinationParcel.cluster);
+  //console.log("distanceToDestination", distanceToDestination);
+  //console.log(currentLocation.cluster);
+  //console.log(destinationParcel.cluster);
 
   const currentCluster = currentLocation.cluster;
   const destinationCluster = destinationParcel.cluster;
@@ -471,24 +471,24 @@ function moveTrain(trainId) {
 
   if (currentCluster === destinationCluster) {
     train.interClusterTravel = 0; // Reset interClusterTravel
-    console.log("intracluster");
+    //console.log("intracluster");
   } else if (train.interClusterTravel === 0) {
     if (!isAtClusterEntranceExit(currentLocation)) {
       const clusterExitParcel = getClosestClusterExitParcel(currentLocation);
       destinationParcel = clusterExitParcel;
       distanceToDestination = calculateDistance(train.currentLocation, destinationParcel.id);
-      console.log("drive to cluster exit");
+      //console.log("drive to cluster exit");
     } else {
       const clusterTravelDistance = getClusterTravelDistance(currentCluster, destinationCluster);
       train.interClusterTravel = clusterTravelDistance; // Initialize interClusterTravel
-      console.log("init intercluster");
+      //console.log("init intercluster");
     }
   }
 
   // Handle inter-cluster travel
   if (train.interClusterTravel > 0) {
     train.interClusterTravel -= train.speed;
-    console.log("intercluster", train.interClusterTravel);
+    //console.log("intercluster", train.interClusterTravel);
 
     const remainingDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster) - train.interClusterTravel;
     const totalDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
@@ -498,7 +498,7 @@ function moveTrain(trainId) {
     if (train.interClusterTravel <= 0) {
       const closestClusterEntryParcel = getClosestClusterEntryParcel(destinationParcel.cluster, train.currentLocation);
       train.currentLocation = closestClusterEntryParcel.id;
-      console.log("Train arrives at the entry parcel: ", train.currentLocation);
+      //console.log("Train arrives at the entry parcel: ", train.currentLocation);
     }
 
     return;
@@ -509,12 +509,12 @@ function moveTrain(trainId) {
     const currentParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === train.currentLocation);
     const destinationParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === destinationParcel.id);
     const direction = (destinationParcelIndex > currentParcelIndex) ? 1 : -1;
-    console.log("direction", direction);
-    console.log("currentParcelIndex", currentParcelIndex);
-    console.log("destinationParcelIndex", destinationParcelIndex);
-    console.log(train.currentLocation);
+    //console.log("direction", direction);
+    //console.log("currentParcelIndex", currentParcelIndex);
+    //console.log("destinationParcelIndex", destinationParcelIndex);
+    //console.log(train.currentLocation);
     const nextParcel = getNextParcel(train.currentLocation, direction);
-    console.log("nextParcel", nextParcel);
+    //console.log("nextParcel", nextParcel);
 
     if (nextParcel) {
       train.currentLocation = nextParcel.id;
@@ -524,7 +524,8 @@ function moveTrain(trainId) {
     // Train overshoots the destination
     train.currentLocation = destinationParcel.id;
   }
-  console.log("Train arrives at: ", train.currentLocation);
+  //console.log("Train arrives at: ", train.currentLocation);
+  updateTrainPositions();
 }
 
 //Loading and Unloading: Loads for 10s and loads all at once
@@ -533,6 +534,157 @@ function moveTrain(trainId) {
 // ----------------------------------------------------------- UI Functions -------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------
 
+/* ---------------------------------------- Visualization World ---------------------------------------- */
+function createGameWorldVisualization() {
+  const svg = document.getElementById("game-world-svg");
+  const svgns = "http://www.w3.org/2000/svg";
+
+  // Create cluster and parcel representations
+  const clusterSet = new Set(parcels.parcelList.map(parcel => parcel.cluster));
+  const clusterHeight = 60;
+  const parcelSize = 20;
+
+  clusterSet.forEach((cluster, index) => {
+    const clusterGroup = document.createElementNS(svgns, "g");
+    clusterGroup.setAttribute("class", "clusterViz");
+
+    const clusterParcels = parcels.parcelList.filter(parcel => parcel.cluster === cluster);
+    const clusterX = 50;
+    const clusterY = 50 + index * (clusterHeight + 50);
+
+    clusterParcels.forEach((parcel, parcelIndex) => {
+      // Create parcel rectangles
+      const parcelRect = document.createElementNS(svgns, "rect");
+      parcelRect.setAttribute("class", "parcelViz");
+      parcelRect.setAttribute("x", clusterX + parcelIndex * parcelSize);
+      parcelRect.setAttribute("y", clusterY);
+      parcelRect.setAttribute("width", parcelSize);
+      parcelRect.setAttribute("height", parcelSize);
+      parcelRect.setAttribute("data-parcel-id", parcel.id);
+
+      clusterGroup.appendChild(parcelRect);
+    });
+
+    svg.appendChild(clusterGroup);
+  });
+
+  // Create train circles
+  gameState.trainList.forEach((train) => {
+    const trainCircle = document.createElementNS(svgns, "circle");
+    trainCircle.classList.add("trainViz");
+    trainCircle.setAttribute("data-train-id", train.id);
+
+    const parcel = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+    const parcelRect = svg.querySelector(`.parcelViz[data-parcel-id="${parcel.id}"]`);
+
+    if (parcelRect) {
+      const initialX = parseFloat(parcelRect.getAttribute("x")) + parcelSize / 2;
+      const initialY = parseFloat(parcelRect.getAttribute("y")) + parcelSize / 2;
+
+      trainCircle.setAttribute("cx", initialX);
+      trainCircle.setAttribute("cy", initialY);
+    }
+
+    trainCircle.setAttribute("r", 5);
+    trainCircle.setAttribute("fill", "blue");
+
+    svg.appendChild(trainCircle);
+  });
+
+  // Initial train positions
+  updateTrainPositions();
+}
+
+function lerp(start, end, t) {
+  return start * (1 - t) + end * t;
+}
+
+function getClusterCenter(clusterId) {
+  const svg = document.getElementById("game-world-svg");
+  const firstParcelInCluster = parcels.parcelList.find(parcel => parcel.cluster === clusterId);
+  const parcelRect = svg.querySelector(`.parcelViz[data-parcel-id="${firstParcelInCluster.id}"]`);
+
+  if (parcelRect) {
+    const clusterX = parseFloat(parcelRect.getAttribute("x")) - 10;
+    const clusterY = parseFloat(parcelRect.getAttribute("y")) + parseFloat(parcelRect.getAttribute("height")) / 2;
+    return { x: clusterX, y: clusterY };
+  }
+
+  return null;
+}
+
+function animateInterClusterTrain(trainCircle, startX, startY, endX, endY, duration, startTime) {
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min((timestamp - startTime) / duration, 1);
+
+    trainCircle.setAttribute("cx", lerp(startX, endX, progress));
+    trainCircle.setAttribute("cy", lerp(startY, endY, progress));
+
+    if (progress < 1) {
+      requestAnimationFrame((timestamp) => animateInterClusterTrain(trainCircle, startX, startY, endX, endY, duration, startTime));
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function updateTrainPositions() {
+  const svg = document.getElementById("game-world-svg");
+  const duration = 1000; // Duration of the animation in milliseconds
+
+  function animateTrain(train, trainCircle, startX, startY, endX, endY, timestamp) {
+    if (!train.startTime) train.startTime = timestamp;
+    const progress = Math.min((timestamp - train.startTime) / duration, 1);
+
+    trainCircle.setAttribute("cx", lerp(startX, endX, progress));
+    trainCircle.setAttribute("cy", lerp(startY, endY, progress));
+
+    if (progress < 1) {
+      requestAnimationFrame((timestamp) => animateTrain(train, trainCircle, startX, startY, endX, endY, timestamp));
+    } else {
+      train.startTime = null; // Reset the startTime after the animation is complete
+    }
+  }
+
+  gameState.trainList.forEach((train) => {
+    const trainCircle = svg.querySelector(`.trainViz[data-train-id="${train.id}"]`);
+    const parcel = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+    const parcelSquare = svg.querySelector(`.parcelViz[data-parcel-id="${parcel.id}"]`);
+
+    if (parcelSquare) {
+      let startX, startY, endX, endY;
+
+      if (train.status.startsWith("Traveling to cluster")) {
+        // Inter-cluster travel
+        const sourceCluster = parcels.parcelList.find(parcel => parcel.id === train.currentLocation).cluster;
+
+        const schedule = getScheduleById(train.scheduleId);
+        const destinationParcelId = schedule.stations[train.nextStop] ? schedule.stations[train.nextStop].parcelId : "parcel-1";
+        const destinationParcel = parcels.parcelList.find(parcel => parcel.id === destinationParcelId);
+        const destinationCluster = destinationParcel.cluster;
+
+        const sourceClusterCenter = getClusterCenter(sourceCluster);
+        const destinationClusterCenter = getClusterCenter(destinationCluster);
+
+        startX = sourceClusterCenter.x;
+        startY = sourceClusterCenter.y;
+        endX = destinationClusterCenter.x;
+        endY = destinationClusterCenter.y;
+      } else {
+        // Intra-cluster travel
+        startX = parseFloat(trainCircle.getAttribute("cx"));
+        startY = parseFloat(trainCircle.getAttribute("cy"));
+        endX = parseFloat(parcelSquare.getAttribute("x")) + parseFloat(parcelSquare.getAttribute("width")) / 2;
+        endY = parseFloat(parcelSquare.getAttribute("y")) + parseFloat(parcelSquare.getAttribute("height")) / 2;
+      }
+
+      if (!train.startTime) {
+        requestAnimationFrame((timestamp) => animateTrain(train, trainCircle, startX, startY, endX, endY, timestamp));
+      }
+    }
+  });
+}
 /* ---------------------------------------- Train Table ---------------------------------------- */
 
 function updateTrainListUI() {
@@ -629,7 +781,6 @@ function showAssignScheduleOverlay(trainId) {
   submitButton.classList.add("overlay-element");
   submitButton.addEventListener("click", () => {
     const selectedScheduleId = parseInt(dropdown.value, 10);
-    console.log(selectedScheduleId);
     updateTrain(trainId, null, selectedScheduleId);
     updateScheduleListUI();
     document.body.removeChild(overlay);
@@ -760,7 +911,6 @@ function showScheduleOverlay(scheduleId) {
 
   schedule.stations.forEach((station, index) => {
     // Get parcel and cluster data (replace with your actual data retrieval methods)
-    console.log(station);
     const parcel = parcels.parcelList.find(p => p.id === station.parcelId);
     const cluster = parcel.cluster;
 
