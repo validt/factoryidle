@@ -56,7 +56,6 @@ const gameLoop = (() => {
         updateClusterParcels();
         updateScheduleListUI();
         updateTrainListUI();
-        createGameWorldVisualization();
         // initializeAnalytics();
         gameInterval = setInterval(() => {
             updateResources();
