@@ -1,5 +1,8 @@
 // trains.js
 const interClusterDistance = 10;
+const LOADING_TIME = 5000; // Value to default to
+const TICK_INTERVAL = 1000;
+
 const addStationButtonListeners = new WeakMap();
 const saveScheduleButtonListeners = new WeakMap();
 const deleteScheduleButtonListeners = new WeakMap();
@@ -73,6 +76,7 @@ function Train(id, name, scheduleId) {
   this.name = name;
   this.scheduleId = scheduleId;
   this.currentLocation = "parcel-1"; //a parcelId
+  this.timeSpentAtStation = 0;
   this.interClusterTravel = 0;
   this.nextStop;        //a parcelId
   this.currentAction = "Waiting";
@@ -405,10 +409,109 @@ function getNextParcel(currentParcelId, direction) {
   }
 }
 
+
+
 function getClusterTravelDistance(currentCluster, destinationCluster) {
   const clusterDistance = Math.abs(destinationCluster - currentCluster);
   return interClusterDistance * clusterDistance;
 }
+
+function getCurrentStationCondition(train) {
+  const schedule = getScheduleById(train.scheduleId);
+  if (!schedule) return null;
+
+  const currentStation = schedule.stations[train.nextStop];
+  if (!currentStation) return null;
+
+  return currentStation.condition;
+}
+
+function executeLoading(train) {
+  const schedule = getScheduleById(train.scheduleId);
+  const currentStation = schedule.stations[train.nextStop];
+  const currentParcel = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+
+  const loading = currentStation.load;
+  const unloading = currentStation.unload;
+  const allResources = loading.concat(unloading);
+
+  let remainingRate = 100;
+  let prevRemainingRate = remainingRate;
+  let iteration = 0;
+  const maxIterations = 10;
+  const minChangeThreshold = 0.01;
+
+  while (iteration < maxIterations) {
+    const ratePerResource = remainingRate / allResources.length;
+    remainingRate = 0;
+
+    for (let resource of allResources) {
+      const rate = ratePerResource;
+
+      if (unloading.includes(resource)) {
+        const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
+
+        if (cargoIndex !== -1) {
+          // Initialize the resource in the parcel if it doesn't exist
+          if (!currentParcel.resources.hasOwnProperty(resource)) {
+            currentParcel.resources[resource] = 0;
+          }
+
+          const parcelSpace = currentParcel.maxResources - currentParcel.resources[resource];
+
+          const actualUnload = Math.min(train.cargo[cargoIndex].amount, parcelSpace, rate);
+          console.log(train.timeSpentAtStation, "unloading", resource, actualUnload);
+          currentParcel.resources[resource] += actualUnload;
+          remainingRate += rate - actualUnload;
+
+          // Update the train's cargo
+          train.cargo[cargoIndex].amount -= actualUnload;
+          if (train.cargo[cargoIndex].amount === 0) {
+            train.cargo.splice(cargoIndex, 1);
+          }
+        }
+      }
+
+      if (loading.includes(resource)) {
+        const availableResource = currentParcel.resources[resource];
+        const trainSpace = train.maxCargo - train.cargo.reduce((acc, cargoItem) => acc + cargoItem.amount, 0);
+
+        const actualLoad = Math.min(trainSpace, availableResource, rate);
+        console.log(train.timeSpentAtStation, "loading", resource, actualLoad);
+        currentParcel.resources[resource] -= actualLoad;
+        remainingRate += rate - actualLoad;
+
+        // Update the train's cargo
+        const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
+        if (cargoIndex === -1) {
+          train.cargo.push({ resource, amount: actualLoad });
+        } else {
+          train.cargo[cargoIndex].amount += actualLoad;
+        }
+      }
+    }
+
+    // Break the loop if the change in remainingRate is below the threshold
+    if (Math.abs(prevRemainingRate - remainingRate) < minChangeThreshold) {
+      break;
+    }
+
+    prevRemainingRate = remainingRate;
+    iteration += 1;
+  }
+
+  // Update the timeSpentAtStation
+  train.timeSpentAtStation += 1;
+
+  // Check if the loading/unloading process is done based on the station's condition
+  if (currentStation.condition.type === "time" && train.timeSpentAtStation >= currentStation.condition.amount) {
+    train.timeSpentAtStation = 0; // Reset the time spent at the station
+    return true;
+  }
+
+  return false;
+}
+
 
 function moveTrain(trainId) {
   const train = getTrainById(trainId);
@@ -435,9 +538,14 @@ function moveTrain(trainId) {
 
   if (currentLocation === destinationParcel) {
     // Train has arrived at its destination
-    train.nextStop = (train.nextStop + 1) % schedule.stations.length;
-    train.status = `Arrived at station "${destinationParcel.id}"`;
-    //console.log("TSSSS");
+
+    // Check if the loading process is done
+    if (executeLoading(train)) {
+      train.nextStop = (train.nextStop + 1) % schedule.stations.length;
+      train.status = `Leaving station "${destinationParcel.name}"`;
+    } else {
+      train.status = `Loading at station "${destinationParcel.name}"`;
+    }
     return;
   }
 
@@ -499,12 +607,12 @@ function moveTrain(trainId) {
       const closestClusterEntryParcel = getClosestClusterEntryParcel(destinationParcel.cluster, train.currentLocation);
       train.currentLocation = closestClusterEntryParcel.id;
 
-      // Store the starting position, destination position, and total inter-cluster distance in the train object
-      const sourceClusterCenter = getClusterCenter(currentCluster);
-      const destinationClusterCenter = getClusterCenter(destinationCluster);
-      train.startPosition = { x: sourceClusterCenter.x, y: sourceClusterCenter.y };
-      train.destinationPosition = { x: destinationClusterCenter.x, y: destinationClusterCenter.y };
-      train.totalInterClusterDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
+      // Animation Stuff // Store the starting position, destination position, and total inter-cluster distance in the train object
+      // const sourceClusterCenter = getClusterCenter(currentCluster);
+      // const destinationClusterCenter = getClusterCenter(destinationCluster);
+      // train.startPosition = { x: sourceClusterCenter.x, y: sourceClusterCenter.y };
+      // train.destinationPosition = { x: destinationClusterCenter.x, y: destinationClusterCenter.y };
+      // train.totalInterClusterDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
     }
     return;
   }
@@ -750,6 +858,27 @@ function updateTrainListUI() {
     statusCell.textContent = train.status;
     currentLocationCell.textContent = train.currentLocation;
     cargoCell.textContent = `${currentCargoSpace} / ${train.maxCargo}`;
+
+    // Attach tooltip event listeners
+    cargoCell.addEventListener("mouseover", (event) => {
+      const cargoText = train.cargo
+        .map((cargoItem) => `${cargoItem.amount} ${cargoItem.resource}`)
+        .join("<br>");
+
+      tooltip.innerHTML = cargoText || "Empty";
+      tooltip.style.display = "block";
+      tooltip.style.left = event.pageX + 10 + "px";
+      tooltip.style.top = event.pageY + 10 + "px";
+    });
+
+    cargoCell.addEventListener("mouseout", () => {
+      tooltip.style.display = "none";
+    });
+
+    cargoCell.addEventListener("mousemove", (event) => {
+      tooltip.style.left = event.pageX + 10 + "px";
+      tooltip.style.top = event.pageY + 10 + "px";
+    });
 
     row.appendChild(nameCell);
     row.appendChild(scheduleCell);
