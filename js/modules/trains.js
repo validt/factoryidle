@@ -90,7 +90,7 @@ function Train(id, name, scheduleId) {
     ironOre: 150,
     */
   ];
-  this.maxCargo = 1000;
+  this.maxCargo = 5000;
   this.loadRate = 100;
 }
 
@@ -318,9 +318,9 @@ function getTrainById(trainId) {
 function calculateCargoSpace(cargo) {
   let totalSpace = 0;
 
-  for (const resource in cargo) {
-    const resourceAmount = cargo[resource];
-    const resourceDensity = resourceMetadata[resource]?.density || 1;
+  for (const cargoItem of cargo) {
+    const resourceAmount = cargoItem.amount;
+    const resourceDensity = resourceMetadata[cargoItem.resource]?.density || 1;
     totalSpace += resourceAmount * resourceDensity;
   }
 
@@ -442,11 +442,18 @@ function executeLoading(train) {
   const minChangeThreshold = 0.01;
 
   while (iteration < maxIterations) {
-    const ratePerResource = remainingRate / allResources.length;
+    let activeResources = allResources.filter(resource => {
+      const canLoad = loading.includes(resource) && currentParcel.resources[resource] > 0;
+      const canUnload = unloading.includes(resource) && train.cargo.some(cargoItem => cargoItem.resource === resource && cargoItem.amount > 0);
+      return canLoad || canUnload;
+    });
+
+    const ratePerResource = remainingRate / activeResources.length;
     remainingRate = 0;
 
-    for (let resource of allResources) {
+    for (let resource of activeResources) {
       const rate = ratePerResource;
+      const resourceDensity = resourceMetadata[resource]?.density || 1;
 
       if (unloading.includes(resource)) {
         const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
@@ -457,10 +464,10 @@ function executeLoading(train) {
             currentParcel.resources[resource] = 0;
           }
 
-          const parcelSpace = currentParcel.maxResources - currentParcel.resources[resource];
+          const parcelSpace = (currentParcel.maxResources / resourceDensity) - currentParcel.resources[resource];
 
           const actualUnload = Math.min(train.cargo[cargoIndex].amount, parcelSpace, rate);
-          console.log(train.timeSpentAtStation, "unloading", resource, actualUnload);
+          console.log(train.timeSpentAtStation, "unloading", resource, actualUnload, resourceDensity);
           currentParcel.resources[resource] += actualUnload;
           remainingRate += rate - actualUnload;
 
@@ -471,24 +478,24 @@ function executeLoading(train) {
           }
         }
       }
+        if (loading.includes(resource)) {
+          const availableResource = currentParcel.resources[resource];
+          const trainSpace = (train.maxCargo - calculateCargoSpace(train.cargo)) / resourceDensity;
 
-      if (loading.includes(resource)) {
-        const availableResource = currentParcel.resources[resource];
-        const trainSpace = train.maxCargo - train.cargo.reduce((acc, cargoItem) => acc + cargoItem.amount, 0);
+          const actualLoad = Math.min(trainSpace, availableResource, rate);
+          console.log(train.timeSpentAtStation, "loading", resource, actualLoad, resourceDensity);
+          currentParcel.resources[resource] -= actualLoad;
+          remainingRate += rate - actualLoad;
 
-        const actualLoad = Math.min(trainSpace, availableResource, rate);
-        console.log(train.timeSpentAtStation, "loading", resource, actualLoad);
-        currentParcel.resources[resource] -= actualLoad;
-        remainingRate += rate - actualLoad;
-
-        // Update the train's cargo
-        const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
-        if (cargoIndex === -1) {
-          train.cargo.push({ resource, amount: actualLoad });
-        } else {
-          train.cargo[cargoIndex].amount += actualLoad;
+          // Update the train's cargo
+          const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
+          if (cargoIndex === -1) {
+            train.cargo.push({ resource, amount: actualLoad });
+          } else {
+            train.cargo[cargoIndex].amount += actualLoad;
+          }
         }
-      }
+
     }
 
     // Break the loop if the change in remainingRate is below the threshold
@@ -505,12 +512,12 @@ function executeLoading(train) {
 
   // Check if the loading/unloading process is done based on the station's condition
   if (currentStation.condition.type === "time" && train.timeSpentAtStation >= currentStation.condition.amount) {
-    train.timeSpentAtStation = 0; // Reset the time spent at the station
-    return true;
+  train.timeSpentAtStation = 0; // Reset the time spent at the station
+  return true;
   }
 
   return false;
-}
+  }
 
 
 function moveTrain(trainId) {
@@ -542,9 +549,9 @@ function moveTrain(trainId) {
     // Check if the loading process is done
     if (executeLoading(train)) {
       train.nextStop = (train.nextStop + 1) % schedule.stations.length;
-      train.status = `Leaving station "${destinationParcel.name}"`;
+      train.status = `Leaving station "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     } else {
-      train.status = `Loading at station "${destinationParcel.name}"`;
+      train.status = `Loading at station "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     }
     return;
   }
@@ -631,7 +638,7 @@ function moveTrain(trainId) {
 
     if (nextParcel) {
       train.currentLocation = nextParcel.id;
-      train.status = `Traveling to "${destinationParcel.id}"`;
+      train.status = `Traveling to "${destinationParcel.name}"`;
     }
   } else {
     // Train overshoots the destination
@@ -743,7 +750,7 @@ function animateTrain(train, trainCircle, startX, startY, endX, endY, duration) 
 
 function updateTrainPositions() {
   const svg = document.getElementById("game-world-svg");
-  const duration = 1000; // Duration of the animation in milliseconds
+  const duration = TICK_INTERVAL; // Duration of the animation in milliseconds
 
   gameState.trainList.forEach((train) => {
     const trainCircle = svg.querySelector(`.trainViz[data-train-id="${train.id}"]`);
@@ -856,13 +863,14 @@ function updateTrainListUI() {
     }
 
     statusCell.textContent = train.status;
-    currentLocationCell.textContent = train.currentLocation;
+    const currentParcel = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+    currentLocationCell.textContent = currentParcel.name ? currentParcel.name : currentParcel.id;
     cargoCell.textContent = `${currentCargoSpace} / ${train.maxCargo}`;
 
     // Attach tooltip event listeners
     cargoCell.addEventListener("mouseover", (event) => {
       const cargoText = train.cargo
-        .map((cargoItem) => `${cargoItem.amount} ${cargoItem.resource}`)
+        .map((cargoItem) => `${cargoItem.amount.toFixed(1)} ${cargoItem.resource}`)
         .join("<br>");
 
       tooltip.innerHTML = cargoText || "Empty";
@@ -1281,15 +1289,22 @@ function populateStationsDropdown() {
   stationsDropdown.innerHTML = "";
 
   // Filter parcels with at least one train station building
-  const stationParcels = parcels.parcelList.filter(parcel => {
-    return parcel.buildings && parcel.buildings.trainStation && parcel.buildings.trainStation > 0;
-  });
+  const stationParcels = parcels.parcelList
+    .filter(parcel => {
+      return parcel.buildings && parcel.buildings.trainStation && parcel.buildings.trainStation > 0;
+    })
+    .sort((a, b) => {
+      if (a.cluster === b.cluster) {
+        return parcels.parcelList.indexOf(a) - parcels.parcelList.indexOf(b);
+      }
+      return a.cluster - b.cluster;
+    });
 
   // Add station parcels as options to the dropdown
   stationParcels.forEach(stationParcel => {
     const option = document.createElement("option");
     option.value = stationParcel.id;
-    option.textContent = stationParcel.name;
+    option.textContent = `Cluster ${stationParcel.cluster} - ${stationParcel.name ? stationParcel.name : stationParcel.id}`;
     stationsDropdown.appendChild(option);
   });
 }
