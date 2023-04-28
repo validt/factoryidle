@@ -29,6 +29,7 @@ const gameState = {
   },
   scheduleList: [],
   trainList: [],
+  maxTrains: 1,
   // Add other relevant game state data as needed
 };
 
@@ -148,6 +149,10 @@ window.loadGame = function() {
       window.gameState.trainList = parsedState.trainList;
     }
 
+    if (parsedState.maxTrains) {
+      window.gameState.maxTrains = parsedState.maxTrains;
+    }
+
     // Add parcels to the UI
     window.gameState.parcels.forEach((parcel, index) => {
       if (index > 0) {
@@ -182,6 +187,7 @@ window.loadGame = function() {
     }
 
     // Add other relevant game state data assignments as needed
+    window.researchManager.populateResearchDropdown();
   }
 };
 

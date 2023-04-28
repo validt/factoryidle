@@ -1040,7 +1040,7 @@ const ui = (() => {
     if (onlyBuiltCheckbox.dataset.listenerAttached !== 'true') {
       onlyBuiltCheckbox.dataset.listenerAttached = 'true';
       onlyBuiltCheckbox.addEventListener("click", () => {
-        updateBuildingDisplay(parcel);
+        updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
       });
     }
 
@@ -1062,7 +1062,7 @@ const ui = (() => {
       allTab.addEventListener("click", () => {
         selectedTab = "All";
         console.log("2", selectedTab);
-        updateBuildingDisplay(parcel);
+        updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
         updateTabClasses();
       });
       tabContainer.appendChild(allTab);
@@ -1082,7 +1082,7 @@ const ui = (() => {
           buildingTab.addEventListener("click", () => {
             selectedTab = key;
             console.log("1", selectedTab);
-            updateBuildingDisplay(parcel);
+            updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
             updateTabClasses();
           });
           tabContainer.appendChild(buildingTab);

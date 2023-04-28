@@ -34,6 +34,29 @@ class ProgressionManager {
     const building = window.buildingManager.getBuilding(buildingId);
     const parcels = window.gameState.parcels;
 
+    const trainUpgrades = [
+      { researchKey: 'trainsMax1', maxTrains: 2, research: { researchPoints: 60 } },
+      { researchKey: 'trainsMax2', maxTrains: 4, research: { researchPoints: 60 } },
+      { researchKey: 'trainsMax3', maxTrains: 8, research: { researchPoints: 60 } },
+      { researchKey: 'trainsMax4', maxTrains: 16, research: { researchPoints: 60 } }
+    ];
+    
+    trainUpgrades.forEach((upgrade, index) => {
+      if (window.gameState.research[upgrade.researchKey]) {
+        gameState.maxTrains = upgrade.maxTrains;
+    
+        // Add the next research option if it exists in the array and it's not already added
+        const nextUpgrade = trainUpgrades[index + 1];
+        if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
+          console.log("adding");
+          window.researchManager.addResearch(
+            new Research(nextUpgrade.researchKey, `Upgrade Train Limit ${nextUpgrade.maxTrains}`, nextUpgrade.research)
+          );
+          window.researchManager.populateResearchDropdown();
+        }
+      }
+    });
+
     // Check for GameWin
     if (window.gameState.research.gameWon) {
       alert("Congrats. You won the Demo. Feedback highly appreciated. Also, take a screenshot of your factory and share it, that would be even more appreciated :)");

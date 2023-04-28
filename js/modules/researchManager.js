@@ -13,7 +13,9 @@ class ResearchManager {
   }
 
   addResearch(research) {
-    this.researchList.push(research);
+    if (!this.researchExists(research.id)) {
+      this.researchList.push(research);
+    }
   }
 
   getResearch(id) {
@@ -57,6 +59,10 @@ class ResearchManager {
     this.completedResearch = new Set(completedResearchData);
     this.populateResearchDropdown();
   }
+
+  researchExists(researchKey) {
+    return this.researchList.some(research => research.id === researchKey);
+  }
 }
 
 
@@ -82,6 +88,7 @@ window.researchManager.addResearch(new Research('beaconTech3', 'Beacon Tech 3', 
 window.researchManager.addResearch(new Research('gameWon', 'Win the Demo', { researchPoints: 4000 }));
 window.researchManager.addResearch(new Research('gameWon2', 'Win Harder', { researchPoints: 40000 }));
 window.researchManager.addResearch(new Research('gameWon3', 'Win too Hard', { researchPoints: 400000 }));
+window.researchManager.addResearch(new Research('trainsMax1', 'Upgrade Train Limit 2', { researchPoints: 60 }));
 //window.researchManager.addResearch(new Research('militaryTech', 'Military (Not Implemented Yet)', { researchPoints: 200000 }));
 // Add more research options as needed
 

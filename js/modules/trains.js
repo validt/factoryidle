@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const trainMenu = document.getElementById("trainMenu");
     const trainId = trainMenu.getAttribute("data-train-id");
     trainMenu.classList.add("hidden");
-    //console.log("open with id", trainId);
     showAssignScheduleOverlay(trainId);
   });
 
@@ -156,7 +155,6 @@ function findAvailableScheduleId() {
 
 function removeSchedule(scheduleId) {
   // Remove a schedule from the schedule list
-  //console.log(scheduleId);
   gameState.scheduleList = gameState.scheduleList.filter((schedule) => schedule.id !== scheduleId);
 
   // Remove the references to the removed schedule from any trains
@@ -215,7 +213,6 @@ function updateTrain(trainId, newName = null, newScheduleId = null) {
     trainId = parseInt(trainId);
   }
   const train = gameState.trainList.find((t) => t.id === trainId);
-  //console.log(train);
 
   if (!train) {
     console.error(`Train with ID ${trainId} not found.`);
@@ -441,6 +438,13 @@ function executeLoading(train) {
   const maxIterations = 10;
   const minChangeThreshold = 0.01;
 
+  // Add a new property to store the inactivity timer
+  if (!train.hasOwnProperty("inactivityTimer")) {
+    train.inactivityTimer = 0;
+  }
+
+  let activityOccurred = false;
+
   while (iteration < maxIterations) {
     let activeResources = allResources.filter(resource => {
       const canLoad = loading.includes(resource) && currentParcel.resources[resource] > 0;
@@ -467,7 +471,6 @@ function executeLoading(train) {
           const parcelSpace = (currentParcel.maxResources / resourceDensity) - currentParcel.resources[resource];
 
           const actualUnload = Math.min(train.cargo[cargoIndex].amount, parcelSpace, rate);
-          console.log(train.timeSpentAtStation, "unloading", resource, actualUnload, resourceDensity);
           currentParcel.resources[resource] += actualUnload;
           remainingRate += rate - actualUnload;
 
@@ -476,6 +479,9 @@ function executeLoading(train) {
           if (train.cargo[cargoIndex].amount === 0) {
             train.cargo.splice(cargoIndex, 1);
           }
+          if (actualUnload > 0) {
+            activityOccurred = activityOccurred || true;
+          }
         }
       }
         if (loading.includes(resource)) {
@@ -483,7 +489,6 @@ function executeLoading(train) {
           const trainSpace = (train.maxCargo - calculateCargoSpace(train.cargo)) / resourceDensity;
 
           const actualLoad = Math.min(trainSpace, availableResource, rate);
-          console.log(train.timeSpentAtStation, "loading", resource, actualLoad, resourceDensity);
           currentParcel.resources[resource] -= actualLoad;
           remainingRate += rate - actualLoad;
 
@@ -493,6 +498,10 @@ function executeLoading(train) {
             train.cargo.push({ resource, amount: actualLoad });
           } else {
             train.cargo[cargoIndex].amount += actualLoad;
+          }
+
+          if (actualLoad > 0) {
+            activityOccurred = activityOccurred || true;
           }
         }
 
@@ -510,10 +519,21 @@ function executeLoading(train) {
   // Update the timeSpentAtStation
   train.timeSpentAtStation += 1;
 
+  // Update inactivityTimer based on activity
+  if (activityOccurred) {
+    train.inactivityTimer = 0;
+  } else {
+    train.inactivityTimer += 1;
+  }
+
   // Check if the loading/unloading process is done based on the station's condition
-  if (currentStation.condition.type === "time" && train.timeSpentAtStation >= currentStation.condition.amount) {
-  train.timeSpentAtStation = 0; // Reset the time spent at the station
-  return true;
+  if (
+    (currentStation.condition.type === "time" && train.timeSpentAtStation >= currentStation.condition.amount) ||
+    (currentStation.condition.type === "inactivity" && train.inactivityTimer >= currentStation.condition.amount)
+  ) {
+    train.timeSpentAtStation = 0; // Reset the time spent at the station
+    train.inactivityTimer = 0; // Reset the inactivity timer
+    return true;
   }
 
   return false;
@@ -530,18 +550,14 @@ function moveTrain(trainId) {
   if (train.nextStop === undefined || Number.isNaN(train.nextStop)) {
     train.nextStop = 0;
   }
-  //console.log("Train starts at: ", train.currentLocation);
-  //console.log("Train drives towards: ", train.nextStop);
   if (!train || !schedule) {
     console.error(`Could not find train or schedule for trainId: ${trainId}`);
     return;
   }
 
   const currentLocation = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
-  //console.log("currentLocation", currentLocation);
   const destinationParcelId = schedule.stations[train.nextStop] ? schedule.stations[train.nextStop].parcelId : "parcel-1";
   let destinationParcel = parcels.parcelList.find(parcel => parcel.id === destinationParcelId);
-  //console.log("destinationParcel", destinationParcel);
 
   if (currentLocation === destinationParcel) {
     // Train has arrived at its destination
@@ -556,9 +572,6 @@ function moveTrain(trainId) {
     return;
   }
 
-  //console.log("currentLocation", currentLocation);
-  //console.log("destinationParcel", destinationParcel);
-
   let distanceToDestination = 0;
   if (currentLocation.cluster === destinationParcel.cluster) {
     distanceToDestination = calculateDistance(train.currentLocation, destinationParcelId)
@@ -571,10 +584,6 @@ function moveTrain(trainId) {
   }
 
 
-  //console.log("distanceToDestination", distanceToDestination);
-  //console.log(currentLocation.cluster);
-  //console.log(destinationParcel.cluster);
-
   const currentCluster = currentLocation.cluster;
   const destinationCluster = destinationParcel.cluster;
 
@@ -586,24 +595,20 @@ function moveTrain(trainId) {
 
   if (currentCluster === destinationCluster) {
     train.interClusterTravel = 0; // Reset interClusterTravel
-    //console.log("intracluster");
   } else if (train.interClusterTravel === 0) {
     if (!isAtClusterEntranceExit(currentLocation)) {
       const clusterExitParcel = getClosestClusterExitParcel(currentLocation);
       destinationParcel = clusterExitParcel;
       distanceToDestination = calculateDistance(train.currentLocation, destinationParcel.id);
-      //console.log("drive to cluster exit");
     } else {
       const clusterTravelDistance = getClusterTravelDistance(currentCluster, destinationCluster);
       train.interClusterTravel = clusterTravelDistance; // Initialize interClusterTravel
-      //console.log("init intercluster");
     }
   }
 
   // Handle inter-cluster travel
   if (train.interClusterTravel > 0) {
     train.interClusterTravel -= train.speed;
-    //console.log("intercluster", train.interClusterTravel);
 
     const remainingDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster) - train.interClusterTravel;
     const totalDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
@@ -629,22 +634,16 @@ function moveTrain(trainId) {
     const currentParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === train.currentLocation);
     const destinationParcelIndex = parcels.parcelList.findIndex(parcel => parcel.id === destinationParcel.id);
     const direction = (destinationParcelIndex > currentParcelIndex) ? 1 : -1;
-    //console.log("direction", direction);
-    //console.log("currentParcelIndex", currentParcelIndex);
-    //console.log("destinationParcelIndex", destinationParcelIndex);
-    //console.log(train.currentLocation);
     const nextParcel = getNextParcel(train.currentLocation, direction);
-    //console.log("nextParcel", nextParcel);
 
     if (nextParcel) {
       train.currentLocation = nextParcel.id;
-      train.status = `Traveling to "${destinationParcel.name}"`;
+      train.status = `Traveling to "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     }
   } else {
     // Train overshoots the destination
     train.currentLocation = destinationParcel.id;
   }
-  //console.log("Train arrives at: ", train.currentLocation);
 }
 
 //Loading and Unloading: Loads for 10s and loads all at once
@@ -784,9 +783,6 @@ function updateTrainPositions() {
           endX = lerp(train.startPosition.x, train.destinationPosition.x, nextProgress);
           endY = lerp(train.startPosition.y, train.destinationPosition.y, nextProgress);
         }
-        console.log("nextProgress", nextProgress.toFixed(1));
-        console.log(endX.toFixed(1), endY.toFixed(1), startX.toFixed(1), startY.toFixed(1), duration, train.interClusterTravel, train.totalInterClusterDistance);
-
         // Swap startX with endX and startY with endY to reverse the direction of the animation
         animateTrain(train, trainCircle, endX, endY, startX, startY, duration);
       }
@@ -799,7 +795,6 @@ function updateTrainPositions() {
         const startY = parseFloat(trainCircle.getAttribute("cy"));
         const endX = parseFloat(parcelSquare.getAttribute("x")) + parseFloat(parcelSquare.getAttribute("width")) / 2;
         const endY = parseFloat(parcelSquare.getAttribute("y")) + parseFloat(parcelSquare.getAttribute("height")) / 2;
-        console.log(endX.toFixed(1), endY.toFixed(1), startX.toFixed(1), startY.toFixed(1), duration);
         animateTrain(train, trainCircle, startX, startY, endX, endY, duration);
       }
     }
@@ -1062,7 +1057,7 @@ function showScheduleOverlay(scheduleId) {
 
     // Add the table cells and their content
     const nameCell = document.createElement("td");
-    nameCell.textContent = parcel.name;
+    nameCell.textContent = parcel.name ? parcel.name : parcel.id;
     nameCell.classList.add("left-cell");
     row.appendChild(nameCell);
 
