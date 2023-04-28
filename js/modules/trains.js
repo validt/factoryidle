@@ -3,6 +3,11 @@ const interClusterDistance = 10;
 const LOADING_TIME = 5000; // Value to default to
 const TICK_INTERVAL = 1000;
 
+const trainCost = {
+  ironPlates: 100,
+  copperPlates: 50,
+};
+
 const addStationButtonListeners = new WeakMap();
 const saveScheduleButtonListeners = new WeakMap();
 const deleteScheduleButtonListeners = new WeakMap();
@@ -279,26 +284,100 @@ function saveSchedule(scheduleId) {
 }
 
 function buyTrain() {
-  // Buy a new train
-  // Deduct the train cost from the player's resources (skip cost logic for now)
+  const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
 
-  // Add a new train to the train list
-  const id = generateUniqueTrainId();
-  const name = `Train ${id}`;
-  const emptySchedule = [];
-  addTrain(name, emptySchedule);
+  if (window.projects.hasEnoughResources(selectedParcel, trainCost)) {
+    // Deduct the train cost from the player's resources
+    for (const resource in trainCost) {
+      const totalResource = (selectedParcel.resources[resource] || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource);
 
-  // Update the UI to reflect the changes (handled by addTrain function)
+      if (selectedParcel.resources[resource] >= trainCost[resource]) {
+        selectedParcel.resources[resource] -= trainCost[resource];
+      } else {
+        const parcelResource = selectedParcel.resources[resource] || 0;
+        const remainingResource = trainCost[resource] - parcelResource;
+        selectedParcel.resources[resource] = 0;
+        buildingManager.deductResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, resource, remainingResource);
+      }
+    }
+
+    // Add a new train to the train list
+    const id = generateUniqueTrainId();
+    const name = `Train ${id}`;
+    const emptySchedule = [];
+    addTrain(name, emptySchedule);
+
+    // Update the UI to reflect the changes (handled by addTrain function)
+    ui.updateResourceDisplay(selectedParcel);
+  } else {
+    alert("You don't have enough resources to buy a train.");
+  }
 }
 
+
 function sellTrain(trainId) {
-  // Sell a train
-  // Add the train's value to the player's resources (skip cost logic for now)
+  const train = gameState.trainList.find((t) => t.id === trainId);
 
-  // Remove the train from the train list
-  removeTrain(trainId);
+  if (train) {
+    // Calculate total resources for the train
+    const refundResources = train.cargo.map(cargoItem => ({
+      resource: cargoItem.resource,
+      amount: cargoItem.amount
+    }));
 
-  // Update the UI to reflect the changes (handled by removeTrain function)
+    // Add the train cost to refundResources
+    for (const resource in trainCost) {
+      const existingResourceIndex = refundResources.findIndex(refundResource => refundResource.resource === resource);
+      if (existingResourceIndex !== -1) {
+        refundResources[existingResourceIndex].amount += trainCost[resource];
+      } else {
+        refundResources.push({ resource, amount: trainCost[resource] });
+      }
+    }
+
+    // Loop through each resource and refund accordingly
+    refundResources.forEach((refundResource) => {
+      let remainingRefund = refundResource.amount;
+      const resourceDensity = resourceMetadata[refundResource.resource]?.density || 1;
+
+      // Find parcels with remote construction facilities that have space
+      const remoteConstructionParcels = parcels.parcelList.filter(
+        (parcel) => parcel.buildings.remoteConstructionFacility &&
+          (parcel.maxResources / resourceDensity) - parcel.resources[refundResource.resource] >= remainingRefund
+      );
+        console.log(remoteConstructionParcels);
+      // Refund resources to remote construction facility parcels with available space
+      for (const parcel of remoteConstructionParcels) {
+        if (remainingRefund <= 0) break;
+
+        if (!parcel.resources.hasOwnProperty(refundResource.resource)) {
+          parcel.resources[refundResource.resource] = 0;
+        }
+
+        const parcelSpace = (parcel.maxResources / resourceDensity) - parcel.resources[refundResource.resource];
+        const actualRefund = Math.min(remainingRefund, parcelSpace);
+        parcel.resources[refundResource.resource] += actualRefund;
+        remainingRefund -= actualRefund;
+      }
+
+      // Refund remaining resources to the active parcel if there's available space
+      if (remainingRefund > 0) {
+        const activeParcel = parcels.getParcel(ui.getSelectedParcelIndex());
+
+        if (!activeParcel.resources.hasOwnProperty(refundResource.resource)) {
+          activeParcel.resources[refundResource.resource] = 0;
+        }
+
+        const activeParcelSpace = (activeParcel.maxResources / resourceDensity) - activeParcel.resources[refundResource.resource];
+        const actualRefund = Math.min(remainingRefund, activeParcelSpace);
+        activeParcel.resources[refundResource.resource] += actualRefund;
+        remainingRefund -= actualRefund;
+      }
+    });
+
+    // Remove the train from the train list
+    removeTrain(trainId);
+  }
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------
@@ -891,6 +970,13 @@ function updateTrainListUI() {
 
     trainTableBody.appendChild(row);
   });
+  // Add the buyTrainButton event listener if not already initialized
+  const buyTrainButton = document.getElementById("buy-train-button");
+
+  if (buyTrainButton.getAttribute("data-tooltip-initialized") !== "true") {
+    addTooltipToBuyTrainButton(buyTrainButton);
+    buyTrainButton.setAttribute("data-tooltip-initialized", "true");
+  }
 }
 
 
@@ -976,6 +1062,31 @@ function showRenameTrainOverlay(trainId) {
     if (event.target === overlay) {
       document.body.removeChild(overlay);
     }
+  });
+}
+
+function addTooltipToBuyTrainButton(button) {
+  const tooltip = document.getElementById("tooltip");
+
+  button.addEventListener("mouseover", (event) => {
+    const costText = Object.entries(trainCost)
+      .map(([resource, cost]) => `${cost} ${resource}`)
+      .join("<br>");
+    const tooltipText = `Cost:<br>${costText}`;
+
+    tooltip.innerHTML = tooltipText;
+    tooltip.style.display = "block";
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+  });
+
+  button.addEventListener("mouseout", () => {
+    tooltip.style.display = "none";
+  });
+
+  button.addEventListener("mousemove", (event) => {
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
   });
 }
 

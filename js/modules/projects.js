@@ -181,6 +181,7 @@ const projectsModule = (() => {
     startProject,
     projects,
     setProjects,
+    hasEnoughResources,
   };
 })();
 
