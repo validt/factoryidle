@@ -281,10 +281,11 @@ const parcels = {
 
 
 
-    createNewParcel() {
-        const parcel = new Parcel(`parcel-${this.parcelList.length + 1}`, this.maxBuildingsPerParcel);
-        this.parcelList.push(parcel);
-        return parcel;
+    createNewParcel(cluster = 0) {
+      const parcel = new Parcel(`parcel-${this.parcelList.length + 1}`, this.maxBuildingsPerParcel);
+      parcel.cluster = cluster;
+      this.parcelList.push(parcel);
+      return parcel;
     },
 
     canBuyParcel(resources) {

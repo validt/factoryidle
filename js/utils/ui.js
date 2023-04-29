@@ -910,6 +910,7 @@ const ui = (() => {
 
     // Create a new cluster container if it doesn't exist
     if (!clusterContainer) {
+      const showClusterHeader = window.gameState.research.clusterTech;      
       clusterContainer = document.createElement("div");
       clusterContainer.className = "cluster-container";
       clusterContainer.id = clusterContainerId;
@@ -928,7 +929,10 @@ const ui = (() => {
       clusterContent.className = "cluster-content";
       clusterContent.id = `cluster-content-${clusterId}`;
       clusterContent.style.display = "block";
-      clusterContainer.appendChild(clusterHeader);
+      if (showClusterHeader) {
+        clusterContainer.appendChild(clusterHeader);
+      }
+  
       clusterContainer.appendChild(clusterContent);
 
       // Find the correct position for the new cluster container
@@ -1590,6 +1594,21 @@ const ui = (() => {
     });
   }
 
+  function updateBuyParcelDropdown() {
+    const dropdown = document.getElementById("buyParcel-dropdown");
+  
+    // Clear the existing options
+    dropdown.innerHTML = "";
+  
+    // Rebuild the dropdown based on gameState.maxClusters
+    for (let i = 0; i < gameState.maxClusters; i++) {
+      const option = document.createElement("option");
+      option.value = `cluster-${i}`;
+      option.textContent = `Cluster ${i}`;
+      dropdown.appendChild(option);
+    }
+  }
+
   return {
     addParcelToUI,
     updateResourceDisplay,
@@ -1607,6 +1626,7 @@ const ui = (() => {
     formatResourceCost,
     activateBuilding,
     deactivateBuilding,
+    updateBuyParcelDropdown,
   };
 })();
 

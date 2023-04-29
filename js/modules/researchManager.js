@@ -47,6 +47,20 @@ class ResearchManager {
 
   completeResearch(researchId) {
     this.completedResearch.add(researchId);
+  
+    // Check if the completed research is "clusterTech"
+    if (researchId === "clusterTech") {
+      // Remove all parcel tabs from the UI
+      const clusterContainers = document.querySelectorAll(".cluster-container");
+      clusterContainers.forEach(clusterContainer => {
+        clusterContainer.remove();
+      });
+  
+      // Re-add all parcels with updated cluster headers
+      window.parcels.parcelList.forEach(parcel => {
+        ui.addParcelToUI(parcel);
+      });
+    }
   }
 
   saveResearchData() {
@@ -79,8 +93,10 @@ window.researchManager.addResearch(new Research('oilProcessing', 'Oil Processing
 window.researchManager.addResearch(new Research('solarTech', 'Solar Tech', { researchPoints: 32 }));
 window.researchManager.addResearch(new Research('advancedElectronics', 'Advanced Electronics', { researchPoints: 36 }));
 window.researchManager.addResearch(new Research('blueprintTech', 'Blueprint Tech', { researchPoints: 40 }));
+window.researchManager.addResearch(new Research('clusterTech', 'Cluster Expansion', { researchPoints: 45 }));
 window.researchManager.addResearch(new Research('trains', 'Trains', { researchPoints: 50 }));
 window.researchManager.addResearch(new Research('trainsMax1', 'Upgrade Train Limit 2', { researchPoints: 60 }));
+window.researchManager.addResearch(new Research('clustersMax1', 'Upgrade Cluster Limit 3', { researchPoints: 60 }));
 window.researchManager.addResearch(new Research('beaconTech', 'Beacon Tech', { researchPoints: 100 }));
 window.researchManager.addResearch(new Research('militaryTech2', 'Armor Penetrating Ammunition', { researchPoints: 150 }));
 window.researchManager.addResearch(new Research('beaconTech2', 'Beacon Tech 2', { researchPoints: 300 }));

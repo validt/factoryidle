@@ -48,7 +48,6 @@ class ProgressionManager {
         // Add the next research option if it exists in the array and it's not already added
         const nextUpgrade = trainUpgrades[index + 1];
         if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
-          console.log("adding");
           window.researchManager.addResearch(
             new Research(nextUpgrade.researchKey, `Upgrade Train Limit ${nextUpgrade.maxTrains}`, nextUpgrade.research)
           );
@@ -56,6 +55,34 @@ class ProgressionManager {
         }
       }
     });
+
+    const clusterUpgrades = [
+      { researchKey: 'clustersMax1', maxClusters: 3, research: { researchPoints: 60 } },
+      { researchKey: 'clustersMax2', maxClusters: 4, research: { researchPoints: 60 } },
+      { researchKey: 'clustersMax3', maxClusters: 5, research: { researchPoints: 60 } },
+      { researchKey: 'clustersMax4', maxClusters: 6, research: { researchPoints: 60 } }
+    ];
+    
+    clusterUpgrades.forEach((upgrade, index) => {
+      if (window.gameState.research[upgrade.researchKey]) {
+        gameState.maxClusters = upgrade.maxClusters;
+    
+        // Add the next research option if it exists in the array and it's not already added
+        const nextUpgrade = clusterUpgrades[index + 1];
+        if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
+          window.researchManager.addResearch(
+            new Research(nextUpgrade.researchKey, `Upgrade Cluster Limit ${nextUpgrade.maxClusters}`, nextUpgrade.research)
+          );
+          window.researchManager.populateResearchDropdown();
+          ui.updateBuyParcelDropdown();
+        }
+      }
+    });
+
+    // Show buyParcel-dropdown when clusterTech is researched
+    if (window.gameState.research.clusterTech) {
+      document.getElementById("buyParcel-dropdown").style.display = "inline-block";
+    }
 
     // Check for GameWin
     if (window.gameState.research.gameWon) {

@@ -30,6 +30,7 @@ const gameState = {
   scheduleList: [],
   trainList: [],
   maxTrains: 1,
+  maxClusters: 2,
   // Add other relevant game state data as needed
 };
 
@@ -151,6 +152,10 @@ window.loadGame = function() {
 
     if (parsedState.maxTrains) {
       window.gameState.maxTrains = parsedState.maxTrains;
+    }
+
+    if (parsedState.maxClusters) {
+      window.gameState.maxClusters = parsedState.maxClusters;
     }
 
     // Add parcels to the UI
