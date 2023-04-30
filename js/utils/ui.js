@@ -1567,32 +1567,33 @@ const ui = (() => {
     }
   }
 
-  function addTooltipToBuyParcelButton(buyParcelButton) {
-    const tooltip = document.getElementById("tooltip");
+function addTooltipToBuyParcelButton(buyParcelButton) {
+  const tooltip = document.getElementById("tooltip");
 
-    buyParcelButton.addEventListener("mouseover", (event) => {
-      const costText = Object.entries(gameState.buyParcelCost)
-        .map(([resource, cost]) => `${cost} ${resource}`)
-        .join("<br>");
-      const parcelText = `Cost:<br>${costText}`;
+  buyParcelButton.addEventListener("mouseover", (event) => {
+    const selectedCluster = parseInt(document.getElementById("buyParcel-dropdown").value.split("-")[1]);
+    const costText = Object.entries(gameState.clusterBuyParcelCosts[selectedCluster])
+      .map(([resource, cost]) => `${cost} ${resource}`)
+      .join("<br>");
+    const parcelText = `Cost:<br>${costText}`;
 
-      tooltip.innerHTML = parcelText;
-      tooltip.style.display = "block";
-      tooltip.style.left = event.pageX + 10 + "px";
-      tooltip.style.top = event.pageY + 10 + "px";
-    });
+    tooltip.innerHTML = parcelText;
+    tooltip.style.display = "block";
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+  });
 
-    // Hide tooltip on mouseout
-    buyParcelButton.addEventListener("mouseout", () => {
-      tooltip.style.display = "none";
-    });
+  // Hide tooltip on mouseout
+  buyParcelButton.addEventListener("mouseout", () => {
+    tooltip.style.display = "none";
+  });
 
-    // Update tooltip position on mousemove
-    buyParcelButton.addEventListener("mousemove", (event) => {
-      tooltip.style.left = event.pageX + 10 + "px";
-      tooltip.style.top = event.pageY + 10 + "px";
-    });
-  }
+  // Update tooltip position on mousemove
+  buyParcelButton.addEventListener("mousemove", (event) => {
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+  });
+}
 
   function updateBuyParcelDropdown() {
     const dropdown = document.getElementById("buyParcel-dropdown");

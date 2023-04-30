@@ -6,6 +6,17 @@ const gameState = {
       expansionPoints: 2,
       alienArtefacts: 1,
   },
+  clusterBuyParcelCosts: [
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },                        
+  ],
   research: {}, // Fill with your research data
   progression: {
     unlockedBuildings: new Set(), // Store the unlocked buildings here
@@ -105,8 +116,22 @@ window.loadGame = function() {
     });
 
     // Assign the Parcel Costs
+    if (parsedState.clusterBuyParcelCosts) {
+      window.gameState.clusterBuyParcelCosts = parsedState.clusterBuyParcelCosts;
+    }
+
+    // Assign the Parcel Costs
     if (parsedState.buyParcelCost) {
       window.gameState.buyParcelCost = parsedState.buyParcelCost;
+
+      // Check if buyParcelCost is higher than the first element of clusterBuyParcelCosts array
+      if (
+        !parsedState.clusterBuyParcelCosts ||
+        (parsedState.buyParcelCost.expansionPoints > window.gameState.clusterBuyParcelCosts[0].expansionPoints) ||
+        (parsedState.buyParcelCost.alienArtefacts > window.gameState.clusterBuyParcelCosts[0].alienArtefacts)
+      ) {
+        window.gameState.clusterBuyParcelCosts[0] = parsedState.buyParcelCost;
+      }
     }
 
     // Assign the research data

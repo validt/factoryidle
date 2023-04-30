@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const selectedParcel = window.parcels.getParcel(ui.getSelectedParcelIndex());
       const selectedParcelHasRCF = selectedParcel.buildings.remoteConstructionFacility;
+      const selectedCluster = parseInt(buyParcelDropdown.value.split("-")[1]);
 
       const resourceCounts = {
         expansionPoints: firstParcelResourceEP + (selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("resourceCounts", resourceCounts);
       console.log("parcels.canBuyParcel(resourceCounts)", parcels.canBuyParcel(resourceCounts));
       if (parcels.canBuyParcel(resourceCounts)) {
-        const cost = gameState.buyParcelCost;
+        const cost = gameState.clusterBuyParcelCosts[selectedCluster];
 
         for (const [resource, amount] of Object.entries(cost)) {
           // Handle the case where firstParcel.resources[resource] is undefined
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        const selectedCluster = parseInt(buyParcelDropdown.value.split("-")[1]);
+        
         const newParcel = parcels.createNewParcel(selectedCluster);
         ui.addParcelToUI(newParcel);
         ui.updateResourceDisplay(newParcel);
@@ -80,8 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ui.selectParcel(newIndex);
 
         // Increment the costs for the next purchase
-        gameState.buyParcelCost.expansionPoints = parseFloat((parseFloat(gameState.buyParcelCost.expansionPoints) + 0.7).toFixed(1));
-        gameState.buyParcelCost.alienArtefacts = parseFloat((parseFloat(gameState.buyParcelCost.alienArtefacts) + 0.5).toFixed(1));
+        gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints = parseFloat((parseFloat(cost.expansionPoints) + 0.7).toFixed(1));
+        gameState.clusterBuyParcelCosts[selectedCluster].alienArtefacts = parseFloat((parseFloat(cost.alienArtefacts) + 0.5).toFixed(1));
       }
       //else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
       else alert(`Missing Resources:\n(${resourceCounts.expansionPoints}/${gameState.buyParcelCost.expansionPoints}) Expansion Points,\n(${resourceCounts.alienArtefacts}/${gameState.buyParcelCost.alienArtefacts}) Alien Artifacts\n\nDid you know: To buy a parcel, you need the relevant resources inside your leftmost parcel or a parcel with a Remote Construction Facility`)

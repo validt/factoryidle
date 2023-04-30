@@ -12,7 +12,7 @@ class ProgressionManager {
   // Unlock a building
   unlockBuilding(buildingId) {
     this.unlockedBuildings.add(buildingId);
-
+    console.log("hello");
     // Check if all required buildings are unlocked and update the Production header visibility
     if (
       this.isUnlocked("ironMiner") &&
@@ -27,7 +27,7 @@ class ProgressionManager {
         //productionHeader.style.display = ""; // Unhide the Production header
       }
     }
-    //window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
+    window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
   }
 
   // Check the requirements for a building
@@ -152,7 +152,7 @@ class ProgressionManager {
     const buildingList = window.buildingManager.getBuildingList();
     for (const i in buildingList) {
       const buildingId = buildingList[i].id
-      if (this.checkRequirements(buildingId)) {
+      if (this.checkRequirements(buildingId) && !this.unlockedBuildings.has(buildingId)) {
         this.unlockBuilding(buildingId);
       }
     }
