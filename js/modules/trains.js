@@ -16,6 +16,10 @@ const saveEditStationButtonListeners = new Map();
 const cancelEditStationButtonListeners = new Map();
 
 document.addEventListener("DOMContentLoaded", function () {
+  initTrainUi();
+});
+
+function initTrainUi () {
   const scheduleOverlay = document.getElementById("schedule-overlay");
   const addScheduleButton = document.getElementById("add-schedule");
 
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const name = `Schedule ${newScheduleId}`;
     addSchedule(name, []);
   });
-});
+}
 
 // Train constructor
 function Train(id, name, scheduleId) {

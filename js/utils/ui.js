@@ -1461,6 +1461,7 @@ const ui = (() => {
     updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
     updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
     updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
+    updateSectionVisibility("train-management", gameState.sectionVisibility.trainSection)
 
     // //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
     // updateSectionVisibility("project-section", Object.values(window.projects.projects).length != 0);

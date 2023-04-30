@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ui.selectParcel(newIndex);
 
         // Increment the costs for the next purchase
-        gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints = parseFloat((parseFloat(cost.expansionPoints) + 0.7).toFixed(1));
+        gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints = parseFloat((parseFloat(cost.expansionPoints) + 1).toFixed(1));
         gameState.clusterBuyParcelCosts[selectedCluster].alienArtefacts = parseFloat((parseFloat(cost.alienArtefacts) + 0.5).toFixed(1));
       }
       //else alert("To Buy A New Parcel:\nMake sure Expansion Points and Alien Artefacts are in the furthest left parcel\n(or in an Remote Construction Facility)")
@@ -200,5 +200,21 @@ function factoryOn() {
         ui.activateBuilding(parcel, buildingId);
       }
     }
+  }
+}
+
+
+function cheat(pin) {
+  if (pin === 99) {
+    parcels.parcelList[0].resources.alienArtefacts = 5000;
+    parcels.parcelList[0].resources.expansionPoints = 5000;
+    parcels.parcelList[0].resources.researchPoints = 5000;
+    parcels.parcelList[0].resources.ironPlates = 5000;
+    parcels.parcelList[0].resources.bricks = 5000;
+    parcels.parcelList[0].resources.steel = 5000;
+    parcels.parcelList[0].resources.copperPlates = 5000;
+    parcels.parcelList[0].resources.greenChips = 5000;
+    parcels.parcelList[0].resources.stone = 5000;
+    parcels.parcelList[0].resources.coal = 5000;
   }
 }

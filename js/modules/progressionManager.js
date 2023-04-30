@@ -109,6 +109,10 @@ class ProgressionManager {
       window.gameState.research.gameWon3 = false;
     }
 
+    if (window.gameState.research.trains) {
+      gameState.sectionVisibility.trainSection = true;
+    }
+
     for (const parcel of parcels) {
       if (parcel.buildings.coalPowerPlant > 0) {
         gameState.sectionVisibility.energySection = true;

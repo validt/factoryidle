@@ -28,6 +28,7 @@ const gameState = {
     projectSection: false,
     researchSection: false,
     blueprints: false,
+    trainSection: false,
 
   },
   battle: null,
