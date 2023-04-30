@@ -1,3 +1,4 @@
+let clusterFlag = false;
 class ProgressionManager {
   constructor() {
     this.unlockedBuildings = new Set();
@@ -26,7 +27,7 @@ class ProgressionManager {
         //productionHeader.style.display = ""; // Unhide the Production header
       }
     }
-    window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
+    //window.ui.updateBuildingDisplay(window.gameState.parcels[ui.getSelectedParcelIndex()]);
   }
 
   // Check the requirements for a building
@@ -69,12 +70,18 @@ class ProgressionManager {
     
         // Add the next research option if it exists in the array and it's not already added
         const nextUpgrade = clusterUpgrades[index + 1];
+        const thisUpgrade = clusterUpgrades[index];
         if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
           window.researchManager.addResearch(
             new Research(nextUpgrade.researchKey, `Upgrade Cluster Limit ${nextUpgrade.maxClusters}`, nextUpgrade.research)
           );
           window.researchManager.populateResearchDropdown();
           ui.updateBuyParcelDropdown();
+        } else if (index === clusterUpgrades.length - 1 && !clusterFlag) {
+          // Handle edge case when the last upgrade is researched
+          console.log("else");
+          ui.updateBuyParcelDropdown();
+          clusterFlag = true;
         }
       }
     });
