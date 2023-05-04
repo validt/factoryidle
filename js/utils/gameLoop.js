@@ -46,7 +46,7 @@ let currentTable;
 
 const gameLoop = (() => {
     let gameInterval;
-    const tickRate = 1000;
+    const tickRate = 250;
     let tickCounter = 0;
 
     function start() {

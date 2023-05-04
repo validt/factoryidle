@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        
+
         const newParcel = parcels.createNewParcel(selectedCluster);
         ui.addParcelToUI(newParcel);
         ui.updateResourceDisplay(newParcel);
@@ -208,7 +208,6 @@ function cheat(pin) {
   if (pin === 99) {
     parcels.parcelList[0].resources.alienArtefacts = 5000;
     parcels.parcelList[0].resources.expansionPoints = 5000;
-    parcels.parcelList[0].resources.researchPoints = 5000;
     parcels.parcelList[0].resources.ironPlates = 5000;
     parcels.parcelList[0].resources.bricks = 5000;
     parcels.parcelList[0].resources.steel = 5000;
