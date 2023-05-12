@@ -1,3 +1,4 @@
+let clusterFlag = false;
 class ProgressionManager {
   constructor() {
     this.unlockedBuildings = new Set();
@@ -11,7 +12,7 @@ class ProgressionManager {
   // Unlock a building
   unlockBuilding(buildingId) {
     this.unlockedBuildings.add(buildingId);
-
+    console.log("hello");
     // Check if all required buildings are unlocked and update the Production header visibility
     if (
       this.isUnlocked("ironMiner") &&
@@ -34,6 +35,62 @@ class ProgressionManager {
     const building = window.buildingManager.getBuilding(buildingId);
     const parcels = window.gameState.parcels;
 
+    const trainUpgrades = [
+      { researchKey: 'trainsMax1', maxTrains: 2, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60} },
+      { researchKey: 'trainsMax2', maxTrains: 4, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60} },
+      { researchKey: 'trainsMax3', maxTrains: 8, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60, yellowScience: 60} },
+      { researchKey: 'trainsMax4', maxTrains: 16, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60, yellowScience: 60, whiteScience: 60} }
+    ];
+
+    trainUpgrades.forEach((upgrade, index) => {
+      if (window.gameState.research[upgrade.researchKey]) {
+        gameState.maxTrains = upgrade.maxTrains;
+
+        // Add the next research option if it exists in the array and it's not already added
+        const nextUpgrade = trainUpgrades[index + 1];
+        if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
+          window.researchManager.addResearch(
+            new Research(nextUpgrade.researchKey, `Upgrade Train Limit to ${nextUpgrade.maxTrains}`, nextUpgrade.research)
+          );
+          window.researchManager.populateResearchDropdown();
+        }
+      }
+    });
+
+    const clusterUpgrades = [
+      { researchKey: 'clustersMax1', maxClusters: 3, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60} },
+      { researchKey: 'clustersMax2', maxClusters: 4, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60} },
+      { researchKey: 'clustersMax3', maxClusters: 5, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60, yellowScience: 60} },
+      { researchKey: 'clustersMax4', maxClusters: 6, research: { redScience: 60, greenScience: 60, darkScience: 60, blueScience: 60, purpleScience: 60, yellowScience: 60, whiteScience: 60} }
+    ];
+
+    clusterUpgrades.forEach((upgrade, index) => {
+      if (window.gameState.research[upgrade.researchKey]) {
+        gameState.maxClusters = upgrade.maxClusters;
+
+        // Add the next research option if it exists in the array and it's not already added
+        const nextUpgrade = clusterUpgrades[index + 1];
+        const thisUpgrade = clusterUpgrades[index];
+        if (nextUpgrade && !window.researchManager.researchExists(nextUpgrade.researchKey)) {
+          window.researchManager.addResearch(
+            new Research(nextUpgrade.researchKey, `Upgrade Cluster Limit to ${nextUpgrade.maxClusters}`, nextUpgrade.research)
+          );
+          window.researchManager.populateResearchDropdown();
+          ui.updateBuyParcelDropdown();
+        } else if (index === clusterUpgrades.length - 1 && !clusterFlag) {
+          // Handle edge case when the last upgrade is researched
+          console.log("else");
+          ui.updateBuyParcelDropdown();
+          clusterFlag = true;
+        }
+      }
+    });
+
+    // Show buyParcel-dropdown when clusterTech is researched
+    if (window.gameState.research.clusterTech) {
+      document.getElementById("buyParcel-dropdown").style.display = "inline-block";
+    }
+
     // Check for GameWin
     if (window.gameState.research.gameWon) {
       alert("Congrats. You won the Demo. Feedback highly appreciated. Also, take a screenshot of your factory and share it, that would be even more appreciated :)");
@@ -50,6 +107,10 @@ class ProgressionManager {
     if (window.gameState.research.gameWon3) {
       alert("This you must explain to me.");
       window.gameState.research.gameWon3 = false;
+    }
+
+    if (window.gameState.research.trains) {
+      gameState.sectionVisibility.trainSection = true;
     }
 
     for (const parcel of parcels) {
@@ -95,7 +156,7 @@ class ProgressionManager {
     const buildingList = window.buildingManager.getBuildingList();
     for (const i in buildingList) {
       const buildingId = buildingList[i].id
-      if (this.checkRequirements(buildingId)) {
+      if (this.checkRequirements(buildingId) && !this.unlockedBuildings.has(buildingId)) {
         this.unlockBuilding(buildingId);
       }
     }

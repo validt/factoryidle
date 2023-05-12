@@ -6,6 +6,17 @@ const gameState = {
       expansionPoints: 2,
       alienArtefacts: 1,
   },
+  clusterBuyParcelCosts: [
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+    { expansionPoints: 2, alienArtefacts: 1 },
+  ],
   research: {}, // Fill with your research data
   progression: {
     unlockedBuildings: new Set(), // Store the unlocked buildings here
@@ -17,6 +28,7 @@ const gameState = {
     projectSection: false,
     researchSection: false,
     blueprints: false,
+    trainSection: false,
 
   },
   battle: null,
@@ -27,6 +39,10 @@ const gameState = {
     pollutionEnergyValue: 0,
     pollutionBuildingValue: 0,
   },
+  scheduleList: [],
+  trainList: [],
+  maxTrains: 1,
+  maxClusters: 2,
   // Add other relevant game state data as needed
 };
 
@@ -47,6 +63,7 @@ window.saveGame = function() {
   const projectsJSON = LZString.compress(JSON.stringify(projectsModule.projects));
   localStorage.setItem("savedProjects", projectsJSON);
   localStorage.setItem("researchData", LZString.compress(window.researchManager.saveResearchData()));
+  console.log('Game Saved.');
 };
 
 window.loadGame = function() {
@@ -57,7 +74,13 @@ window.loadGame = function() {
     // Ensure parcels object is properly linked and updated
     const updatedParcelList = parsedState.parcels.map((parcelData, index) => {
       // Create a new parcel object using the saved parcel data
-      const parcel = new Parcel(parcelData.id, parcelData.maxBuildings);
+      const parcel = new Parcel(
+        parcelData.id,
+        parcelData.maxBuildings,
+        parcelData.cluster ?? 0,
+        parcelData.continent ?? 0,
+        parcelData.planet ?? 0,
+      );
 
       // Assign the properties from the saved parcel data
       Object.assign(parcel.buildings, parcelData.buildings);
@@ -70,6 +93,9 @@ window.loadGame = function() {
       parcel.consumptionRateModifier = parcelData.consumptionRateModifier;
       Object.assign(parcel.buildingProductionRateModifiers, parcelData.buildingProductionRateModifiers);
       Object.assign(parcel.buildingConsumptionRateModifiers, parcelData.buildingConsumptionRateModifiers);
+      parcel.maxResources = parcels.calcParcelMaxResources(parcelData.maxBuildings);
+
+
 
       // Assign the inputValues property from the saved parcel data
       Object.assign(parcel.inputValues, parcelData.inputValues);
@@ -91,8 +117,22 @@ window.loadGame = function() {
     });
 
     // Assign the Parcel Costs
+    if (parsedState.clusterBuyParcelCosts) {
+      window.gameState.clusterBuyParcelCosts = parsedState.clusterBuyParcelCosts;
+    }
+
+    // Assign the Parcel Costs
     if (parsedState.buyParcelCost) {
       window.gameState.buyParcelCost = parsedState.buyParcelCost;
+
+      // Check if buyParcelCost is higher than the first element of clusterBuyParcelCosts array
+      if (
+        !parsedState.clusterBuyParcelCosts ||
+        (parsedState.buyParcelCost.expansionPoints > window.gameState.clusterBuyParcelCosts[0].expansionPoints) ||
+        (parsedState.buyParcelCost.alienArtefacts > window.gameState.clusterBuyParcelCosts[0].alienArtefacts)
+      ) {
+        window.gameState.clusterBuyParcelCosts[0] = parsedState.buyParcelCost;
+      }
     }
 
     // Assign the research data
@@ -124,6 +164,24 @@ window.loadGame = function() {
       window.progressionManager.unlockedBuildings = new Set(parsedState.progression.unlockedBuildings);
     } else {
       window.progressionManager.unlockedBuildings = new Set();
+    }
+
+    // Assign scheduleList
+    if (parsedState.scheduleList) {
+      window.gameState.scheduleList = parsedState.scheduleList;
+    }
+
+    // Assign scheduleList
+    if (parsedState.trainList) {
+      window.gameState.trainList = parsedState.trainList;
+    }
+
+    if (parsedState.maxTrains) {
+      window.gameState.maxTrains = parsedState.maxTrains;
+    }
+
+    if (parsedState.maxClusters) {
+      window.gameState.maxClusters = parsedState.maxClusters;
     }
 
     // Add parcels to the UI
@@ -160,11 +218,12 @@ window.loadGame = function() {
     }
 
     // Add other relevant game state data assignments as needed
+    window.researchManager.populateResearchDropdown();
   }
 };
 
-// Save the game state every minute
-  setInterval(window.saveGame, 60 * 1000);
+// // Save the game state every minute
+//   setInterval(window.saveGame, 60 * 1000);
 
 function getSaveStateString() {
   const saveData = {

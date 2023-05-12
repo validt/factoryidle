@@ -23,7 +23,8 @@
 
 .dark-mode button {
   border-color: rgb(131, 122, 108);
-  background-image: -webkit-linear-gradient(top, rgb(24, 26, 27), rgb(91, 99, 103));
+  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+
   background-color: initial;
   box-shadow: rgba(24, 26, 27, 0.4) 0px 0px 0px, rgba(24, 26, 27, 0.4) 0px 1px 0px inset;
   text-shadow: rgb(53, 57, 59) 0px 1px 0px;
@@ -33,7 +34,7 @@
 }
 
 .dark-mode button:hover {
-    background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+    background-image: -webkit-linear-gradient(top, rgb(24, 26, 27), rgb(91, 99, 103));
     background-color: initial;
 }
 
@@ -198,9 +199,8 @@ h1 {
 
 /* Parcel tabs styles */
 #parcel-tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 10px;
+    display: block;
+    margin-bottom: 2em;
 }
 
 .parcel-tab {
@@ -325,7 +325,8 @@ cursor: pointer;
 /* Buttons */
 button {
     border: 1px solid #1a1a1a;
-    background: -webkit-linear-gradient(top, #ffffff, #888888);
+
+    background: -webkit-linear-gradient(top, #888888, #ffffff);
     padding: 4px 8px;
     border-radius: 2px;
     box-shadow: rgba(255,255,255,0.4) 0 0px 0, inset rgba(255,255,255,0.4) 0 1px 0;
@@ -340,7 +341,7 @@ button {
 }
 
 button:hover {
-    background: -webkit-linear-gradient(top, #888888, #ffffff);
+    background: -webkit-linear-gradient(top, #ffffff, #888888);
 }
 
 button:disabled {
@@ -663,4 +664,141 @@ h1 {
     flex-wrap: wrap;
     flex-direction: row;
     gap: 40px;
+}
+
+/* Cluster Styles */
+#parcel-section {
+  display: block;
+}
+
+.cluster-container {
+  margin-bottom: 10px;
+  margin-right: 4px;
+}
+
+.cluster-content {
+  display: none;
+  overflow: hidden;
+  padding: 10px;
+}
+
+button.cluster-header {
+  background-image: -webkit-linear-gradient(top, rgba(91, 99, 103, 0), rgba(24, 26, 27, 0));
+  border: none;
+  width: min-content;
+  white-space: nowrap;
+  padding: 10px;
+  text-align: left;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Trains */
+
+.dark-mode .train-manipulation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.train-manipulation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-element {
+  margin: 4px;
+}
+
+
+.dark-mode .overlay-container {
+  border: 1px solid rgb(131, 122, 108);
+  background-color: #222326;
+}
+
+ .overlay-container {
+  border: 1px solid #1a1a1a;
+  background-color: #f2f2f2;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.left-cell {
+  text-align: left;
+}
+
+.action-cell {
+  white-space: nowrap;
+}
+
+.dark-mode .schedule-overlay-content {
+  background-color: #222326;
+}
+
+.schedule-overlay-content {
+  background-color: #f2f2f2;
+  width: min-content;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.dark-mode .station-overlay-content {
+  background-color: #222326;
+}
+
+.station-overlay-content {
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, 15%);
+  padding: 20px;
+  border-radius: 10px;
+  overflow-y: auto;
+  background-color: #f2f2f2;
+}
+
+#load-section, #unload-section {
+  display: flex;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.fixed-width-cell {
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Train visualization */
+.clusterViz {
+  stroke: black;
+  fill: none;
+}
+
+.parcelViz {
+  stroke: blue;
+  fill: grey;
+}
+
+.trainViz {
+  fill: red;
 }

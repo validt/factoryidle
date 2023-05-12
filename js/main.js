@@ -1,14 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
-  setTimeout(function () {
-    const intro = document.getElementById("intro");
+  const intro = document.getElementById("intro");
+  let introTimeout;
+
+  // Function to hide the intro
+  function hideIntro() {
+    clearTimeout(introTimeout);
     intro.style.display = "none";
-  }, 6000);
+  }
+
+  // Set the timeout to hide the intro after 6 seconds
+  introTimeout = setTimeout(hideIntro, 6000);
+
+  // Add a double-click event listener to interrupt the intro
+  intro.addEventListener("dblclick", hideIntro);
 });
 
 let accessibilityMode = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     const buyParcelButton = document.getElementById("buyParcel");
+    const buyParcelDropdown = document.getElementById("buyParcel-dropdown");
     const startResearchButton = document.getElementById("startResearch");
     const researchSelect = document.getElementById("researchSelect");
 
@@ -37,17 +48,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const selectedParcel = window.parcels.getParcel(ui.getSelectedParcelIndex());
       const selectedParcelHasRCF = selectedParcel.buildings.remoteConstructionFacility;
+      const selectedCluster = parseInt(buyParcelDropdown.value.split("-")[1]);
 
       const resourceCounts = {
-        expansionPoints: firstParcelResourceEP + (selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
-        alienArtefacts: firstParcelResourceAA + (selectedParcelHasRCF ? selectedParcel.resources.alienArtefacts : 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
+        expansionPoints: firstParcelResourceEP + ((selectedParcelHasRCF ? selectedParcel.resources.expansionPoints : 0) || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'),
+        alienArtefacts: firstParcelResourceAA + ((selectedParcelHasRCF ? selectedParcel.resources.alienArtefacts : 0) || 0) + buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'alienArtefacts'),
       };
 
-
+      console.log(selectedParcelHasRCF, selectedParcel.resources.expansionPoints, buildingManager.getResourcesFromRemoteConstructionFacilities(window.parcels.parcelList, 'expansionPoints'))
       console.log("resourceCounts", resourceCounts);
-      console.log("parcels.canBuyParcel(resourceCounts)", parcels.canBuyParcel(resourceCounts));
-      if (parcels.canBuyParcel(resourceCounts)) {
-        const cost = gameState.buyParcelCost;
+      console.log("parcels.canBuyParcel(resourceCounts)", parcels.canBuyParcel(resourceCounts, selectedCluster));
+      if (parcels.canBuyParcel(resourceCounts, selectedCluster)) {
+        const cost = gameState.clusterBuyParcelCosts[selectedCluster];
 
         for (const [resource, amount] of Object.entries(cost)) {
           // Handle the case where firstParcel.resources[resource] is undefined
@@ -62,26 +74,32 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        const newParcel = parcels.createNewParcel();
-        ui.addParcelToUI(newParcel);
-        ui.updateResourceDisplay(newParcel);
+        const newParcel = parcels.createNewParcel(selectedCluster);
 
-        // Select the newly bought parcel
-        const newIndex = parcels.getParcelCount() - 1;
-        ui.selectParcel(newIndex);
+        // Add new parcel to UI, then update cluster parcels
+        ui.addParcelToUI(newParcel, () => {
+          ui.updateResourceDisplay(newParcel);
 
-        // Increment the costs for the next purchase
-        gameState.buyParcelCost.expansionPoints = (gameState.buyParcelCost.expansionPoints + 0.7).toFixed(1);
-        gameState.buyParcelCost.alienArtefacts = (gameState.buyParcelCost.alienArtefacts + 0.5).toFixed(1);
+          // Select the newly bought parcel
+          const newIndex = parcels.getParcelCount() - 1;
+          ui.selectParcel(newIndex);
+
+          // Update cluster parcels
+          gameLoop.updateClusterParcels();
+
+          // Increment the costs for the next purchase
+          gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints = parseFloat((parseFloat(gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints) + 1).toFixed(1));
+          gameState.clusterBuyParcelCosts[selectedCluster].alienArtefacts = parseFloat((parseFloat(gameState.clusterBuyParcelCosts[selectedCluster].alienArtefacts) + 0.5).toFixed(1));
+        });
       } else {
         const missingResources = [
           {
             resourceName: "Expansion Points",
-            amount: gameState.buyParcelCost.expansionPoints - resourceCounts.expansionPoints,
+            amount: gameState.clusterBuyParcelCosts[selectedCluster].expansionPoints - resourceCounts.expansionPoints,
           },
           {
             resourceName: "Alien Artifacts",
-            amount: gameState.buyParcelCost.alienArtefacts - resourceCounts.alienArtefacts,
+            amount: gameState.clusterBuyParcelCosts[selectedCluster].alienArtefacts - resourceCounts.alienArtefacts,
           },
         ];
 
@@ -165,6 +183,10 @@ document.addEventListener("DOMContentLoaded", () => {
     researchManager.populateResearchDropdown();
     ui.updateParcelsSectionVisibility();
     //ui.populateBuildNewBuildingDropdown();
+
+    // Add event listeners for the buttons
+    document.getElementById('factoryOff').addEventListener('click', factoryOff);
+    document.getElementById('factoryOn').addEventListener('click', factoryOn);
 });
 
 function saveGameWithAnimation() {
@@ -226,5 +248,23 @@ function factoryOn() {
         ui.activateBuilding(parcel, buildingId);
       }
     }
+  }
+}
+
+
+function cheat(pin) {
+  if (pin === 99) {
+    parcels.parcelList[0].resources.alienArtefacts = 5000;
+    parcels.parcelList[0].resources.expansionPoints = 5000;
+    parcels.parcelList[0].resources.ironPlates = 5000;
+    parcels.parcelList[0].resources.bricks = 5000;
+    parcels.parcelList[0].resources.steel = 5000;
+    parcels.parcelList[0].resources.copperPlates = 5000;
+    parcels.parcelList[0].resources.greenChips = 5000;
+    parcels.parcelList[0].resources.stone = 5000;
+    parcels.parcelList[0].resources.coal = 5000;
+    parcels.parcelList[0].resources.gears = 5000;
+    parcels.parcelList[0].resources.redScience = 5000;
+    parcels.parcelList[0].resources.greenScience = 5000;
   }
 }

@@ -64,7 +64,7 @@ const ui = (() => {
       this.updateHeader();
 
       // Iterate over each resource in the parcel
-      for (const category of window.resourceCategories) {
+      for (const category of window.resourceMetadata) {
         for (const resource of category.resources) {
           const resourceName = resource.name;
           if (this.parcel.resources.hasOwnProperty(resourceName)) {
@@ -299,7 +299,7 @@ const ui = (() => {
           if (forwardHeader) {
             const forwardIcon = createIcon("assets/forwardBelt-48.png");
             const forwardBeltCount = this.parcel.beltUsage?.forwardBelt ?? 0;
-            const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            const totalForwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
             forwardHeader.innerHTML = "";
             forwardHeader.appendChild(forwardIcon);
             forwardHeader.appendChild(document.createTextNode(`Forward ${forwardBeltCount}/${totalForwardBeltCount}`));
@@ -312,7 +312,8 @@ const ui = (() => {
           if (backwardHeader) {
             const backwardIcon = createIcon("assets/backwardBelt-48.png");
             const backwardBeltCount = this.parcel.beltUsage?.backwardBelt ?? 0;
-            const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+            const totalBackwardBeltCount = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
+
             backwardHeader.innerHTML = "";
             backwardHeader.appendChild(backwardIcon);
             backwardHeader.appendChild(document.createTextNode(`Backward ${backwardBeltCount}/${totalBackwardBeltCount}`));
@@ -349,7 +350,7 @@ const ui = (() => {
       const textWrapper = document.createElement("div");
 
       // Create the icon element
-      const resourceData = resourceCategories[resourceName];
+      const resourceData = resourceMetadata[resourceName];
       const icon = document.createElement("img");
       icon.src = resourceData.icon48;
       icon.style.width = "24px"; // Adjust the size as needed
@@ -490,6 +491,8 @@ const ui = (() => {
       */
     }
 
+
+
     createResourceName(resource, cell) {
       cell.classList.add("resource-name");
       cell.style.whiteSpace = "nowrap";
@@ -506,7 +509,11 @@ const ui = (() => {
       textWrapper.insertAdjacentText('beforeend', resource.name);
       textWrapper.style.display = "inline-block";
       textWrapper.style.verticalAlign = "-webkit-baseline-middle";
+
       cell.appendChild(textWrapper);
+
+
+
       return cell;
     }
 
@@ -566,6 +573,9 @@ const ui = (() => {
               //init
               cell = this.createResourceName(resource, cell)
 
+
+
+
               if (building && building.minable) {
                 const mineButton = this.createMineButton(resourceName);
                 cell.appendChild(mineButton);
@@ -608,23 +618,27 @@ const ui = (() => {
                 tooltip.style.top = event.pageY + 10 + "px";
               });
             }
-            //update
-            const bgColor = getResourceRateColor(this.parcel, resourceName);
-            cell.textContent = Math.round(this.parcel.resources[resourceName] * 10) / 10;
-            if (bgColor === "green") {
-              cell.style.color = "white";
-              cell.style.backgroundColor = bgColor;
-            } else if (bgColor === "red") {
-              if (localStorage.getItem('darkMode') === 'true') {
-                cell.style.color = "white";
-              } else {
-                cell.style.color = "black";
-              }
-              cell.style.backgroundColor = bgColor;
-            } else {
-              cell.style.color = null;
-              cell.style.backgroundColor = null;
-            }
+            // update
+            const currentAmount = Math.round(this.parcel.resources[resourceName] * 10) / 10;
+            cell.textContent = currentAmount;
+            const maxResourceValue = this.parcel.maxResources * (1 / getResourceDensity(resourceName));
+            const progressPercentage = Math.min(currentAmount / maxResourceValue, 1) * 100;
+
+            // Get the color from getResourceRateColor and apply it to the resource amount cell
+            const rateColor = getResourceRateColor(this.parcel, resourceName);
+
+            // Get the color from getColorFromPercentage
+            let colorPercent = this.getColorFromPercentage(progressPercentage / 100);
+
+            // Blend the rateColor with the colorPercent, preserving the transparency in the progress bar
+            cell.style.background = `
+              linear-gradient(90deg,
+                ${colorPercent} ${progressPercentage}%,
+                ${rateColor} ${progressPercentage}%,
+                ${rateColor} 100%)`;
+
+            //console.log(rateColor);
+
           } else if (column.id === 'productionRate') {
             //update
             let targetInterval = 7;
@@ -634,7 +648,7 @@ const ui = (() => {
             let amount = 0;
 
             if (building) {
-              if (building.id === "expansionCenter" || building.id === "researchCenter") {
+              if (building.id.includes("lab") || building.id === "rocketPartAssembly" || building.id === "sateliteAssembly" || building.id === "expansionCenter" || building.id === "researchCenter") {
                 targetInterval = 300;
               }
 
@@ -806,7 +820,7 @@ const ui = (() => {
 
       directionInput.addEventListener("input", (event) => {
         const inputVal = parseInt(event.target.value, 10) || 0;
-        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + (parcel.buildings["beltBus"] || 0), 0);
+        const maxVal = window.parcels.parcelList.reduce((sum, parcel) => sum + ((parcel.cluster === this.parcel.cluster) ? (parcel.buildings["beltBus"] || 0) : 0), 0);
         const currentVal = parseInt(event.target.dataset.currentval, 10) || 0;
         const beltUsage = parseInt(this.parcel.beltUsage[beltId], 10) || 0;
         const maxCellVal = maxVal - (beltUsage - currentVal);
@@ -910,20 +924,97 @@ const ui = (() => {
 
   }
 
-  function addParcelToUI(parcel) {
+  function updateClusterHeadersVisibility() {
+    const showClusterHeader = window.gameState.research.clusterTech;
+    const clusterHeaders = document.getElementsByClassName("cluster-header");
+    for (const clusterHeader of clusterHeaders) {
+      clusterHeader.style.display = showClusterHeader ? "block" : "none";
+    }
+  }
+
+  function addParcelToUI(parcel, callback) {
+    const clusterId = parcel.cluster || 0;
+    const clusterContainerId = `cluster-${clusterId}`;
+
+    let clusterContainer = document.getElementById(clusterContainerId);
+    console.log("clusterContainer", clusterContainer);
+
+    // Create a new cluster container if it doesn't exist
+    if (!clusterContainer) {
+      const showClusterHeader = window.gameState.research.clusterTech;
+      clusterContainer = document.createElement("div");
+      clusterContainer.className = "cluster-container";
+      clusterContainer.id = clusterContainerId;
+      clusterContainer.style.display = "block";
+
+      const clusterHeader = document.createElement("button");
+      clusterHeader.className = "cluster-header";
+      clusterHeader.textContent = `Cluster ${clusterId}`;
+      clusterHeader.style.display = showClusterHeader ? "block" : "none"; // control visibility here
+      clusterHeader.addEventListener("click", () => {
+        clusterContent.classList.toggle("active");
+        clusterContent.style.display = clusterContent.style.display === "none" ? "block" : "none";
+        clusterContainer.style.display = clusterContainer.style.display === "inline-block" ? "block" : "inline-block";
+      });
+
+      const clusterContent = document.createElement("div");
+      clusterContent.className = "cluster-content";
+      clusterContent.id = `cluster-content-${clusterId}`;
+      clusterContent.style.display = "block";
+
+      // Always append the clusterHeader but control its visibility
+      clusterContainer.appendChild(clusterHeader);
+
+      clusterContainer.appendChild(clusterContent);
+
+      // Find the correct position for the new cluster container
+      const existingClusterContainers = Array.from(parcelContainer.children).filter(child => child.className === "cluster-container");
+      let insertPosition = existingClusterContainers.length;
+
+      for (let i = 0; i < existingClusterContainers.length; i++) {
+        const currentClusterId = parseInt(existingClusterContainers[i].id.split('-')[1], 10);
+
+        if (clusterId < currentClusterId) {
+          insertPosition = i;
+          break;
+        }
+      }
+
+      if (insertPosition < existingClusterContainers.length) {
+        parcelContainer.insertBefore(clusterContainer, existingClusterContainers[insertPosition]);
+      } else {
+        parcelContainer.appendChild(clusterContainer);
+      }
+    }
+
+    const clusterContent = document.getElementById(`cluster-content-${clusterId}`);
     const parcelTab = document.createElement("button");
+    const selectedParcel = parcels.getParcel(selectedParcelIndex);
     parcelTab.className = "parcel-tab";
     parcelTab.id = `tab-${parcel.id}`;
     parcelTab.textContent = parcel.id;
 
+    if (parcel === selectedParcel) {
+      parcelTab.classList.add("selected");
+    }
+
     // Add event listener for selecting the parcel
     addParcelClickListener(parcelTab);
 
-    parcelContainer.appendChild(parcelTab);
+    clusterContent.appendChild(parcelTab);
 
     // Update the parcel tab with color and name if available
-    const parcelIndex = window.parcels.parcelList.findIndex(p => p.id === parcel.id);
+    const parcelIndex = window.parcels.parcelList.findIndex((p) => p.id === parcel.id);
     parcelManipulation.updateParcelTab(parcelIndex);
+
+    updateClusterHeadersVisibility();
+
+    // Simulate async operation with setTimeout
+    setTimeout(() => {
+      if (callback) {
+        callback();
+      }
+    }, 0);
   }
 
   function addParcelClickListener(parcelTab) {
@@ -994,7 +1085,7 @@ const ui = (() => {
     if (onlyBuiltCheckbox.dataset.listenerAttached !== 'true') {
       onlyBuiltCheckbox.dataset.listenerAttached = 'true';
       onlyBuiltCheckbox.addEventListener("click", () => {
-        updateBuildingDisplay(parcel);
+        updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
       });
     }
 
@@ -1016,7 +1107,7 @@ const ui = (() => {
       allTab.addEventListener("click", () => {
         selectedTab = "All";
         console.log("2", selectedTab);
-        updateBuildingDisplay(parcel);
+        updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
         updateTabClasses();
       });
       tabContainer.appendChild(allTab);
@@ -1036,7 +1127,7 @@ const ui = (() => {
           buildingTab.addEventListener("click", () => {
             selectedTab = key;
             console.log("1", selectedTab);
-            updateBuildingDisplay(parcel);
+            updateBuildingDisplay(parcels.getParcel(selectedParcelIndex));
             updateTabClasses();
           });
           tabContainer.appendChild(buildingTab);
@@ -1323,7 +1414,7 @@ const ui = (() => {
     }
   }
 
-  function showMissingResourceOverlay(missingResources, event, descriptionText = "", timer = 2000) {
+  function showMissingResourceOverlay(missingResources, event, descriptionText = "", timer = 5000) {
     // Remove any existing popup
     const existingPopup = document.querySelector("#missing-resource-overlay");
     if (existingPopup) {
@@ -1397,7 +1488,10 @@ const ui = (() => {
 
     // Automatically close the overlay after 2 seconds
     const closeOverlay = () => {
-      document.body.removeChild(overlay);
+      // Check if the overlay is defined and in the document body
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
     };
     setTimeout(closeOverlay, timer);
 
@@ -1473,8 +1567,8 @@ const ui = (() => {
   }
 
   function selectParcel(parcelIndex) {
-    selectedParcelIndex = parcelIndex;
     const parcelButtons = document.querySelectorAll(".parcel-button");
+    selectedParcelIndex = parcelIndex;
     parcelButtons.forEach((button, index) => {
       button.classList.toggle("selected", index === parcelIndex);
     });
@@ -1520,6 +1614,7 @@ const ui = (() => {
     updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
     updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
     updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
+    updateSectionVisibility("train-management", gameState.sectionVisibility.trainSection)
 
     // //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
     // updateSectionVisibility("project-section", Object.values(window.projects.projects).length != 0);
@@ -1626,34 +1721,51 @@ const ui = (() => {
     }
   }
 
-  function addTooltipToBuyParcelButton(buyParcelButton) {
-    const tooltip = document.getElementById("tooltip");
+function addTooltipToBuyParcelButton(buyParcelButton) {
+  const tooltip = document.getElementById("tooltip");
 
-    buyParcelButton.addEventListener("mouseover", (event) => {
-      const costText = Object.entries(gameState.buyParcelCost)
-        .map(([resource, cost]) => `${cost} ${resource}`)
-        .join("<br>");
-      const parcelText = `Cost:<br>${costText}`;
+  buyParcelButton.addEventListener("mouseover", (event) => {
+    const selectedCluster = parseInt(document.getElementById("buyParcel-dropdown").value.split("-")[1]);
+    const costText = Object.entries(gameState.clusterBuyParcelCosts[selectedCluster])
+      .map(([resource, cost]) => `${cost} ${resource}`)
+      .join("<br>");
+    const parcelText = `Cost:<br>${costText}`;
 
-      tooltip.innerHTML = parcelText;
-      tooltip.style.display = "block";
-      tooltip.style.left = event.pageX + 10 + "px";
-      tooltip.style.top = event.pageY + 10 + "px";
-    });
+    tooltip.innerHTML = parcelText;
+    tooltip.style.display = "block";
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+  });
 
-    // Hide tooltip on mouseout
-    buyParcelButton.addEventListener("mouseout", () => {
-      tooltip.style.display = "none";
-    });
+  // Hide tooltip on mouseout
+  buyParcelButton.addEventListener("mouseout", () => {
+    tooltip.style.display = "none";
+  });
 
-    // Update tooltip position on mousemove
-    buyParcelButton.addEventListener("mousemove", (event) => {
-      tooltip.style.left = event.pageX + 10 + "px";
-      tooltip.style.top = event.pageY + 10 + "px";
-    });
+  // Update tooltip position on mousemove
+  buyParcelButton.addEventListener("mousemove", (event) => {
+    tooltip.style.left = event.pageX + 10 + "px";
+    tooltip.style.top = event.pageY + 10 + "px";
+  });
+}
+
+  function updateBuyParcelDropdown() {
+    const dropdown = document.getElementById("buyParcel-dropdown");
+
+    // Clear the existing options
+    dropdown.innerHTML = "";
+
+    // Rebuild the dropdown based on gameState.maxClusters
+    for (let i = 0; i < gameState.maxClusters; i++) {
+      const option = document.createElement("option");
+      option.value = `cluster-${i}`;
+      option.textContent = `Cluster ${i}`;
+      dropdown.appendChild(option);
+    }
   }
 
   return {
+    updateClusterHeadersVisibility,
     addParcelToUI,
     updateResourceDisplay,
     updateBuildingDisplay,
@@ -1671,6 +1783,7 @@ const ui = (() => {
     showMissingResourceOverlay,
     activateBuilding,
     deactivateBuilding,
+    updateBuyParcelDropdown,
   };
 })();
 

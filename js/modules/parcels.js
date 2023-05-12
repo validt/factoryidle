@@ -36,9 +36,13 @@ function createBuildingsHandler(target) {
 }
 
 class Parcel {
-    constructor(id, maxBuildings) {
+    constructor(id, maxBuildings, cluster = 0, continent = 0, planet = 0) {
         this.id = id;
+        this.cluster = cluster,
+        this.continent = continent,
+        this.planet = planet,
         this.maxBuildings = maxBuildings;
+        this.maxResources = 500;
         this.buildings = createBuildingsHandler(createNumberGuard({
         }));
         this.activeBuildings = {};
@@ -64,7 +68,7 @@ class Parcel {
         this.buildingConsumptionRateModifiers = {};
         this.inputValues = {};
         this.productionHistory = {};
-        const allResourceTypes = Object.keys(resourceCategories);
+        const allResourceTypes = Object.keys(resourceMetadata);
         for (const resourceType of allResourceTypes) {
           this.productionHistory[resourceType] = new CircularBuffer(300);
         }
@@ -157,7 +161,7 @@ class Parcel {
 
 const parcels = {
     parcelList: [],
-    maxBuildingsPerParcel: 8,
+    maxBuildingsPerParcel: 10,
     upgradeCosts: {
       maxBuildingLimit: [
         {
@@ -165,74 +169,77 @@ const parcels = {
           cost: {
             stone: 50,
           },
-          maxBuildingLimit: 8, // Add the max building limit value for this level
+          maxBuildingLimit: 10, // Add the max building limit value for this level
         },
         {
           level: 2,
           cost: {
             expansionPoints: 1,
           },
-          maxBuildingLimit: 16, // Add the max building limit value for this level
+          maxBuildingLimit: 20, // Add the max building limit value for this level
         },
         {
           level: 3,
           cost: {
             expansionPoints: 2,
           },
-          maxBuildingLimit: 24, // Add the max building limit value for this level
+          maxBuildingLimit: 30, // Add the max building limit value for this level
         },
         {
           level: 4,
           cost: {
+            redScience: 1,
             expansionPoints: 4,
-          },
-          maxBuildingLimit: 32, // Add the max building limit value for this level
-        },
-        {
-          level: 5,
-          cost: {
-            expansionPoints: 6,
           },
           maxBuildingLimit: 40, // Add the max building limit value for this level
         },
         {
+          level: 5,
+          cost: {
+            greenScience: 1,
+            expansionPoints: 6,
+          },
+          maxBuildingLimit: 50, // Add the max building limit value for this level
+        },
+        {
           level: 6,
           cost: {
+            darkScience: 1,
             expansionPoints: 8,
           },
-          maxBuildingLimit: 48, // Add the max building limit value for this level
+          maxBuildingLimit: 60, // Add the max building limit value for this level
         },
         {
           level: 7,
           cost: {
-            steel: 50,
+            blueScience: 1,
             expansionPoints: 16,
           },
-          maxBuildingLimit: 56, // Add the max building limit value for this level
+          maxBuildingLimit: 70, // Add the max building limit value for this level
         },
         {
           level: 8,
           cost: {
-            steel: 100,
+            purpleScience: 1,
             expansionPoints: 32,
           },
-          maxBuildingLimit: 64, // Add the max building limit value for this level
+          maxBuildingLimit: 80, // Add the max building limit value for this level
         },
         {
           level: 9,
           cost: {
-            steel: 400,
+            yellowScience: 1,
             expansionPoints: 64,
           },
-          maxBuildingLimit: 72, // Add the max building limit value for this level
+          maxBuildingLimit: 90, // Add the max building limit value for this level
         },
         {
           level: 10,
           cost: {
-            steel: 1600,
+            whiteScience: 1,
             expansionPoints: 128,
           },
-          maxBuildingLimit: 80, // Add the max building limit value for this level
+          maxBuildingLimit: 100, // Add the max building limit value for this level
         },
         {
           level: 11,
@@ -240,7 +247,7 @@ const parcels = {
             steel: 3200,
             expansionPoints: 256,
           },
-          maxBuildingLimit: 88, // Add the max building limit value for this level
+          maxBuildingLimit: 110, // Add the max building limit value for this level
         },
         {
           level: 12,
@@ -248,7 +255,7 @@ const parcels = {
             steel: 6400,
             expansionPoints: 512,
           },
-          maxBuildingLimit: 96, // Add the max building limit value for this level
+          maxBuildingLimit: 120, // Add the max building limit value for this level
         },
         {
           level: 13,
@@ -256,7 +263,7 @@ const parcels = {
             steel: 12800,
             expansionPoints: 1024,
           },
-          maxBuildingLimit: 104, // Add the max building limit value for this level
+          maxBuildingLimit: 130, // Add the max building limit value for this level
         },
       ],
     },
@@ -277,14 +284,15 @@ const parcels = {
 
 
 
-    createNewParcel() {
-        const parcel = new Parcel(`parcel-${this.parcelList.length + 1}`, this.maxBuildingsPerParcel);
-        this.parcelList.push(parcel);
-        return parcel;
+    createNewParcel(cluster = 0) {
+      const parcel = new Parcel(`parcel-${this.parcelList.length + 1}`, this.maxBuildingsPerParcel);
+      parcel.cluster = cluster;
+      this.parcelList.push(parcel);
+      return parcel;
     },
 
-    canBuyParcel(resources) {
-      return Object.entries(gameState.buyParcelCost).every(([resource, cost]) => {
+    canBuyParcel(resources, selectedCluster) {
+      return Object.entries(gameState.clusterBuyParcelCosts[selectedCluster]).every(([resource, cost]) => {
         return resources[resource] >= cost;
       });
     },
@@ -360,6 +368,7 @@ const parcels = {
       // Update the max building limit for the parcel
       if (upgradeInfo && upgradeInfo.maxBuildingLimit) {
         parcel.maxBuildings = upgradeInfo.maxBuildingLimit;
+        parcel.maxResources = this.calcParcelMaxResources(upgradeInfo.maxBuildingLimit);
         ui.updateBuildingDisplay(parcel);
       }
 
@@ -380,6 +389,10 @@ const parcels = {
       }
 
       return missingResources;
+    },
+
+    calcParcelMaxResources(maxBuildings) {
+      return maxBuildings / 8 * 250 + 250;
     }
 
 };
