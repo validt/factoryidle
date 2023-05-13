@@ -937,7 +937,6 @@ const ui = (() => {
     const clusterContainerId = `cluster-${clusterId}`;
 
     let clusterContainer = document.getElementById(clusterContainerId);
-    console.log("clusterContainer", clusterContainer);
 
     // Create a new cluster container if it doesn't exist
     if (!clusterContainer) {

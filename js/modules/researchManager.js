@@ -109,7 +109,7 @@ window.researchManager.addResearch(new Research('beaconTech2', 'Beacon Tech 2', 
 window.researchManager.addResearch(new Research('rocketTech', 'Rocket Tech', { redScience: 150, greenScience: 150, darkScience: 150, blueScience: 150, purpleScience: 150, yellowScience: 150}));
 window.researchManager.addResearch(new Research('militaryTech3', 'Piercing Ammunition', { redScience: 600, greenScience: 600, darkScience: 600, blueScience: 600, purpleScience: 600, yellowScience: 600, whiteScience: 60}));
 window.researchManager.addResearch(new Research('beaconTech3', 'Beacon Tech 3', { redScience: 900, greenScience: 900, darkScience: 900, blueScience: 900, purpleScience: 900, yellowScience: 900, whiteScience: 90}));
-window.researchManager.addResearch(new Research('gameWon', 'Win', { redScience: 4000, greenScience: 4000, darkScience: 4000, blueScience: 4000, purpleScience: 4000, yellowScience: 4000, whiteScience: 4000 }));
+window.researchManager.addResearch(new Research('gameWon', 'Win', { redScience: 4000, greenScience: 4000, darkScience: 4000, blueScience: 4000, purpleScience: 4000, yellowScience: 4000, whiteScience: 400 }));
 window.researchManager.addResearch(new Research('gameWon2', 'Win Harder', { redScience: 40000, greenScience: 40000, darkScience: 40000, blueScience: 40000, purpleScience: 40000, yellowScience: 40000, whiteScience: 40000 }));
 window.researchManager.addResearch(new Research('gameWon3', 'Win too Hard', { redScience: 400000, greenScience: 400000, darkScience: 400000, blueScience: 400000, purpleScience: 400000, yellowScience: 400000, whiteScience: 400000 }));
 
