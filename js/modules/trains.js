@@ -14,6 +14,9 @@ const deleteScheduleButtonListeners = new WeakMap();
 const closeScheduleOverlayButtonListeners = new WeakMap();
 const saveEditStationButtonListeners = new Map();
 const cancelEditStationButtonListeners = new Map();
+let sliderEventListeners = new Map();
+
+
 
 document.addEventListener("DOMContentLoaded", function () {
   initTrainUi();
@@ -110,6 +113,7 @@ function Schedule(id, name, stations) {
   this.id = id;
   this.name = name;
   this.stations = stations;
+  this.reserveSpace = 0;
 }
 
 function createStation(parcelId, load, unload, condition) {
@@ -492,8 +496,6 @@ function getNextParcel(currentParcelId, direction) {
   }
 }
 
-
-
 function getClusterTravelDistance(currentCluster, destinationCluster) {
   const clusterDistance = Math.abs(destinationCluster - currentCluster);
   return interClusterDistance * clusterDistance;
@@ -517,6 +519,27 @@ function executeLoading(train) {
   const loading = currentStation.load;
   const unloading = currentStation.unload;
   const allResources = loading.concat(unloading);
+
+  const reserveSpace = schedule.reserveSpace;
+
+  // Calculate the reserved and unreserved spaces for each item type
+  let uniqueItems = new Set();
+  for (let station of schedule.stations) {
+    station.load.forEach(item => uniqueItems.add(item));
+  }
+  // Calculate the reserved space for each item type
+  let reservedSpacePerItem = (train.maxCargo * reserveSpace) / (100 * uniqueItems.size);
+
+  // Calculate the unreserved space
+  let unreservedSpace = train.maxCargo;
+  for (let resource of uniqueItems) {
+    const resourceSpaceInTrain = train.cargo.find(cargoItem => cargoItem.resource === resource)?.amount || 0;
+    if (resourceSpaceInTrain < reservedSpacePerItem) {
+      unreservedSpace -= reservedSpacePerItem;
+    } else {
+      unreservedSpace -= resourceSpaceInTrain;
+    }
+  }
 
   let remainingRate = 100;
   let prevRemainingRate = remainingRate;
@@ -570,26 +593,55 @@ function executeLoading(train) {
           }
         }
       }
-        if (loading.includes(resource)) {
-          const availableResource = currentParcel.resources[resource];
-          const trainSpace = (train.maxCargo - calculateCargoSpace(train.cargo)) / resourceDensity;
+      if (loading.includes(resource)) {
+        const availableResource = currentParcel.resources[resource];
+        const resourceSpaceInTrain = train.cargo.find(cargoItem => cargoItem.resource === resource)?.amount || 0;
 
-          const actualLoad = Math.min(trainSpace, availableResource, rate);
-          currentParcel.resources[resource] -= actualLoad;
-          remainingRate += rate - actualLoad;
+        const reservedSpaceAvailable = Math.max(0, reservedSpacePerItem - resourceSpaceInTrain);
+        const unreservedSpaceAvailable = Math.max(0, unreservedSpace);
+        const totalSpaceAvailable = (reservedSpaceAvailable + unreservedSpaceAvailable) / resourceDensity;
+        let actualLoad = Math.min(reservedSpaceAvailable / resourceDensity, availableResource, rate);
+        const totalCargoSpaceAfterLoading = calculateCargoSpace(train.cargo) + (actualLoad * resourceDensity);
 
-          // Update the train's cargo
-          const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
-          if (cargoIndex === -1) {
-            train.cargo.push({ resource, amount: actualLoad });
+        // Check if the reserved space is fully utilized
+        if (actualLoad < rate) {
+          // Load the remaining available space from the unreserved space
+          const remainingLoad = Math.min(unreservedSpaceAvailable / resourceDensity, availableResource - actualLoad, rate - actualLoad);
+          actualLoad += remainingLoad;
+          unreservedSpace -= remainingLoad * resourceDensity; // Update the unreserved space
+        }
+
+        // Check if the total cargo space after loading exceeds the maxCargo limit of the train
+        let cargoExceeded = false;
+        if (totalCargoSpaceAfterLoading > train.maxCargo) {
+          // Adjust the actual load amount to ensure the total cargo space does not exceed the maxCargo limit
+          const excessCargoSpace = totalCargoSpaceAfterLoading - train.maxCargo;
+          const excessLoad = excessCargoSpace / resourceDensity;
+          actualLoad -= excessLoad;
+          cargoExceeded = true;
+          unreservedSpace += excessLoad * resourceDensity; // Update the unreserved space
+        }
+
+        currentParcel.resources[resource] -= actualLoad;
+        remainingRate += rate - actualLoad;
+
+        // Update the train's cargo
+        const cargoIndex = train.cargo.findIndex(cargoItem => cargoItem.resource === resource);
+        if (cargoIndex === -1) {
+          train.cargo.push({ resource, amount: actualLoad });
+        } else {
+          train.cargo[cargoIndex].amount += actualLoad;
+        }
+
+        // Register activity only if actualLoad is greater than zero
+        if (actualLoad > 0) {
+          if (cargoExceeded) {
+            activityOccurred = false;
           } else {
-            train.cargo[cargoIndex].amount += actualLoad;
-          }
-
-          if (actualLoad > 0) {
             activityOccurred = activityOccurred || true;
           }
         }
+      }
 
     }
 
@@ -625,7 +677,6 @@ function executeLoading(train) {
   return false;
   }
 
-
 function moveTrain(trainId) {
   const train = getTrainById(trainId);
   if (!train) return;
@@ -651,9 +702,9 @@ function moveTrain(trainId) {
     // Check if the loading process is done
     if (executeLoading(train)) {
       train.nextStop = (train.nextStop + 1) % schedule.stations.length;
-      train.status = `Leaving station "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
+      train.status = `↑ "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     } else {
-      train.status = `Loading at station "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
+      train.status = `↓ "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     }
     return;
   }
@@ -699,7 +750,7 @@ function moveTrain(trainId) {
     const remainingDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster) - train.interClusterTravel;
     const totalDistance = interClusterDistance * Math.abs(destinationParcel.cluster - currentLocation.cluster);
 
-    train.status = `Traveling to cluster ${destinationParcel.cluster} (${remainingDistance}/${totalDistance})`;
+    train.status = `→ cluster ${destinationParcel.cluster} (${remainingDistance}/${totalDistance})`;
 
     if (train.interClusterTravel <= 0) {
       const closestClusterEntryParcel = getClosestClusterEntryParcel(destinationParcel.cluster, train.currentLocation);
@@ -724,15 +775,13 @@ function moveTrain(trainId) {
 
     if (nextParcel) {
       train.currentLocation = nextParcel.id;
-      train.status = `Traveling to "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
+      train.status = `→ "${destinationParcel.name ? destinationParcel.name : destinationParcel.id}"`;
     }
   } else {
     // Train overshoots the destination
     train.currentLocation = destinationParcel.id;
   }
 }
-
-//Loading and Unloading: Loads for 10s and loads all at once
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------- UI Functions -------------------------------------------------------------
@@ -840,7 +889,7 @@ function updateTrainPositions() {
   gameState.trainList.forEach((train) => {
     const trainCircle = svg.querySelector(`.trainViz[data-train-id="${train.id}"]`);
     let nextProgress;
-    if (train.status.startsWith("Traveling to cluster")) {
+    if (train.status.startsWith("→ cluster")) {
       if (train.startPosition && train.destinationPosition && train.totalInterClusterDistance) {
         const remainingDistance = train.totalInterClusterDistance - train.interClusterTravel;
         const startProgress = 1 - (remainingDistance / train.totalInterClusterDistance);
@@ -1157,13 +1206,37 @@ function updateScheduleListUI() {
 
 function showScheduleOverlay(scheduleId) {
   const schedule = gameState.scheduleList.find((s) => s.id === scheduleId);
-
+  console.log(schedule);
   // Create the overlay and its content
   const overlay = document.getElementById("schedule-overlay");
   overlay.style.display = "block";
 
   const scheduleNameInput = document.getElementById("schedule-name");
   scheduleNameInput.value = schedule.name;
+
+  // Initialize the reserve space slider and value display
+  const reserveSpaceSlider = document.getElementById('reserve-space-slider');
+  const reserveSpaceValue = document.getElementById('reserve-space-value');
+
+  reserveSpaceSlider.value = schedule.reserveSpace;
+  reserveSpaceValue.textContent = schedule.reserveSpace + '%';
+
+  // Define the new slider event listener
+  const sliderEventListener = function() {
+    schedule.reserveSpace = this.value;
+    reserveSpaceValue.textContent = this.value + '%';
+  };
+
+  // Remove the old slider event listener
+  if (sliderEventListeners.has(reserveSpaceSlider)) {
+    reserveSpaceSlider.removeEventListener('input', sliderEventListeners.get(reserveSpaceSlider));
+  }
+
+  // Add the new slider event listener
+  reserveSpaceSlider.addEventListener('input', sliderEventListener);
+
+  // Store the new slider event listener
+  sliderEventListeners.set(reserveSpaceSlider, sliderEventListener);
 
   // Populate the Dropdown with available Stations
   populateStationsDropdown();

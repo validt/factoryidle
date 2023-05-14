@@ -283,11 +283,40 @@
 
           <div id="schedule-overlay" class="schedule-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
             <div class="schedule-overlay-content">
+              <div style="text-align: right;">
+                <button id="delete-schedule" style="margin-right: 10px;">Delete Schedule</button>
+                <button id="close-schedule-overlay">Close</button>
+              </div>
               <h2>Manage Schedule</h2>
               <label for="schedule-name">Schedule Name:</label>
               <input id="schedule-name" type="text" placeholder="Enter schedule name">
+              <button id="save-schedule" style="margin-right: 10px;">Save</button>
+
+              <div id="storage-rules-container">
+                <h3>Storage Rules</h3>
+                <fieldset>
+                  <legend>Reserve Space:</legend>
+                  <div>
+                    <input type="range" id="reserve-space-slider" name="reserveSpace" min="0" max="100">
+                    <label for="reserve-space-slider">Reserve Space (%)</label>
+                    <span id="reserve-space-value"></span>
+                  </div>
+                </fieldset>
+              </div>
+
+
 
               <h3>Stations</h3>
+              <div style="text-align: left; margin-top: 1em;">
+                <label for="stations-dropdown">Station: </label>
+                <select id="stations-dropdown">
+                  <option value="green-chips">Green Chips Parcel - Cluster 3</option>
+                  <option value="iron-patch">Iron Patch Parcel - Cluster 2</option>
+                  <option value="science">Science Parcel - Cluster 2</option>
+                </select>
+                <button id="add-station">Add Station</button>
+              </div>
+
               <table id="stations-table">
                 <thead>
                   <tr>
@@ -330,20 +359,10 @@
                 </tbody>
               </table>
 
-              <div style="text-align: left; margin-top: 1em;">
-                <select id="stations-dropdown">
-                  <option value="green-chips">Green Chips Parcel - Cluster 3</option>
-                  <option value="iron-patch">Iron Patch Parcel - Cluster 2</option>
-                  <option value="science">Science Parcel - Cluster 2</option>
-                </select>
-                <button id="add-station">Add Station</button>
-              </div>
 
-              <div style="text-align: right;">
-                <button id="save-schedule" style="margin-right: 10px;">Save Schedule</button>
-                <button id="delete-schedule" style="margin-right: 10px;">Delete Schedule</button>
-                <button id="close-schedule-overlay">Close</button>
-              </div>
+
+
+
             </div>
           </div>
 

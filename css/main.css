@@ -826,6 +826,7 @@ table.train-table-fixed td {
   overflow:hidden;
   white-space: nowrap;
   text-overflow:ellipsis;
+  text-align: left;
 }
 table.train-table-fixed td:nth-of-type(1) {
   width:100px;
