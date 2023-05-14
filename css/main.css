@@ -674,6 +674,7 @@ h1 {
 .cluster-container {
   margin-bottom: 10px;
   margin-right: 4px;
+  display: flex !important;
 }
 
 .cluster-content {
@@ -842,4 +843,11 @@ table.train-table-fixed td:nth-of-type(4) {
 }
 table.train-table-fixed td:nth-of-type(5) {
   width:300px;
+}
+
+button.collapseButton {
+  background: transparent;
+  border-left: transparent;
+  border-top: transparent;
+  border-right: transparent;
 }

@@ -1,8 +1,8 @@
 const resourceMetadata = {
-  stone: { category: "1Raw", order: 1, icon48: "assets/stone-48.png", name: "Stone" },
-  coal: { category: "1Raw", order: 2, icon48: "assets/coal-48.png", name: "Coal" },
-  ironOre: { category: "1Raw", order: 3, icon48: "assets/ironOre-48.png", name: "Iron Ore" },
-  copperOre: { category: "1Raw", order: 4, icon48: "assets/copperOre-48.png", name: "Copper Ore" },
+  stone: { category: "1Raw", order: 1, icon48: "assets/stone-48.png", name: "Stone", density: 0.5},
+  coal: { category: "1Raw", order: 2, icon48: "assets/coal-48.png", name: "Coal", density: 0.5},
+  ironOre: { category: "1Raw", order: 3, icon48: "assets/ironOre-48.png", name: "Iron Ore", density: 0.5},
+  copperOre: { category: "1Raw", order: 4, icon48: "assets/copperOre-48.png", name: "Copper Ore", density: 0.5},
   oilBarrel: { category: "1Raw", order: 5, icon48: "assets/oilBarrel-48.png", name: "Oil Barrel" },
   bricks: { category: "2Basic", order: 1, icon48: "assets/bricks-48.png", name: "Bricks" },
   ironPlates: { category: "2Basic", order: 2, icon48: "assets/ironPlates-48.png", name: "Iron Plates" },

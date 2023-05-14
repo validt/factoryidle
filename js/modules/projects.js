@@ -12,7 +12,6 @@ const projectsModule = (() => {
 
   const projectCategories = {
     exploration: "Exploration",
-    research: "Research",
     scouting: "Scouting",
   };
 
@@ -33,13 +32,7 @@ const projectsModule = (() => {
       new Project("Exploration Contract 13/16", "exploration", { ironPlates: 7875, purpleScience: 25 }, { expansionPoints: 10}),
       new Project("Exploration Contract 14/16", "exploration", { ironPlates: 7875, yellowScience: 1 }, { expansionPoints: 10}),
       new Project("Exploration Contract 15/16", "exploration", { ironPlates: 7875, yellowScience: 25 }, { expansionPoints: 10}),
-      new Project("Exploration Contract 16/16", "exploration", { ironPlates: 7875, whiteScience: 7 }, { expansionPoints: 10}),
-    ],
-    research: [
-      new Project("Research Project 1/4", "research", { ironPlates: 50 }, { redScience: 2 }),
-      new Project("Research Project 2/4", "research", { ironPlates: Math.round(50 * 1.5) }, { redScience: Math.round(2 * 1.25) }),
-      new Project("Research Project 3/4", "research", { ironPlates: Math.round(50 * 1.5 * 1.5) }, { greenScience: Math.round(2 * 1.25 * 1.25) }),
-      new Project("Research Project 4/4", "research", { ironPlates: Math.round(50 * 1.5 * 1.5 * 1.5) }, { greenScience: Math.round(2 * 1.25 * 1.25 * 1.25) }),
+      new Project("Exploration Contract 16/16", "exploration", { ironPlates: 7875, whiteScience: 20 }, { expansionPoints: 10}),
     ],
     scouting: [
       new Project("Defense Contract 1/6", "scouting", { copperPlates: 150 }, { alienArtefacts: 2 }),

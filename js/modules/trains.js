@@ -104,8 +104,8 @@ function Train(id, name, scheduleId) {
     ironOre: 150,
     */
   ];
-  this.maxCargo = 5000;
-  this.loadRate = 100;
+  this.maxCargo = 8000;
+  this.loadRate = 200;
 }
 
 // Schedule constructor
@@ -295,6 +295,11 @@ function saveSchedule(scheduleId) {
 }
 
 function buyTrain() {
+  if (gameState.trainList.length >= gameState.maxTrains) {
+    alert("Max train limit reached. Research upgrades to add more trains to the network.");
+    return;
+  }
+
   const selectedParcel = parcels.getParcel(ui.getSelectedParcelIndex());
 
   if (window.projects.hasEnoughResources(selectedParcel, trainCost)) {
