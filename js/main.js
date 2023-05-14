@@ -278,3 +278,39 @@ function toggleGameSection(sectionId) {
     section.classList.add("hidden");
   }
 }
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------ */
+/* --------------------------------------------------------------- Keyboard Shortcuts ------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------------------------------------ */
+function addParcelNavigationKeyListener() {
+  window.addEventListener('keydown', (event) => {
+    const selectedParcelTab = document.querySelector(".parcel-tab.selected");
+    if (!selectedParcelTab) return;
+
+    let nextParcelTab;
+    if (event.key === 'ArrowRight') {
+      nextParcelTab = selectedParcelTab.nextElementSibling;
+    } else if (event.key === 'ArrowLeft') {
+      nextParcelTab = selectedParcelTab.previousElementSibling;
+    } else {
+      // If neither left nor right arrow key was pressed, do nothing
+      return;
+    }
+
+    // If there is a next parcel to select
+    if (nextParcelTab) {
+      // Deselect the currently selected parcel
+      selectedParcelTab.classList.remove("selected");
+
+      // Select the next parcel
+      nextParcelTab.classList.add("selected");
+      selectedParcelIndex = parseInt(nextParcelTab.id.split("-")[2]) - 1;
+      ui.setSelectedParcelIndex(selectedParcelIndex);
+
+      // Update the resource and building display
+      const parcel = parcels.getParcel(selectedParcelIndex);
+      ui.updateResourceDisplay(parcel);
+      ui.updateBuildingDisplay(parcel);
+    }
+  });
+}

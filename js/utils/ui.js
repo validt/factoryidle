@@ -1565,6 +1565,10 @@ const ui = (() => {
     return selectedParcelIndex;
   }
 
+  function setSelectedParcelIndex(newSelectedParcelIndex) {
+    selectedParcelIndex = newSelectedParcelIndex;
+  }
+
   function selectParcel(parcelIndex) {
     const parcelButtons = document.querySelectorAll(".parcel-button");
     selectedParcelIndex = parcelIndex;
@@ -1770,6 +1774,7 @@ function addTooltipToBuyParcelButton(buyParcelButton) {
     updateBuildingDisplay,
     updateParcelBuildingCount,
     getSelectedParcelIndex,
+    setSelectedParcelIndex,
     selectParcel,
     updateParcelsSectionVisibility,
     updateEnergyDisplay,
@@ -1782,7 +1787,7 @@ function addTooltipToBuyParcelButton(buyParcelButton) {
     showMissingResourceOverlay,
     activateBuilding,
     deactivateBuilding,
-    updateBuyParcelDropdown,
+    updateBuyParcelDropdown
   };
 })();
 
