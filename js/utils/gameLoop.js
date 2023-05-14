@@ -68,11 +68,11 @@ const gameLoop = (() => {
             updateAmmunitionDisplay(battleOngoing);
             displayArmyCost(factoryUnits);
             updateStartBattleButtonState();
-            updatePollutionValues()
+            updatePollutionValues();
             updatePollutionDisplay();
             reduceBiterFactor();
             ui.updateEnergyDisplay();
-            moveTrain(1);
+            moveAllTrains();
             updateTrainListUI();
             window.progressionManager.update(gameState);
             tickCounter++;
