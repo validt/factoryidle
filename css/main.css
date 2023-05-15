@@ -663,7 +663,6 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    gap: 40px;
 }
 
 /* Cluster Styles */

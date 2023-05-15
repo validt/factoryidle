@@ -862,7 +862,7 @@ const ui = (() => {
       mineButton.style.float = "right";
       mineButton.style.marginLeft = "1em"
       mineButton.addEventListener("click", () => {
-        this.parcel.resources[resourceName]++;
+        this.parcel.resources[resourceName] += 5;
         this.update();
       });
 
