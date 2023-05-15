@@ -815,8 +815,15 @@ const ui = (() => {
       };
 
       // Attach event listeners
-      minusBtn.addEventListener("click", () => handleButtonClick(-1));
-      plusBtn.addEventListener("click", () => handleButtonClick(1));
+      minusBtn.addEventListener("click", (event) => {
+        const amount = event.shiftKey ? -5 : -1;
+        handleButtonClick(amount);
+      });
+
+      plusBtn.addEventListener("click", (event) => {
+        const amount = event.shiftKey ? 5 : 1;
+        handleButtonClick(amount);
+      });
 
       directionInput.addEventListener("input", (event) => {
         const inputVal = parseInt(event.target.value, 10) || 0;
@@ -1609,15 +1616,19 @@ const ui = (() => {
     const expansionTech = window.gameState.research.expansionTech;
 
     updateSectionVisibility("parcels-section", expansionTech);
+    updateSectionVisibility("parcels-header", expansionTech);
+    updateSectionVisibility("parcelManipulationMenuButton", expansionTech);
     updateSectionVisibility("global-header", expansionTech);
     updateSectionVisibility("energy-section", gameState.sectionVisibility.energySection);
     updateSectionVisibility("pollution-section", gameState.sectionVisibility.pollutionSection);
     updateSectionVisibility("fight-container", gameState.sectionVisibility.fightSection);
+    updateSectionVisibility("military-header", gameState.sectionVisibility.fightSection);
     updateSectionVisibility("project-section", gameState.sectionVisibility.projectSection);
     updateSectionVisibility("research-section", gameState.sectionVisibility.researchSection);
     updateSectionVisibility("copyDropdownItem", gameState.sectionVisibility.blueprints);
     updateSectionVisibility("pasteDropdownItem", gameState.sectionVisibility.blueprints);
     updateSectionVisibility("train-management", gameState.sectionVisibility.trainSection)
+    updateSectionVisibility("train-header", gameState.sectionVisibility.trainSection)
 
     // //Hide Project Section when all projects are done: Object.values(window.projects.projects).every(array => array.length === 0);
     // updateSectionVisibility("project-section", Object.values(window.projects.projects).length != 0);

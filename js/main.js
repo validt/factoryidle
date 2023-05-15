@@ -266,6 +266,11 @@ function cheat(pin) {
     parcels.parcelList[0].resources.gears = 5000;
     parcels.parcelList[0].resources.redScience = 5000;
     parcels.parcelList[0].resources.greenScience = 5000;
+    parcels.parcelList[0].resources.darkScience = 5000;
+    parcels.parcelList[0].resources.blueScience = 5000;
+    parcels.parcelList[0].resources.purpleScience = 5000;
+    parcels.parcelList[0].resources.yellowScience = 5000;
+    parcels.parcelList[0].resources.whiteScience = 5000;                    
   }
 }
 
