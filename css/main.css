@@ -42,11 +42,7 @@
     background: #888;
 }
 
-.dark-mode .input-btn:hover{
-  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
-  background-color: initial;
-  cursor:pointer;
-}
+
 
 .dark-mode .parcel-tab.selected {
   background-image: -webkit-linear-gradient(top, rgb(0, 2, 4), rgb(48, 50, 53));
@@ -75,21 +71,6 @@
 
 .dark-mode td {
   background-color: #222426;
-}
-
-.dark-mode .input-btn {
-    background-color: #35393B;
-}
-
-.dark-mode .input-controller {
-    border-color: rgb(140, 130, 115);
-}
-
-.dark-mode .input-display {
-    border-left-color: rgb(140, 130, 115);
-    border-top-color: initial;
-    border-right-color: rgb(140, 130, 115);
-    border-bottom-color: initial;
 }
 
 /* Dark Mode Move Parcel Pop Up */
@@ -490,7 +471,7 @@ button:disabled {
 /* Input Controller */
 .input-controller{
   display: inline-flex;
-  width:120px;
+  width:170px;
   border:1px solid black;
 }
 
@@ -519,6 +500,46 @@ button:disabled {
   border-bottom: 0px;
 }
 
+.dark-mode .input-btn {
+    background-color: #35393B;
+}
+
+.dark-mode .input-btn:hover{
+  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+  background-color: initial;
+  cursor:pointer;
+}
+
+.dark-mode .input-controller {
+    border-color: rgb(140, 130, 115);
+}
+
+.dark-mode .input-display {
+    border-left-color: rgb(140, 130, 115);
+    border-top-color: initial;
+    border-right-color: rgb(140, 130, 115);
+    border-bottom-color: initial;
+}
+
+
+/* Default mode disabled state */
+.input-btn:disabled {
+    background-color: #DDDDDD; /* Change this to the color you want */
+    cursor: not-allowed; /* Typically, a not-allowed cursor is used to show that the button is disabled */
+}
+
+.input-btn:disabled:hover {
+    background-color: #DDDDDD; /* The hover color should typically be the same as the normal color, because you usually don't want any hover effects when the button is disabled */
+}
+
+/* Dark mode disabled state */
+.dark-mode .input-btn:disabled {
+    background-color: #2D2F31; /* Change this to the dark mode color you want */
+}
+
+.dark-mode .input-btn:disabled:hover {
+    background-color: #2D2F31; /* The hover color should typically be the same as the normal color */
+}
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -849,4 +870,16 @@ button.collapseButton {
   border-left: transparent;
   border-top: transparent;
   border-right: transparent;
+}
+
+td.resource-name div {
+    /* Your styles here */
+    width: 250px;
+    position: absolute;
+    z-index: 3;
+    overflow: hidden;
+}
+
+.resource-name {
+  width: 187px;
 }

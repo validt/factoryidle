@@ -79,10 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Add new parcel to UI, then update cluster parcels
         ui.addParcelToUI(newParcel, () => {
           ui.updateResourceDisplay(newParcel);
+          ui.updateBuildingDisplay(newParcel);
 
           // Select the newly bought parcel
           const newIndex = parcels.getParcelCount() - 1;
+          ui.setSelectedParcelIndex(newIndex);
           ui.selectParcel(newIndex);
+          parcelManipulation.selectParcel(newIndex);
 
           // Update cluster parcels
           gameLoop.updateClusterParcels();
@@ -270,7 +273,7 @@ function cheat(pin) {
     parcels.parcelList[0].resources.blueScience = 5000;
     parcels.parcelList[0].resources.purpleScience = 5000;
     parcels.parcelList[0].resources.yellowScience = 5000;
-    parcels.parcelList[0].resources.whiteScience = 5000;                    
+    parcels.parcelList[0].resources.whiteScience = 5000;
   }
 }
 

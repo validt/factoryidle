@@ -507,7 +507,7 @@ const ui = (() => {
       textWrapper.appendChild(icon);
 
       textWrapper.insertAdjacentText('beforeend', resource.name);
-      textWrapper.style.display = "inline-block";
+      textWrapper.style.display = "contents";
       textWrapper.style.verticalAlign = "-webkit-baseline-middle";
 
       cell.appendChild(textWrapper);
