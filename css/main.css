@@ -23,7 +23,7 @@
 
 .dark-mode button {
   border-color: rgb(131, 122, 108);
-  background-image: -webkit-linear-gradient(top, rgb(91, 99, 103), rgb(24, 26, 27));
+  background-image: -webkit-linear-gradient(top, rgb(75, 75, 75), rgb(24, 26, 27));
 
   background-color: initial;
   box-shadow: rgba(24, 26, 27, 0.4) 0px 0px 0px, rgba(24, 26, 27, 0.4) 0px 1px 0px inset;
@@ -498,6 +498,19 @@ button:disabled {
   border-top: 0px;
   border-right: 1px solid black;
   border-bottom: 0px;
+  font-weight: bold;
+}
+
+.input-display.zero-value {
+  color: grey;
+  font-weight: normal;
+  background-color: #cdcdcd;
+}
+
+.dark-mode .input-display.zero-value {
+  color: grey;
+  font-weight: normal;
+  background-color: #222326;
 }
 
 .dark-mode .input-btn {

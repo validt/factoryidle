@@ -504,6 +504,7 @@ const ui = (() => {
       icon.style.height = "24px"; // Adjust the size as needed
       icon.style.verticalAlign = "middle";
       icon.style.marginRight = "5px"; // Add some margin between the icon and the text
+      icon.classList.add("resource-icon")
       textWrapper.appendChild(icon);
 
       textWrapper.insertAdjacentText('beforeend', resource.name);
@@ -843,6 +844,12 @@ const ui = (() => {
           event.target.value = 0;
         }
 
+        if (inputVal <= 0 || isNaN(inputVal) || inputVal === null || inputVal === "") {
+          event.target.classList.add('zero-value');
+        } else {
+          event.target.classList.remove('zero-value');
+        }
+
         event.target.dataset.currentval = event.target.value;
 
         // Save the input field value for the parcel, resource, and beltId
@@ -850,6 +857,11 @@ const ui = (() => {
 
         this.update();
       });
+
+      // Check initial input value and add 'zero-value' class if necessary
+      if (inputValue === 0) {
+        directionInput.classList.add('zero-value');
+      }
 
       return beltController;
     }
