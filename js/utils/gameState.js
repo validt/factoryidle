@@ -222,8 +222,8 @@ window.loadGame = function() {
   }
 };
 
-// // Save the game state every minute
-//   setInterval(window.saveGame, 60 * 1000);
+// Save the game state every minute
+  setInterval(window.saveGame, 60 * 1000);
 
 function getSaveStateString() {
   const saveData = {
