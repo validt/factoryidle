@@ -142,6 +142,9 @@ const ui = (() => {
       resourceNames.forEach((resourceName) => {
         if (resourceName.dataset.tooltipListenerAttached !== 'true') {
           resourceName.addEventListener("mouseover", (event) => {
+            if (event.target.classList.contains('exclude')) {
+                return;
+            }
             const name = resourceName.parentNode.id.split('-')[1];
             const resource = buildingManager.getBuildingByResourceName(name);
             if (resource) {
@@ -870,11 +873,12 @@ const ui = (() => {
       const mineButton = document.createElement("button");
       mineButton.textContent = "Mine";
       mineButton.style.display = "inline-block";
+      mineButton.classList.add("exclude");
       mineButton.style.verticalAlign = "-webkit-baseline-middle";
       mineButton.style.float = "right";
       mineButton.style.marginLeft = "1em"
       mineButton.addEventListener("click", () => {
-        this.parcel.resources[resourceName] += 5;
+        this.parcel.resources[resourceName] += 1;
         this.update();
       });
 
@@ -1790,6 +1794,36 @@ function addTooltipToBuyParcelButton(buyParcelButton) {
     }
   }
 
+  function addExplainerTooltip(explainedElementId, explanationHTML) {
+      // Get the element with the specified ID
+      const explainedElement = document.getElementById(explainedElementId);
+
+      // Create a div for the tooltip and set its content
+      const tooltip = document.createElement('div');
+      tooltip.innerHTML = explanationHTML;
+      tooltip.classList.add('explainerTooltip');
+
+      // Append the tooltip to the document body
+      document.body.appendChild(tooltip);
+
+      // Position the tooltip and make it visible when the explained element is hovered over
+      explainedElement.addEventListener('mouseenter', function(event) {
+          // Position the tooltip below the explained element
+          const rect = explainedElement.getBoundingClientRect();
+          tooltip.style.left = rect.left + 'px';
+          tooltip.style.top = (rect.bottom + window.scrollY) + 'px'; // Adjust for page scroll
+
+          // Make the tooltip visible
+          tooltip.classList.add('tooltip-visible');
+      });
+
+      // Hide the tooltip when the mouse leaves the explained element
+      explainedElement.addEventListener('mouseleave', function() {
+          tooltip.classList.remove('tooltip-visible');
+      });
+  }
+
+
   return {
     updateClusterHeadersVisibility,
     addParcelToUI,
@@ -1810,7 +1844,8 @@ function addTooltipToBuyParcelButton(buyParcelButton) {
     showMissingResourceOverlay,
     activateBuilding,
     deactivateBuilding,
-    updateBuyParcelDropdown
+    updateBuyParcelDropdown,
+    addExplainerTooltip
   };
 })();
 

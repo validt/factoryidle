@@ -374,6 +374,21 @@ button:disabled {
   margin-right: 5px;
 }
 
+.explainerTooltip {
+    position: absolute;
+    z-index: 100;
+    background-color: #222;
+    border: 1px solid #ccc;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none; /* This makes sure that the tooltip does not interfere with mouse events on other elements */
+}
+
+.tooltip-visible {
+    opacity: 1;
+}
+
 /* Projects */
 .project-box {
   border: 1px solid black;
