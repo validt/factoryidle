@@ -247,6 +247,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.research.expansionTech,
+    description: "Move resources between parcels",
   },
   {
     id: "expansionCenter",
@@ -834,7 +835,7 @@ const buildings = [
     id: "redScienceLab",
     name: "Red Science Laboratory",
     category : "Progress & Expansion",
-    cost: { gears: 100, bricks: 100 },
+    cost: { gears: 50, bricks: 100 },
     inputs: { bricks: 50, gears: 50 },
     outputs: { redScience: 1 },
     energyInput: 3,
