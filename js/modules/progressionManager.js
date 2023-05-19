@@ -95,7 +95,7 @@ class ProgressionManager {
 
     // Check for GameWin
     if (window.gameState.research.gameWon) {
-      alert("Congrats. You won the Demo. Feedback highly appreciated. Also, take a screenshot of your factory and share it, that would be even more appreciated :)");
+      alert("Congrats! You won the Demo! There is a feedback button top left, sharing your perspective highly appreciated :)");
       window.gameState.research.gameWon = false;
     }
 

@@ -790,9 +790,26 @@ function moveTrain(trainId) {
 
 function moveAllTrains() {
   gameState.trainList.forEach((train) => {
+    // Check if the train has a schedule assigned
+    if (train.scheduleId.length === 0) {
+      //console.log(`Train ${train.id} does not have a schedule assigned.`);
+      return; // skip this iteration
+    }
+
+    // Get the schedule
+    const trainSchedule = gameState.scheduleList.find(schedule => schedule.id === train.scheduleId);
+
+    // Check if the schedule exists and has at least 2 stations
+    if (!trainSchedule || trainSchedule.stations.length < 2) {
+      //console.log(`Train ${train.id}'s schedule does not exist or has less than 2 stations.`);
+      return; // skip this iteration
+    }
+
+    // Now move the train
     moveTrain(train.id);
   });
 }
+
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------- UI Functions -------------------------------------------------------------
