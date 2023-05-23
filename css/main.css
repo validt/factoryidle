@@ -814,7 +814,8 @@ button.cluster-header {
 }
 
 .station-overlay-content {
-  position: fixed;
+  position: relative;
+  width: fit-content;
   left: 50%;
   transform: translate(-50%, 15%);
   padding: 20px;

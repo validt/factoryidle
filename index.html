@@ -25,7 +25,7 @@
     <div id="container">
       <h1>
         <span class="title-text">Factory Idle</span>
-        <span class="version-number">v1.0.6.0</span>
+        <span class="version-number">v1.0.6.1</span>
       </h1>
       <button id="darkModeToggle">Toggle Dark Mode</button>
       <button id="feedback-button" onclick="window.open('https://docs.google.com/forms/d/1oq8YquPPuWRE1zaipHxxVlX2mTAbsTNlvpIQefqQE6M', '_blank')">
@@ -278,7 +278,7 @@
             <button id="add-schedule">Add Schedule</button>
           </div>
 
-          <div id="schedule-overlay" class="schedule-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
+          <div id="schedule-overlay" class="schedule-overlay" style="display: none; position: fixed; overflow: auto; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
             <div class="schedule-overlay-content">
               <div style="text-align: right;">
                 <button id="delete-schedule" style="margin-right: 10px;">Delete Schedule</button>
@@ -364,7 +364,7 @@
           </div>
 
           <!-- Add this inside your HTML body -->
-          <div id="edit-station-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1001;">
+          <div id="edit-station-overlay" style="display: none; position: fixed; overflow: auto; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1001;">
             <div class="station-overlay-content">
               <h2>Edit Station</h2>
               <div>
