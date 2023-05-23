@@ -518,8 +518,19 @@ function getCurrentStationCondition(train) {
 
 function executeLoading(train) {
   const schedule = getScheduleById(train.scheduleId);
-  const currentStation = schedule.stations[train.nextStop];
+  let currentStation = schedule.stations[train.nextStop];
   const currentParcel = parcels.parcelList.find(parcel => parcel.id === train.currentLocation);
+
+  //There can be a situation where a nextStop of a train is not avaialbel in the schedule anymore.
+  let correctionValue = 1;
+  while (currentStation === undefined) {
+    console.log("while", correctionValue, currentStation);
+    currentStation = schedule.stations[train.nextStop - correctionValue]
+    correctionValue++;
+    if (correctionValue === 1000) {
+      return true;
+    }
+  }
 
   const loading = currentStation.load;
   const unloading = currentStation.unload;
