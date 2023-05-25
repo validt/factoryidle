@@ -35,9 +35,9 @@ const projectsModule = (() => {
       new Project("Exploration Contract 16/16", "exploration", { ironPlates: 7875, whiteScience: 20 }, { expansionPoints: 100}),
     ],
     scouting: [
-      new Project("Defense Contract 1/6", "scouting", { copperPlates: 150 }, { alienArtefacts: 2 }),
-      new Project("Defense Contract 2/6", "scouting", { copperPlates: Math.round(150 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25) }),
-      new Project("Defense Contract 3/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25) }),
+      new Project("Defense Contract 1/6", "scouting", { copperPlates: 50 }, { alienArtefacts: 2 }),
+      new Project("Defense Contract 2/6", "scouting", { copperPlates: Math.round(50 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25) }),
+      new Project("Defense Contract 3/6", "scouting", { copperPlates: Math.round(100 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25) }),
       new Project("Defense Contract 4/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25) }),
       new Project("Defense Contract 5/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25 * 1.25) }),
       new Project("Defense Contract 6/6", "scouting", { copperPlates: Math.round(150 * 1.5 * 1.5 * 1.5 * 1.5) }, { alienArtefacts: Math.round(2 * 1.25 * 1.25 * 1.25 * 1.25 * 1.25) }),
