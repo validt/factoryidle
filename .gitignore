@@ -3,3 +3,5 @@
 
 #Ignore Other
 Other/
+node_modules/
+build/
