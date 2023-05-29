@@ -1441,6 +1441,7 @@ function showScheduleOverlay(scheduleId) {
   });
 
   // Hook up the remaining buttons and dropdowns for adding stations, saving the schedule, etc.
+  const stationsDropdown = document.getElementById("stations-dropdown");
   const addStationButton = document.getElementById("add-station");
   const addStationClickListener = onAddStationClick(scheduleId);
   if (addStationButtonListeners.has(addStationButton)) {
@@ -1448,6 +1449,12 @@ function showScheduleOverlay(scheduleId) {
   }
   addStationButton.addEventListener("click", addStationClickListener);
   addStationButtonListeners.set(addStationButton, addStationClickListener);
+
+  if (stationsDropdown.options.length === 0) {
+    addStationButton.disabled = true;
+  } else {
+    addStationButton.disabled = false;
+  };
 
   const saveScheduleButton = document.getElementById("save-schedule");
   const saveScheduleClickListener = onSaveScheduleClick(scheduleId, scheduleNameInput, schedule, overlay);

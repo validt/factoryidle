@@ -25,7 +25,7 @@
     <div id="container">
       <h1>
         <span class="title-text">Incremental Factory</span>
-        <span class="version-number">v1.0.6.1</span>
+        <span class="version-number">v1.0.6.2</span>
       </h1>
       <button id="darkModeToggle">Toggle Dark Mode</button>
       <button id="feedback-button" onclick="window.open('https://docs.google.com/forms/d/1oq8YquPPuWRE1zaipHxxVlX2mTAbsTNlvpIQefqQE6M', '_blank')">
@@ -36,6 +36,9 @@
         <img src="assets/save-icon.svg" alt="">
         <span class="save-text">Save</span>
         <span class="save-checkmark">&#10003;</span>
+      </button>
+      <button id="autoSaveToggle" onclick="toggleAutoSave()">
+        <span class="autoSave-text">Auto Save (On)</span>
       </button>
       <button id="resetButton" class="reset-button" onclick="showResetConfirmation()">
         Reset Game
