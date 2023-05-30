@@ -802,9 +802,11 @@ function moveTrain(trainId) {
 function moveAllTrains() {
   gameState.trainList.forEach((train) => {
     // Check if the train has a schedule assigned
-    if (!train.scheduleId) {
+    if (typeof train.scheduleId === 'undefined' || train.scheduleId === null) {
       //console.log(`Train ${train.id} does not have a schedule assigned.`);
       return; // skip this iteration
+    } else if (train.scheduleId.length === 0) {
+      return;
     }
 
     // Get the schedule
