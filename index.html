@@ -80,6 +80,21 @@
     </div>
     <div id="tooltip" class="tooltip" style="display: none;"></div>
     <div id="container">
+      <section id="supplyChainForm">
+          <form>
+              <label for="resource">Resource:</label>
+              <select id="resource"></select>
+              <label for="amount">Target Amount:</label>
+              <input type="float" id="amount" min="0">
+              <button type="submit">Calculate Supply Chain</button>
+          </form>
+      </section>
+      <section id="supplyChainList">
+      </section>
+      <div id="buildingTable">
+      </div>
+    </div>
+    <div id="container">
 
         <h2 id="global-header">Global <button class="collapseButton" onclick="toggleGameSection('global-section')">-</button> </h2>
         <div class="category global" id="global-section">
@@ -532,6 +547,7 @@
 
     <script src="js/modules/parcels.js"></script>
     <script src="js/modules/buildings.js"></script>
+    <script src="js/modules/buildingsView.js"></script>
     <script src="js/modules/progressionManager.js"></script>
     <script src="js/modules/researchManager.js"></script>
     <script src="js/modules/projects.js"></script>

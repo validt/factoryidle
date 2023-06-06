@@ -912,3 +912,13 @@ td.resource-name div {
 .resource-name {
   width: 187px;
 }
+
+/* buildingsView */
+
+.selected {
+  background-color: yellow;
+}
+
+.selected-child {
+  background-color: blue;  
+}
