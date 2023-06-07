@@ -31,7 +31,7 @@ form.addEventListener('submit', function(event) {
   while (buildingTableDiv.firstChild) {
     buildingTableDiv.removeChild(buildingTableDiv.firstChild);
   }
-  var totalBuildings = calculateTotalBuildings(supplyChain);
+  var totalBuildings = createTableFromCalculation(calculateTotalBuildings(supplyChain));
   console.log(supplyChain);
   console.log(totalBuildings);
   buildingTableDiv.appendChild(totalBuildings);
@@ -60,9 +60,9 @@ function calculateTotalBuildings(supplyChain) {
     var building = buildingObj.building;
     var cycles = buildingObj.cycles;
     if (!totalBuildings[building]) {
-      totalBuildings[building] = 0;
+      totalBuildings[building] = { cycles: 0 };
     }
-    totalBuildings[building] += cycles;
+    totalBuildings[building].cycles += cycles;
   }
 
   function recurse(chain) {
@@ -78,17 +78,20 @@ function calculateTotalBuildings(supplyChain) {
 
   recurse(supplyChain);
 
-  // Now let's create a table to display the results
+  return totalBuildings;
+}
+
+function createTableFromCalculation(calculation) {
   var table = document.createElement('table');
   var tbody = document.createElement('tbody');
 
-  for (var building in totalBuildings) {
+  for (var building in calculation) {
     var tr = document.createElement('tr');
     var tdBuilding = document.createElement('td');
     var tdTotal = document.createElement('td');
 
     tdBuilding.textContent = building;
-    tdTotal.textContent = fixPrecision(totalBuildings[building]);
+    tdTotal.textContent = fixPrecision(calculation[building].cycles);
 
     tr.appendChild(tdBuilding);
     tr.appendChild(tdTotal);
@@ -102,6 +105,7 @@ function calculateTotalBuildings(supplyChain) {
   return table;
 }
 
+
 function createSupplyChainList(supplyChain) {
   var ul = document.createElement('ul');
 
@@ -109,6 +113,8 @@ function createSupplyChainList(supplyChain) {
   var li = document.createElement('li');
   li.textContent = `${supplyChain[0].building}, Cycles: ${supplyChain[0].cycles}, Inputs: ${JSON.stringify(supplyChain[0].inputs)}`;
   li.classList.add('building-li');
+  li.dataset.buildingName = supplyChain[0].building;
+  li.dataset.cycles = supplyChain[0].cycles;
   ul.appendChild(li);
 
   // Go through the rest of the array and create nested lists for inputs
@@ -119,41 +125,56 @@ function createSupplyChainList(supplyChain) {
   }
 
   li.addEventListener('click', function(event) {
-      var isSelected = li.classList.contains('selected');
-      var isMac = window.navigator.platform.includes('Mac');
-      var isModifierKeyPressed = isMac ? event.metaKey : event.ctrlKey;
+    var isSelected = li.classList.contains('selected');
+    var isMac = window.navigator.platform.includes('Mac');
+    var isModifierKeyPressed = isMac ? event.metaKey : event.ctrlKey;
 
-      if (!isModifierKeyPressed) {
-          document.querySelectorAll('.selected, .selected-child').forEach(el => {
-          el.classList.remove('selected', 'selected-child');
-          });
-      }
-
-      li.classList.toggle('selected', !isSelected);
-      Array.from(li.querySelectorAll('li')).forEach(child => {
-          child.classList.toggle('selected-child', !isSelected);
+    if (!isModifierKeyPressed) {
+      document.querySelectorAll('.selected, .selected-child').forEach(el => {
+        el.classList.remove('selected', 'selected-child');
       });
+    }
 
-      var buildingName = supplyChain[0].building;
-      var cycles = supplyChain[0].cycles;
+    li.classList.toggle('selected', !isSelected);
+    Array.from(li.querySelectorAll('li')).forEach(child => {
+      child.classList.toggle('selected-child', !isSelected);
+    });
+
+    var selectedLis = Array.from(document.querySelectorAll('.selected:not(.selected-child)'));
+    var buildingTableDiv = document.querySelector('#buildingTable');
+
+    while (buildingTableDiv.firstChild) {
+      buildingTableDiv.removeChild(buildingTableDiv.firstChild);
+    }
+
+    var totalBuildingsAll = {};
+
+    selectedLis.forEach(li => {
+      var buildingName = li.dataset.buildingName;
+      var cycles = parseInt(li.dataset.cycles, 10);
       var outputs = buildings.find(b => b.name === buildingName).outputs;
 
       var selectedSupplyChain = calculateSupplyChain(Object.keys(outputs)[0], Object.values(outputs)[0] * cycles)
-      var buildingTableDiv = document.querySelector('#buildingTable');
-      while (buildingTableDiv.firstChild) {
-        buildingTableDiv.removeChild(buildingTableDiv.firstChild);
-      }
       var totalBuildings = calculateTotalBuildings(selectedSupplyChain);
-      console.log(selectedSupplyChain);
-      console.log(totalBuildings);
-      buildingTableDiv.appendChild(totalBuildings);
 
-      event.stopPropagation();
+      // Sum up the total buildings
+      for (let building in totalBuildings) {
+        if (!totalBuildingsAll[building]) {
+          totalBuildingsAll[building] = { cycles: 0 };
+        }
+        totalBuildingsAll[building].cycles += totalBuildings[building].cycles;
+      }
+    });
+
+    var totalBuildingsTable = createTableFromCalculation(totalBuildingsAll);
+    buildingTableDiv.appendChild(totalBuildingsTable);
+
+    event.stopPropagation();
   });
-
 
   return ul;
 }
+
 
 function calculateSupplyChain(resource, amount) {
   var building = buildings.find(b => b.outputs[resource]);
