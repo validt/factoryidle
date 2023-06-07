@@ -111,7 +111,7 @@ function createSupplyChainList(supplyChain) {
 
   // Create an 'li' for the building itself (first element of the array)
   var li = document.createElement('li');
-  li.textContent = `${supplyChain[0].building}, Cycles: ${supplyChain[0].cycles}, Inputs: ${JSON.stringify(supplyChain[0].inputs)}`;
+  li.textContent = `${supplyChain[0].building}, (${supplyChain[0].cycles})`;
   li.classList.add('building-li');
   li.dataset.buildingName = supplyChain[0].building;
   li.dataset.cycles = supplyChain[0].cycles;
@@ -151,10 +151,12 @@ function createSupplyChainList(supplyChain) {
 
     selectedLis.forEach(li => {
       var buildingName = li.dataset.buildingName;
-      var cycles = parseInt(li.dataset.cycles, 10);
+      var cycles = parseFloat(li.dataset.cycles, 10);
       var outputs = buildings.find(b => b.name === buildingName).outputs;
 
       var selectedSupplyChain = calculateSupplyChain(Object.keys(outputs)[0], Object.values(outputs)[0] * cycles)
+      console.log("Object.values(outputs)[0]", Object.values(outputs)[0]);
+      console.log("cycles", cycles);
       var totalBuildings = calculateTotalBuildings(selectedSupplyChain);
 
       // Sum up the total buildings
@@ -184,6 +186,7 @@ function calculateSupplyChain(resource, amount) {
 
   var producedAmount = fixPrecision(building.outputs[resource] * building.rate);
   console.log(`Produced Amount: ${producedAmount}`);
+  console.log(`Amount: ${amount}`);
 
   var cyclesNeeded = fixPrecision(amount / producedAmount);
   console.log(`Cycles Needed: ${cyclesNeeded}`);

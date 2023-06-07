@@ -916,9 +916,61 @@ td.resource-name div {
 /* buildingsView */
 
 .selected {
-  background-color: yellow;
+  background-color: blue;
 }
 
 .selected-child {
-  background-color: blue;  
+  background-color: grey;
+}
+
+#supplyChainList,
+#buildingTable {
+    width: 50%;
+}
+
+#supplyChainMainDiv {
+    display: flex;
+    justify-content: space-between;
+}
+
+.supplyChain-overlay-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: fit-content;
+    max-width: 80%; /* Set this to whatever maximum width you want */
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 2px rgba(0,0,0,0.1);
+    overflow: auto;
+}
+
+.supplyChain-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+
+#supplyChainMainDiv {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+#supplyChainFormContainer {
+    margin-bottom: 20px;
+}
+
+#supplyChainForm {
+    margin-bottom: 20px;
 }

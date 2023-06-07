@@ -190,6 +190,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add event listeners for the buttons
     document.getElementById('factoryOff').addEventListener('click', factoryOff);
     document.getElementById('factoryOn').addEventListener('click', factoryOn);
+
+    // Get the overlay and the buttons
+    var overlay = document.getElementById('supplyChain-overlay');
+    var openButton = document.getElementById('open-supplyChain-overlay');
+    var closeButton = document.getElementById('close-supplyChain-overlay');
+
+    // Add event listeners to the buttons
+    openButton.addEventListener('click', openOverlay);
+    closeButton.addEventListener('click', closeOverlay);
+
+    // Define the functions that will be called when the buttons are clicked
+    function openOverlay() {
+      overlay.style.display = 'block';
+    }
+
+    function closeOverlay() {
+      overlay.style.display = 'none';
+    }
+
+
 });
 
 function saveGameWithAnimation() {

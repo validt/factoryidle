@@ -63,6 +63,7 @@
       <button id="factoryOn">Factory On</button>
       <button id="factoryOff">Factory Off</button>
       <button id="accessibility-mode-toggle">Accessibility Mode: Off</button>
+      <button id="open-supplyChain-overlay">Build Planner</button>
       <!-- <button id="importLegacyButton">Import (Legacy)</button> -->
 
       <div id="exportContainer" style="display: none;">
@@ -79,21 +80,34 @@
       </div> -->
     </div>
     <div id="tooltip" class="tooltip" style="display: none;"></div>
-    <div id="container">
-      <section id="supplyChainForm">
-          <form>
+
+    <div id="supplyChain-overlay" class="supplyChain-overlay" style="display: none; position: fixed; overflow: auto; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000;">
+      <div class="supplyChain-overlay-content">
+        <div style="text-align: right;">
+          <button id="close-supplyChain-overlay">Close</button>
+        </div>
+        <h2>Build Planner</h2>
+
+        <div id="supplyChainFormContainer">
+          <section id="supplyChainForm">
+            <form>
               <label for="resource">Resource:</label>
               <select id="resource"></select>
-              <label for="amount">Target Amount:</label>
+              <label for="amount">items / s:</label>
               <input type="float" id="amount" min="0">
               <button type="submit">Calculate Supply Chain</button>
-          </form>
-      </section>
-      <section id="supplyChainList">
-      </section>
-      <div id="buildingTable">
+            </form>
+          </section>
+          <div id="supplyChainMainDiv">
+            <div id="buildingTable">
+            </div>
+            <section id="supplyChainList">
+            </section>
+          </div>
+        </div>
       </div>
     </div>
+
     <div id="container">
 
         <h2 id="global-header">Global <button class="collapseButton" onclick="toggleGameSection('global-section')">-</button> </h2>
