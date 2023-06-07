@@ -82,6 +82,44 @@ function initTrainUi () {
     const name = `Schedule ${newScheduleId}`;
     addSchedule(name, []);
   });
+
+  // Function to check or uncheck all checkboxes in a section
+  function toggleCheckboxes(sectionId, isChecked) {
+    const checkboxes = document.querySelectorAll(`#${sectionId} input[type=checkbox]`);
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = isChecked;
+    });
+  }
+
+  // Function to update the button text based on whether all checkboxes are checked
+  function updateSelectAllButton(buttonId, sectionId) {
+    const checkboxes = document.querySelectorAll(`#${sectionId} input[type=checkbox]`);
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+    const button = document.getElementById(buttonId);
+    button.textContent = allChecked ? 'Deselect All' : 'Select All';
+  }
+
+  // Add event listeners to the Select All/Deselect All buttons
+  document.getElementById('select-all-load').addEventListener('click', (event) => {
+    const allChecked = event.target.textContent === 'Deselect All';
+    toggleCheckboxes('load-section', !allChecked);
+    updateSelectAllButton('select-all-load', 'load-section');
+  });
+
+  document.getElementById('select-all-unload').addEventListener('click', (event) => {
+    const allChecked = event.target.textContent === 'Deselect All';
+    toggleCheckboxes('unload-section', !allChecked);
+    updateSelectAllButton('select-all-unload', 'unload-section');
+  });
+
+  // Update the Select All/Deselect All buttons whenever a checkbox is changed
+  document.getElementById('load-section').addEventListener('change', () => {
+    updateSelectAllButton('select-all-load', 'load-section');
+  });
+
+  document.getElementById('unload-section').addEventListener('change', () => {
+    updateSelectAllButton('select-all-unload', 'unload-section');
+  });  
 }
 
 // Train constructor
