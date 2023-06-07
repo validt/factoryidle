@@ -245,12 +245,20 @@ const gameLoop = (() => {
       ui.updateResourceDisplay(selectedParcel);
     }
 
+    const SAME_TYPE_BONUS = 0.5; // 50% bonus
+
     function calculateProductionRateModifier(parcel, building, buildingCount) {
         const energyBasedModifier = parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier || 0;
         const buildingProductionRateModifier = (parcel.buildingProductionRateModifiers[building.id] && parcel.buildingProductionRateModifiers[building.id].energyModifier) || 0;
         const remoteConstructionFacilityModifier = (parcel.buildings.remoteConstructionFacility && parcel.buildings.remoteConstructionFacility > 0) ? 0.3 : 0;
-        const calc = (1 + energyBasedModifier) * (1 + parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier - remoteConstructionFacilityModifier) || 0;
-        return calc
+
+        let sameTypeBonus = 0;
+        if (building.category === "Basics" && allSameTypeAndBasics(parcel.buildings)) {
+            sameTypeBonus = SAME_TYPE_BONUS;
+        }
+
+        const calc = (1 + energyBasedModifier + sameTypeBonus) * (1 + parcels.getGlobalProductionRateModifier() + building.productionRateModifier + parcel.productionRateModifier + buildingProductionRateModifier - remoteConstructionFacilityModifier) || 0;
+        return calc;
     }
 
     function calculateConsumptionRateModifier(parcel, building, buildingCount) {

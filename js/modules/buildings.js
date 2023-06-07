@@ -30,6 +30,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.bricks > 0),
+    description: "Receives a 50% output boost when no other building is present in its parcel."
   },
   {
     id: "coalPowerPlant",
@@ -1154,6 +1155,37 @@ function addAmmunitionToMilitaryHQ(parcels, ammunitionType, totalAmount) {
   });
 }
 
+function allSameTypeAndBasics(parcelBuildings) {
+  // convert the object keys into an array
+  let buildingIds = Object.keys(parcelBuildings);
+
+  // If there are no buildings, return false
+  if (buildingIds.length === 0) {
+      return false;
+  }
+
+  // Get the building type of the first buildingId in the list
+  const firstBuilding = buildingManager.getBuilding(buildingIds[0]);
+
+  // If it's not in the "Basics" category, return false
+  if (firstBuilding.category !== "Basics") {
+      return false;
+  }
+
+  // If there are other types of buildings, return false
+  for (let i = 1; i < buildingIds.length; i++) {
+      const building = buildingManager.getBuilding(buildingIds[i]);
+
+      // Check if the current building is not the same type or is not in the "Basics" category
+      if (building.id !== firstBuilding.id || building.category !== "Basics") {
+          return false;
+      }
+  }
+
+  // If we got this far, it means all buildings are of the same type and in the "Basics" category
+  return true;
+}
+
 
 window.buildingManager = {
   getBuilding,
@@ -1168,4 +1200,5 @@ window.buildingManager = {
   getAmmunitionFromMilitaryHQ,
   deductAmmunitionFromMilitaryHQ,
   addAmmunitionToMilitaryHQ,
+  allSameTypeAndBasics,
 };
