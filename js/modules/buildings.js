@@ -14,6 +14,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => true,
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
   },
   {
     id: "ironSmelter",
@@ -30,7 +31,7 @@ const buildings = [
     productionModifierSources: {},
     consumptionModifierSources: {},
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.bricks > 0),
-    description: "Receives a 50% output boost when no other building is present in its parcel."
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
   },
   {
     id: "coalPowerPlant",
@@ -63,6 +64,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () =>
       window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
       window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
@@ -81,6 +83,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () =>
       window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
       window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
@@ -99,6 +102,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () =>
       window.gameState.parcels.some(parcel => parcel.resources.ironPlates > 0) &&
       window.gameState.parcels.some(parcel => parcel.buildings.coalPowerPlant > 0),
@@ -117,6 +121,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.redScience > 0),
   },
   {
@@ -133,6 +138,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.resources.redScience > 0),
   },
   {
@@ -280,6 +286,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () => window.gameState.research.steelMaking,
   },
   {
@@ -296,6 +303,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () => window.gameState.research.oilProcessing,
   },
   {
@@ -312,6 +320,7 @@ const buildings = [
     consumptionRateModifier: 0,
     productionModifierSources: {},
     consumptionModifierSources: {},
+    description: "Receives a 50% output boost when no other building is present in its parcel.",
     unlockConditions: () => window.gameState.parcels.some(parcel => parcel.buildings.oilWell > 0),
   },
   {
