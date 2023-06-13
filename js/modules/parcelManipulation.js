@@ -405,16 +405,22 @@ function moveParcel() {
       }
 
       // Update the parcel IDs in the parcelList
+      let idChanges = [];
       for (let i = 0; i < window.parcels.parcelList.length; i++) {
-        window.parcels.parcelList[i].id = `parcel-${i + 1}`;
+        let oldId = window.parcels.parcelList[i].id;
+        let newId = `parcel-${i + 1}`;
+        window.parcels.parcelList[i].id = newId;
+        idChanges.push({oldId: oldId, newId: newId});
       }
 
-      // After updating the parcel IDs, update the schedules
+      // Step 2: Update schedules
       window.gameState.scheduleList.forEach(schedule => {
         schedule.stations.forEach(station => {
-          if (station.parcelId === selectedParcelId) {
+          // Find the ID change for this station, if any
+          let idChange = idChanges.find(change => change.oldId === station.parcelId);
+          if (idChange) {
             // update the parcelId to the new id
-            station.parcelId = selectedParcel.id;
+            station.parcelId = idChange.newId;
           }
         });
       });
